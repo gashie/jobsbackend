@@ -42,7 +42,7 @@ app.use(function (req, res, next) {
 
 
 //Mount routes
-app.use("/api/v1/users", routes);
+app.use("/api/v1/jobs", routes);
 
 app.use(errorHandler);
 
