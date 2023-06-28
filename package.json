@@ -1,0 +1,43 @@
+{
+  "name": "jobsinghana",
+  "version": "1.0.0",
+  "description": "jobs portal",
+  "main": "server.js",
+  "scripts": {
+    "dev": "nodemon server",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gashie/jobsbackend.git"
+  },
+  "keywords": [
+    "jobs"
+  ],
+  "author": "Gashie",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/gashie/jobsbackend/issues"
+  },
+  "homepage": "https://github.com/gashie/jobsbackend#readme",
+  "dependencies": {
+    "bcrypt": "^5.0.1",
+    "colors": "^1.4.0",
+    "cookie-parser": "^1.4.6",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "generate-api-key": "^1.0.2",
+    "helmet": "^7.0.0",
+    "joi": "^17.9.2",
+    "jsonwebtoken": "^9.0.0",
+    "jwt-decode": "^3.1.2",
+    "morgan": "^1.10.0",
+    "mysql": "^2.18.1",
+    "node-device-detector": "^2.0.14",
+    "simple-encryptor": "^4.0.0",
+    "uuid": "^9.0.0",
+    "winston": "^3.9.0",
+    "winston-daily-rotate-file": "^4.7.1",
+    "xss-clean": "^0.1.4"
+  }
+}
