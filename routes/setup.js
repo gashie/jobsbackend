@@ -2,13 +2,13 @@ const express = require("express");
 const router = express.Router();
 
 //user account
-const  {CreateUser,ActivateAccount,SendActivation,PasswordReset,GetAllUsers} = require("../controllers/user/user")
+const  {CreateUser,ActivateAccount,SendActivation,PasswordReset,GetAllUsers,UpdateUser} = require("../controllers/user/user")
 
 
    const { checkBaseId,checkOriginatorBaseId,checkUserMenuBaseId } = require("../middleware/rolemenu");
     const  {SetupRoleMenu,AllRoleMenu,SingleRoleMenu,RemoveRoleMenu,UpdateRoleMenu,AllMenus,DeleteRoleMenu } = require("../controllers/user/rolemenu");
 const { checkDuplicateaccount } = require("../middleware/duplicate");
-const { verifyAccountActivate,verifyAccountReactivate,verifyResetAccount,verifyAccountReset } = require("../middleware/verify");
+const { verifyAccountActivate,verifyAccountReactivate,verifyResetAccount,verifyAccountReset ,verifyUser} = require("../middleware/verify");
 
 
 
@@ -32,6 +32,7 @@ router.route("/updaterolemenu")["post"](UpdateRoleMenu);
 
 //users table
 router.route("/allusers").post(GetAllUsers);
+router.route("/updateuser").post(verifyUser,UpdateUser);
 
 
 module.exports = router;

@@ -74,29 +74,50 @@ exports.GetAllUsers = asynHandler(async (req, res, next) => {
 
 
 
-exports.UpdateSystemUser = asynHandler(async (req, res, next) => {
-  let id = req.body.id;
-  const { roleid, status } = req.body;
-
-  let payload = {
-    roleid,
-    status,
+exports.UpdateUser = asynHandler(async (req, res, next) => {
+  const { reset,blockUser,allow,userId,patch, profile,deleterecord,restore } = req.body;
+  const salt = await bcyrpt.genSalt(10);
+  let rawResetToken = crypto.randomBytes(32).toString("hex");
+   console.log(rawResetToken);
+  let resetUserPayload = {
+    updatedAt :req.date,
+    resetToken : await bcyrpt.hash(rawResetToken, salt),
+    resetPeriod : req.date,
+  };
+  let blockUserPayload = {
+    updatedAt :req.date,
+    status :allow,
+  };
+  let deleteUserPayload = {
+    updatedAt :req.date,
+    deletedAt :!restore ? req.date : null,
+  };
+  let patchUserPayload = {
+    updatedAt :req.date,
+    email:profile.email,
+    username:profile.username,
+    fullName:profile.fullName,
+    phone:profile.phone,
+    address:profile.address,
+    country:profile.country,
+    birthDate:profile.birthDate,
+    maritalStatus:profile.maritalStatus,
+    gender:profile.gender,
+    highestEducation:profile.highestEducation,
+    userType:profile.userType,
+    roleid:profile.roleid,
   };
 
-  payload.updatedAt = new Date().toISOString().slice(0, 19).replace("T", " ");
-  payload.updatedBy = req.kid.username
-
-  if (!id) {
-    return sendResponse(res, 0, 200, 'Please provide id')
-  }
-  let result = await USERS.UpdateUser(payload, id);
+   let switchActionPayload = reset? resetUserPayload : blockUser ? blockUserPayload :deleterecord ? deleteUserPayload : patchUserPayload
+ 
+  let result = await GlobalModel.Update('users', switchActionPayload, 'userId', userId);
 
   if (result.affectedRows === 1) {
-    CatchHistory({ event: 'UPDATE ADMIN USER', functionName: 'UpdateSystemUser', response: `Record Updated`, dateStarted: systemDate, state: 1, requestStatus: 200, }, req);
+    CatchHistory({ event: 'UPDATE ADMIN USER', functionName: 'UpdateUser', response: `Record Updated`, dateStarted: req.date, state: 1, requestStatus: 200, }, req);
     return sendResponse(res, 1, 200, 'Record Updated')
 
   } else {
-    CatchHistory({ event: 'UPDATE ADMIN USER', functionName: 'UpdateSystemUser', response: `Error Updating Record`, dateStarted: systemDate, state: 0, requestStatus: 200, }, req);
+    CatchHistory({ event: 'UPDATE ADMIN USER', functionName: 'UpdateUser', response: `Error Updating Record`, dateStarted: req.date, state: 0, requestStatus: 200, }, req);
     return sendResponse(res, 0, 200, 'Error Updating Record')
   }
 

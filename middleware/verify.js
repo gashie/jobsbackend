@@ -99,3 +99,23 @@ exports.verifyAccountReset = asynHandler(async (req, res, next) => {
 
 
 });
+
+exports.verifyUser = asynHandler(async (req, res, next) => {
+    let userId = req.body.userId;
+  
+    //check if user table if userId exist
+  
+    let finduser = await GlobalModel.Find('users','userId',userId);
+    //if user exist
+    if (!finduser) {
+      CatchHistory({ api_response: `Sorry, user does not exist :${userId}`, function_name: 'verifyUser/middleware', date_started: systemDate, sql_action: "INSERT", event: "User Verify", actor: userId }, req)
+      return sendResponse(res, 0, 200, "Sorry, user does not exist")
+  
+    }
+  
+ 
+  
+     req.date = systemDate
+     return next();
+  });
+  
