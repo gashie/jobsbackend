@@ -81,8 +81,8 @@ exports.SingleRoleMenu = asynHandler(async (req, res, next) => {
   let id = req.body.id;
   let dbresult = await RoleModel.FindRoleID(id);
   if (!dbresult) {
-    CatchHistory({event:'VIEW SINGLE MODULE',functionName:'AllRoleMenu',response:`No Record Found`,dateStarted:systemDate,state:0,requestStatus:200,}, req);
-    return sendResponse(res,0,200,'No Record Found')
+    CatchHistory({event:'VIEW ALL MENUS',functionName:'AllRoleMenu',response:`No Record Found For Role with id ${id}`,dateStarted:systemDate,state:0,requestStatus:200,}, req);
+    return sendResponse(res,0,200,`No Record Found For Role with id ${id}`)
 
   }
 
@@ -92,7 +92,7 @@ exports.SingleRoleMenu = asynHandler(async (req, res, next) => {
     title: dbresult.title,
     menus,
   };
-  CatchHistory({event:'VIEW SINGLE MODULE',functionName:'SingleRoleMenu',response:`Record Found`,dateStarted:systemDate,state:1,requestStatus:200,}, req);
+  CatchHistory({event:`View all menus for ${dbresult.title}`,functionName:'SingleRoleMenu',response:`Record Found`,dateStarted:systemDate,state:1,requestStatus:200,}, req);
  return sendResponse(res,1,200,'Record Found',role)
 
 });

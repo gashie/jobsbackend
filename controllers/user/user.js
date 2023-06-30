@@ -1,101 +1,177 @@
+const bcyrpt = require("bcrypt");
+const crypto = require("crypto");
+const uuidV4 = require('uuid');
 const USERS = require("../../models/User");
+const GlobalModel = require("../../models/Global");
+const COMPANY = require("../../models/Company");
 const dotenv = require("dotenv");
 const asynHandler = require("../../middleware/async");
-const { sendResponse } = require("../../helper/utilfunc");
-const { CatchHistory } = require("../../helper/global");
+const { sendResponse, CatchHistory } = require("../../helper/utilfunc");
+const { autoSaveUser, autoSaveCompany } = require("../../helper/autoSavers");
 dotenv.config({ path: "./config/config.env" });
 const systemDate = new Date().toISOString().slice(0, 19).replace("T", " ");
 
-exports.CreateSystemUser = asynHandler(async (req, res, next) => {
-  const { user, roleid, status } = req.body;
+exports.CreateUser = asynHandler(async (req, res, next) => {
+  payload = req.body
+  payload.roleid = payload.userType === 'jobseeker' ? 2 : 3
+  payload.userId = uuidV4.v4()
+  let rawResetToken = crypto.randomBytes(32).toString("hex");
+  const salt = await bcyrpt.genSalt(10);
+  payload.password = await bcyrpt.hash(payload.password, salt);
+  payload.resetToken = await bcyrpt.hash(rawResetToken, salt);
+  payload.resetPeriod = req.date
+  console.log(rawResetToken);
+  //find company in db
+  if (payload.userType === 'employer') {
+    //find company
+    let companyResult = await COMPANY.FindCompany(payload.companyName);
+    if (companyResult) {
+      //set user status to pending and respond
+      let userPayload = {
+        userId: uuidV4.v4(),
+        email: payload.email,
+        username: payload.username,
+        userType: payload.userType,
+        fullName: payload.fullName,
+        password: payload.password,
+        phone: payload.phone,
+        address: payload.address,
+        country: payload.country,
+        birthDate: payload.birthDate,
+        maritalStatus: payload.maritalStatus,
+        gender: payload.gender,
+        highestEducation: payload.highestEducation,
+        status: 0,
+        roleid: 3,
 
-  let bigData = {
-    username:user.SamAccountName,
-    email:user.UserPrincipalName,
-    fullname:user.Name,
-    roleid,
-    status,
-    createdBy:req.kid.username
-  };
+      }
+      await autoSaveUser(userPayload, req, res)
 
-  /**
-   * check if user exist
-   */
-
-  let FindUsername = await USERS.FindMe("username", bigData.username);
-
-  if (FindUsername) {
-    CatchHistory({event:'CREATE ADMIN USER',functionName:'CreateSystemUser',response:`Sorry, User already exist`,dateStarted:systemDate,state:0,requestStatus:200,}, req);
-   return sendResponse(res,0,200,'Sorry, User already exist')
-  }
-
-  let FindEmail = await USERS.FindMe("email", bigData.email);
-
-  if (FindEmail) {
-    CatchHistory({event:'CREATE ADMIN USER',functionName:'CreateSystemUser',response:`Sorry, User already exist`,dateStarted:systemDate,state:0,requestStatus:200,}, req);
-    return sendResponse(res,0,200,'Sorry, User already exist')
-  }
-
-  let result = await USERS.Create(bigData);
-  if (result.affectedRows === 1) {
-    CatchHistory({event:'CREATE ADMIN USER',functionName:'CreateSystemUser',response:`Record Saved`,dateStarted:systemDate,state:1,requestStatus:200,}, req);
-   return sendResponse(res,1,200,'Record Saved')
-  } else {
-    CatchHistory({event:'CREATE ADMIN USER',functionName:'CreateSystemUser',response:`Error Saving Record`,dateStarted:systemDate,state:0,requestStatus:200,}, req);
-   return sendResponse(res,0,200,'Error Saving Record')
-  }
-});
-exports.GetAllUsers = asynHandler(async (req, res, next) => {
-    let results = await USERS.all();
-    if (results.length == 0) {
-      CatchHistory({event:'VIEW ADMIN USER',functionName:'GetAllUsers',response:`No Record Found`,dateStarted:systemDate,state:0,requestStatus:200,}, req);
-      return sendResponse(res,0,200,'No Record Found')
-    }
-    CatchHistory({event:'VIEW ADMIN USER',functionName:'GetAllUsers',response:`Record Found`,dateStarted:systemDate,state:1,requestStatus:200,}, req);
-
-    return sendResponse(res,1,200,'Record Found',results)
-
-  });
-
-exports.DeleteSystemUser = asynHandler(async (req, res, next) => {
-    let id = req.body.id;
-  
-    if (!id) {
-      return sendResponse(res,0,200,'Please provide id')
-    }
-    let result = await USERS.Delete(id);
-  
-    if (result.affectedRows === 1) {
-      return sendResponse(res,1,200,'Record Deleted')
     } else {
-      return sendResponse(res,0,200,'Error Removing Record')
+      autoSaveCompany(payload, req, res)
+
     }
-  });
+
+  } else {
+    await autoSaveUser(payload, req, res)
+
+  }
+
+
+})
+exports.GetAllUsers = asynHandler(async (req, res, next) => {
+  let {viewAction} = req.body
+  let results = await USERS.all(viewAction);
+  if (results.length == 0) {
+    CatchHistory({ event: 'View Users', functionName: 'GetAllUsers', response: `No Record Found`, dateStarted: systemDate,requestStatus: 200, }, req);
+    return sendResponse(res, 0, 200, 'No Record Found')
+  }
+  CatchHistory({ event: 'View Users', functionName: 'GetAllUsers', response: `Record Found`, dateStarted: systemDate,  requestStatus: 200, }, req);
+
+  return sendResponse(res, 1, 200, 'Record Found', results)
+
+});
+
+
 
 exports.UpdateSystemUser = asynHandler(async (req, res, next) => {
-    let id = req.body.id;
-    const { roleid, status } = req.body;
+  let id = req.body.id;
+  const { roleid, status } = req.body;
 
-    let payload = {
-      roleid,
-      status,
-    };
-  
-    payload.updatedAt = new Date().toISOString().slice(0, 19).replace("T", " ");
-    payload.updatedBy = req.kid.username
-  
-    if (!id) {
-      return sendResponse(res,0,200,'Please provide id')
-    }
-    let result = await USERS.UpdateUser(payload, id);
-  
-    if (result.affectedRows === 1) {
-      CatchHistory({event:'UPDATE ADMIN USER',functionName:'UpdateSystemUser',response:`Record Updated`,dateStarted:systemDate,state:1,requestStatus:200,}, req);
-      return sendResponse(res,1,200,'Record Updated')
+  let payload = {
+    roleid,
+    status,
+  };
 
-    } else {
-      CatchHistory({event:'UPDATE ADMIN USER',functionName:'UpdateSystemUser',response:`Error Updating Record`,dateStarted:systemDate,state:0,requestStatus:200,}, req);
-      return sendResponse(res,0,200,'Error Updating Record')
-    }
+  payload.updatedAt = new Date().toISOString().slice(0, 19).replace("T", " ");
+  payload.updatedBy = req.kid.username
 
-  })
+  if (!id) {
+    return sendResponse(res, 0, 200, 'Please provide id')
+  }
+  let result = await USERS.UpdateUser(payload, id);
+
+  if (result.affectedRows === 1) {
+    CatchHistory({ event: 'UPDATE ADMIN USER', functionName: 'UpdateSystemUser', response: `Record Updated`, dateStarted: systemDate, state: 1, requestStatus: 200, }, req);
+    return sendResponse(res, 1, 200, 'Record Updated')
+
+  } else {
+    CatchHistory({ event: 'UPDATE ADMIN USER', functionName: 'UpdateSystemUser', response: `Error Updating Record`, dateStarted: systemDate, state: 0, requestStatus: 200, }, req);
+    return sendResponse(res, 0, 200, 'Error Updating Record')
+  }
+
+})
+
+exports.ActivateAccount = asynHandler(async (req, res, next) => {
+  let user = req.user;
+  let { email } = req.body
+  let payload = {};
+
+  payload.updatedAt = req.date;
+  payload.resetToken = null
+  payload.resetPeriod = null
+  payload.status = 1
+
+  let result = await GlobalModel.Update('users', payload, 'userId', user.userId);
+
+  if (result.affectedRows === 1) {
+    CatchHistory({ api_response: `Account activated successfully :${email}`, function_name: 'ActivateAccount', date_started: req.date, sql_action: "UPDATE", event: "User Account Activate", actor: email }, req)
+    return sendResponse(res, 1, 200, 'Account activated successfully')
+
+  } else {
+    CatchHistory({ api_response: `Sorry, no record exist,token mismatch for  :${email}`, function_name: 'ActivateAccount', date_started: req.date, sql_action: "UPDATE", event: "User Account Activate", actor: email }, req)
+    return sendResponse(res, 0, 200, 'Failed to activate, please try again later')
+  }
+
+})
+exports.SendActivation = asynHandler(async (req, res, next) => {
+  let user = req.user;
+  const salt = await bcyrpt.genSalt(10);
+
+  let { email } = req.body
+  let payload = {};
+  let rawResetToken = crypto.randomBytes(32).toString("hex");
+   console.log(rawResetToken);
+  payload.updatedAt = req.date;
+  payload.resetToken = await bcyrpt.hash(rawResetToken, salt);
+  payload.resetPeriod = req.date
+  // payload.status = 1
+
+  let result = await GlobalModel.Update('users', payload, 'userId', user.userId);
+
+  if (result.affectedRows === 1) {
+    CatchHistory({ api_response: `Activation token sent to ${email}`, function_name: 'ActivateAccount', date_started: req.date, sql_action: "UPDATE", event: "User Account Activate", actor: email }, req)
+    return sendResponse(res, 1, 200, 'Activation token has been sent to your email successfully')
+
+  } else {
+    CatchHistory({ api_response: `Failed to update record or save activation code for  :${email}`, function_name: 'ActivateAccount', date_started: req.date, sql_action: "UPDATE", event: "User Account Activate", actor: email }, req)
+    return sendResponse(res, 0, 200, 'Failed to activation code, please try again later')
+  }
+
+})
+
+exports.PasswordReset = asynHandler(async (req, res, next) => {
+  let user = req.user;
+  let email  = req.body.email;
+  const salt = await bcyrpt.genSalt(10);
+  let payload = req.body
+
+  let newPayload = {
+    password : await bcyrpt.hash(payload.password, salt),
+    updatedAt : req.date,
+    resetPeriod : null,
+    resetToken : null
+  }
+
+  let result = await GlobalModel.Update('users', newPayload, 'userId', user.userId);
+
+  if (result.affectedRows === 1) {
+    CatchHistory({ api_response: `Password has been changed successfully for ${email}`, function_name: 'ActivateAccount', date_started: req.date, sql_action: "UPDATE", event: "User Account Activate", actor: email }, req)
+    return sendResponse(res, 1, 200, 'Password has been changed successfully')
+
+  } else {
+    CatchHistory({ api_response: `Failed to update record or save new password for  :${email}`, function_name: 'ActivateAccount', date_started: req.date, sql_action: "UPDATE", event: "User Account Activate", actor: email }, req)
+    return sendResponse(res, 0, 200, 'Failed to save new password, please try again later')
+  }
+
+})

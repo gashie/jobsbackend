@@ -2,9 +2,13 @@ const pool = require("../config/db");
 
 let jobsdb = {};
 
-jobsdb.all = () => {
+jobsdb.all = (viewAction) => {
   return new Promise((resolve, reject) => {
-    pool.query("SELECT m.* ,c.title as roleTitle FROM users m INNER JOIN role c ON c.id = m.roleid", (err, results) => {
+    let noDelsql = `SELECT m.userId,m.fullName,m.username,m.email,m.phone,m.address,m.country,m.gender,m.maritalStatus,m.userType,m.status,m.createdAt,m.birthDate,m.highestEducation,c.title as roleTitle FROM users m INNER JOIN role c ON c.id = m.roleid AND m.deletedAt IS  NULL`
+    let Delsql = `SELECT m.userId,m.fullName,m.username,m.email,m.phone,m.address,m.country,m.gender,m.maritalStatus,m.userType,m.status,m.createdAt,m.birthDate,m.highestEducation,c.title as roleTitle FROM users m INNER JOIN role c ON c.id = m.roleid AND m.deletedAt IS NOT NULL`
+    let allsql = `SELECT m.userId,m.fullName,m.username,m.email,m.phone,m.address,m.country,m.gender,m.maritalStatus,m.userType,m.status,m.createdAt,m.birthDate,m.highestEducation,c.title as roleTitle FROM users m INNER JOIN role c ON c.id = m.roleid`
+
+    pool.query(viewAction === 'notdeleted'? noDelsql:viewAction === 'deleted'? Delsql: allsql, (err, results) => {
       if (err) {
         return reject(err);
       }
@@ -41,6 +45,42 @@ jobsdb.ActivateUser = (status, email) => {
         return resolve(results);
       }
     );
+  });
+};
+
+jobsdb.ActivateAccount = (email) => {
+  return new Promise((resolve, reject) => {
+    const sql = `SELECT userId,resetToken FROM users WHERE email = ? AND status= ? AND NOW() <= DATE_ADD(resetPeriod, INTERVAL 30 MINUTE)`;
+    pool.query(sql, [email,0], function (error, results, fields) {
+      if (error) {
+        return reject(error);
+      }
+      return resolve(results[0]);
+    });
+  });
+};
+
+jobsdb.ReActivateAccount = (email,status) => {
+  return new Promise((resolve, reject) => {
+    const sql = `SELECT userId,resetToken FROM users WHERE email = ? AND status= ?`;
+    pool.query(sql, [email,status], function (error, results, fields) {
+      if (error) {
+        return reject(error);
+      }
+      return resolve(results[0]);
+    });
+  });
+};
+
+jobsdb.ActivateOrResetAccount = (email,status) => {
+  return new Promise((resolve, reject) => {
+    const sql = `SELECT userId,resetToken FROM users WHERE email = ? AND status= ? AND NOW() <= DATE_ADD(resetPeriod, INTERVAL 30 MINUTE)`;
+    pool.query(sql, [email,status], function (error, results, fields) {
+      if (error) {
+        return reject(error);
+      }
+      return resolve(results[0]);
+    });
   });
 };
 

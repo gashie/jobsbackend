@@ -1,31 +1,37 @@
 const express = require("express");
 const router = express.Router();
 
-// const  { AllRoles,
-//     SetupSystemRole,
-//     SingleRole,
-//     RemoveRole,
-//     UpdateRole,DeleteSystemRole} = require("../controllers/user/role")
-  
-//     const {CreateSystemUser,GetAllUsers,DeleteSystemUser,UpdateSystemUser} = require("../controllers/user/user")
+//user account
+const  {CreateUser,ActivateAccount,SendActivation,PasswordReset,GetAllUsers} = require("../controllers/user/user")
 
 
    const { checkBaseId,checkOriginatorBaseId,checkUserMenuBaseId } = require("../middleware/rolemenu");
-    const  {SetupRoleMenu,AllRoleMenu,SingleRoleMenu,RemoveRoleMenu,UpdateRoleMenu,AllMenus,DeleteRoleMenu } = require("../controllers/user/rolemenu")
+    const  {SetupRoleMenu,AllRoleMenu,SingleRoleMenu,RemoveRoleMenu,UpdateRoleMenu,AllMenus,DeleteRoleMenu } = require("../controllers/user/rolemenu");
+const { checkDuplicateaccount } = require("../middleware/duplicate");
+const { verifyAccountActivate,verifyAccountReactivate,verifyResetAccount,verifyAccountReset } = require("../middleware/verify");
+
+
+
+//user account
+router.route("/signup")["post"](checkDuplicateaccount,CreateUser);
+router.route("/activate")["post"](verifyAccountActivate,ActivateAccount);
+router.route("/resendactivatecode")["post"](verifyAccountReactivate,SendActivation);
+router.route("/sendresetcode")["post"](verifyResetAccount,SendActivation);
+router.route("/passwordreset")["post"](verifyAccountReset,PasswordReset);
+
+
 
 //ums
-
-// router.route("/createsystemrole")["post"](SetupSystemRole);
-// router.route("/roles")["post"](AllRoles);
-// router.route("/findrole")["post"](SingleRole);
-// router.route("/deleterole")["post"](DeleteSystemRole);
-// router.route("/updaterole")["post"](UpdateRole);
-
 router.route("/createrolemenu")["post"](checkBaseId,SetupRoleMenu);
 router.route("/rolemenu")["post"](AllRoleMenu);
 router.route("/menu").post(AllMenus);
 router.route("/findrolemenu")["post"](SingleRoleMenu);
 router.route("/deleterolemenu")["post"](DeleteRoleMenu);
 router.route("/updaterolemenu")["post"](UpdateRoleMenu);
+
+
+//users table
+router.route("/allusers").post(GetAllUsers);
+
 
 module.exports = router;

@@ -9,6 +9,16 @@
             "date": 1687935300561,
             "name": "logs/rotate-2023-06-28.log",
             "hash": "d27479f4f2fbf9ddac9da9d72be37294e786597ffc6e967fb63b1e10045b107c"
+        },
+        {
+            "date": 1688013590853,
+            "name": "logs/rotate-2023-06-29.log",
+            "hash": "7fff8ad3febf897aeccebc399f49c725d16ab3571cde18db484760dd9ea29ba5"
+        },
+        {
+            "date": 1688083592644,
+            "name": "logs/rotate-2023-06-30.log",
+            "hash": "b4c4d9cdd55969df560224edc4cfd7997170899dcbabf0672608e32451b6717e"
         }
     ],
     "hashType": "sha256"
