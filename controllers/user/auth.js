@@ -1,117 +1,60 @@
-const USERS = require("../../models/User");
-const {FilterMenu} = require('../../helper/filtermenus')
-const bcyrpt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const dotenv = require("dotenv");
+const bcrypt = require("bcrypt");
 const asynHandler = require("../../middleware/async");
-const { sendResponse } = require("../../helper/utilfunc");
-const { CatchHistory } = require("../../helper/global");
-dotenv.config({ path: "./config/config.env" });
+const GlobalModel = require("../../models/Global")
+const { sendResponse, sendCookie, clearResponse, CatchHistory } = require("../../helper/utilfunc");
+const { FilterMenu } = require("../../helper/filtermenus");
 const systemDate = new Date().toISOString().slice(0, 19).replace("T", " ");
-exports.AuthUser = asynHandler(async (req, res, next) => {
-  const { username, password } = req.body;
 
-  const ad = new AD({
-    url: process.env.url,
-    user: `${username}@calbank.test`,
-    pass: password,
-  });
+// @desc Login controller
+// @route POST /auth
+// @access Public
+exports.Auth = asynHandler(async (req, res) => {
+    const { email, password } = req.body
 
-  //AUHTENTICATE USER
-  let authme = await ad.user(username).authenticate(password);
+    //search for user in db
+    const foundUser =await GlobalModel.Find('users','email',email);
+    if (!foundUser) {
+       CatchHistory({ payload: JSON.stringify({ email }), api_response: "Unauthorized access-email not in database", function_name: 'Auth', date_started: systemDate, sql_action: "SELECT", event: "User Authentication", actor: email }, req)
+        return sendResponse(res, 0, 401, 'Unauthorized access')
 
-  if (!authme) {
-    CatchHistory({event:'ADMIN AUTHENTICATION',functionName:'AuthUser',response:`Invalid Username Or Password`,dateStarted:systemDate,state:0,requestStatus:200,channelUsername:req.body.username,channelUserId:req.body.username}, req);
-    return sendResponse(res,0,200,'Invalid Username Or Password')
-  }
-
-  //Get user Details From Active Directory
-  let userDetails = await ad.user(username).get();
-  let user = {
-    username: userDetails.sAMAccountName,
-    email: userDetails.userPrincipalName,
-    fullname: userDetails.displayName,
-    roleid: 1,
-    status: 1,
-  };
-
-  /**
-   * check if user exist
-   */
-  
-
-  let userDbResult = await USERS.Authenticate(user.username);
-  if (!userDbResult) {
-    CatchHistory({event:'ADMIN AUTHENTICATION',functionName:'AuthUser',response:`User not assigned to oauth admin`,dateStarted:systemDate,state:0,requestStatus:200,channelUsername:req.body.username,channelUserId:req.body.username}, req);
-    return sendResponse(res,0,200,'Sorry, you have not been assigned to the system')
-  } 
-    userDbResult.password = undefined
-    let roleResult = await USERS.FindRole(userDbResult.roleid);
-    if (!roleResult) {
-      CatchHistory({event:'ADMIN AUTHENTICATION',functionName:'AuthUser',response:`Sorry, no role has been assigned to this account`,dateStarted:systemDate,state:0,requestStatus:200,channelUsername:req.body.username,channelUserId:req.body.username}, req);
-      return sendResponse(res,0,200,'Sorry, no role has been assigned to this account')
     }
-    req.session.username = username
-    req.session.password = password
-    //Get Role Menu List
-    let getUserinfo = await FilterMenu(userDbResult)
-    CatchHistory({event:'ADMIN AUTHENTICATION',functionName:'AuthUser',response:`Logged in successfully`,dateStarted:systemDate,state:1,requestStatus:200,channelUsername:req.body.username,channelUserId:req.body.username}, req);
-
-    res.status(200).json({
-      Status: 1,
-     User:getUserinfo,
-    });
 
 
-  /**
-   * Check username
-   */
+    //check for password
+    const match = await bcrypt.compare(password, foundUser.password)
 
-  /**
-   * Check password
-   */
+    if (!match) {
+        CatchHistory({ payload: JSON.stringify({ email }), api_response: "Unauthorized access-user exist but password does not match", function_name: 'Auth', date_started: systemDate, sql_action: "SELECT", event: "User Authentication", actor: email }, req)
+        return sendResponse(res, 0, 401, 'Unauthorized access')
+    }
+    let UserInfo = {
+        id: foundUser.id,
+        userId:foundUser.userId,
+        fullName: foundUser.fullName,
+        email: foundUser.email,
+        username: foundUser.username,
+        phone:foundUser.phone,
+        roleid:foundUser.roleid,
+        systemUser:foundUser.systemUser
 
-  //Get User role
+    }
 
-  // sendTokenResponse(
-  //   username,
-  //   200,
-  //   issuer,
-  //   audience,
-  //   timetolive,
-  //   token_name,
-  //   res
-  // );
+    let getUserinfo = await FilterMenu(UserInfo)
+
+    // CatchHistory({ payload: JSON.stringify({ email }), api_response: "User logged in", function_name: 'Auth', date_started: systemDate, sql_action: "SELECT", event: "User Authentication", actor: email }, req)
+    return sendCookie(getUserinfo, 1, 200, res, req)
+})
+
+
+exports.VerifyUser = asynHandler(async (req, res, next) => {
+    let userData = req.user;
+    CatchHistory({  api_response: "User is verified", function_name: 'VerifyUser', date_started: systemDate, sql_action: "SELECT", event: "Get User Info", actor: userData.id }, req)
+
+    return sendResponse(res, 1, 200, "Loggedin", userData)
 });
 
-// const sendTokenResponse = (
-//   username,
-//   statusCode,
-//   issuer,
-//   audience,
-//   timetolive,
-//   token_name,
-//   res
-// ) => {
-//   const payload = {
-//     sub: username,
-//     iss: issuer,
-//     aud: audience,
-//   };
-//   const token = jwt.sign(payload, process.env.jwtPrivateKey, {
-//     expiresIn: timetolive,
-//   });
 
-//   const options = {
-//     maxAge: 60 * 60 * 1000,
-//     httpOnly: true,
-//   };
-
-//   if (process.env.NODE_ENV === "production") {
-//     options.secure = true;
-//   }
-//   res
-//     .status(statusCode)
-//     .cookie(token_name, token, options)
-//     .json({ success: true, message: "Logged in successfully" });
-// };
+exports.Logout = asynHandler(async (req, res, next) => {
+    CatchHistory({  api_response: "User is logged out", function_name: 'Logout', date_started: systemDate, sql_action: "SELECT", event: "Logout", actor: req.user.id }, req)
+    return clearResponse(req, res)
+});
