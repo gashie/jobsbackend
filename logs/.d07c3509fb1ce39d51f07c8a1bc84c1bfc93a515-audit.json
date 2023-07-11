@@ -29,6 +29,11 @@
             "date": 1688630996368,
             "name": "logs/rotate-2023-07-06.log",
             "hash": "19ce06854aa14f84754ee65a76978a6e5d39e4a42298eb4765da5f6fe13e0057"
+        },
+        {
+            "date": 1689071131843,
+            "name": "logs/rotate-2023-07-11.log",
+            "hash": "da8814d40040eeb6e4a1f5246b8eebe1495489b37ba2c48f640925e85412fd62"
         }
     ],
     "hashType": "sha256"

@@ -1,5 +1,4 @@
 const asynHandler = require("../../middleware/async");
-const Model = require("../../models/Skills")
 const GlobalModel = require("../../models/Global");
 const { sendResponse, CatchHistory } = require("../../helper/utilfunc");
 
