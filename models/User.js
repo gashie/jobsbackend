@@ -8,12 +8,10 @@ jobsdb.all = (viewAction) => {
     let Delsql = `SELECT m.userId,m.fullName,m.username,m.email,m.phone,m.address,m.country,m.gender,m.maritalStatus,m.userType,m.status,m.createdAt,m.birthDate,m.highestEducation,c.title as roleTitle FROM users m INNER JOIN role c ON c.id = m.roleid AND m.deletedAt IS NOT NULL`
     let allsql = `SELECT m.userId,m.fullName,m.username,m.email,m.phone,m.address,m.country,m.gender,m.maritalStatus,m.userType,m.status,m.createdAt,m.birthDate,m.highestEducation,c.title as roleTitle FROM users m INNER JOIN role c ON c.id = m.roleid`
 
-    pool.query(viewAction === 'notdeleted'? noDelsql:viewAction === 'deleted'? Delsql: allsql, (err, results) => {
+    pool.query(viewAction === 'notdeleted' ? noDelsql : viewAction === 'deleted' ? Delsql : allsql, (err, results) => {
       if (err) {
         return reject(err);
       }
-      var rec = JSON.parse(JSON.stringify(results));
-
       return resolve(results);
     });
   });
@@ -25,7 +23,7 @@ jobsdb.Create = (postData = req.body) => {
   return new Promise((resolve, reject) => {
     pool.query("INSERT INTO users SET ?", [postData], (err, results) => {
       if (err) {
-        throw err;
+        return reject(err);
       }
 
       return resolve(results);
@@ -51,7 +49,7 @@ jobsdb.ActivateUser = (status, email) => {
 jobsdb.ActivateAccount = (email) => {
   return new Promise((resolve, reject) => {
     const sql = `SELECT userId,resetToken FROM users WHERE email = ? AND status= ? AND NOW() <= DATE_ADD(resetPeriod, INTERVAL 30 MINUTE)`;
-    pool.query(sql, [email,0], function (error, results, fields) {
+    pool.query(sql, [email, 0], function (error, results, fields) {
       if (error) {
         return reject(error);
       }
@@ -60,10 +58,10 @@ jobsdb.ActivateAccount = (email) => {
   });
 };
 
-jobsdb.ReActivateAccount = (email,status) => {
+jobsdb.ReActivateAccount = (email, status) => {
   return new Promise((resolve, reject) => {
     const sql = `SELECT userId,resetToken FROM users WHERE email = ? AND status= ?`;
-    pool.query(sql, [email,status], function (error, results, fields) {
+    pool.query(sql, [email, status], function (error, results, fields) {
       if (error) {
         return reject(error);
       }
@@ -72,10 +70,10 @@ jobsdb.ReActivateAccount = (email,status) => {
   });
 };
 
-jobsdb.ActivateOrResetAccount = (email,status) => {
+jobsdb.ActivateOrResetAccount = (email, status) => {
   return new Promise((resolve, reject) => {
     const sql = `SELECT userId,resetToken FROM users WHERE email = ? AND status= ? AND NOW() <= DATE_ADD(resetPeriod, INTERVAL 30 MINUTE)`;
-    pool.query(sql, [email,status], function (error, results, fields) {
+    pool.query(sql, [email, status], function (error, results, fields) {
       if (error) {
         return reject(error);
       }
@@ -104,7 +102,7 @@ jobsdb.SingleUser = (email) => {
   return new Promise((resolve, reject) => {
     const sql =
       "SELECT m.*,c.title AS roleTitle FROM users m INNER JOIN role c ON c.id = m.roleid WHERE  m.email = ?";
-    pool.query(sql,[email], function (error, results, fields) {
+    pool.query(sql, [email], function (error, results, fields) {
       if (error) {
         return reject(error);
       }
@@ -178,11 +176,11 @@ jobsdb.FindRoleMenu = (id) => {
   });
 };
 
-jobsdb.FindUserMenu = (user,access) => {
+jobsdb.FindUserMenu = (user, access) => {
   return new Promise((resolve, reject) => {
     const sql =
       "SELECT DISTINCT menuid AS menu FROM usermenu WHERE userID = ? AND status  = ? AND accessType = ?  AND deletedAt IS NULL";
-    pool.query(sql, [user, "1",access], function (error, results, fields) {
+    pool.query(sql, [user, "1", access], function (error, results, fields) {
       if (error) {
         return reject(error);
       }
@@ -204,10 +202,10 @@ jobsdb.FindMenu = (id) => {
   });
 };
 
-jobsdb.FindMe = (column,value) => {
+jobsdb.FindMe = (column, value) => {
   return new Promise((resolve, reject) => {
     const sql = 'SELECT ?? FROM users WHERE ?? = ? ';
-    pool.query(sql, [column,column,value], function (error, results, fields) {
+    pool.query(sql, [column, column, value], function (error, results, fields) {
       if (error) {
         return reject(error);
       }

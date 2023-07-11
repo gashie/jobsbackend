@@ -61,12 +61,13 @@ exports.CreateUser = asynHandler(async (req, res, next) => {
 })
 exports.GetAllUsers = asynHandler(async (req, res, next) => {
   let {viewAction} = req.body
+  let actor = req.user.userInfo
   let results = await USERS.all(viewAction);
   if (results.length == 0) {
-    CatchHistory({ event: 'View Users', functionName: 'GetAllUsers', response: `No Record Found`, dateStarted: systemDate,requestStatus: 200, }, req);
+    CatchHistory({ event:  `user with id: ${actor.userId} viewed ${results.length} user's`, functionName: 'GetAllUsers', response: `No Record Found`, dateStarted: req.date,requestStatus: 200,actor: actor.userId }, req);
     return sendResponse(res, 0, 200, 'No Record Found')
   }
-  CatchHistory({ event: 'View Users', functionName: 'GetAllUsers', response: `Record Found`, dateStarted: systemDate,  requestStatus: 200, }, req);
+  CatchHistory({ event:  `user with id: ${actor.userId} viewed ${results.length} user's`, functionName: 'GetAllUsers', response: `Record Found`, dateStarted: req.date,  requestStatus: 200,actor: actor.userId }, req);
 
   return sendResponse(res, 1, 200, 'Record Found', results)
 
@@ -77,6 +78,7 @@ exports.GetAllUsers = asynHandler(async (req, res, next) => {
 exports.UpdateUser = asynHandler(async (req, res, next) => {
   const { reset,blockUser,allow,userId,patch, profile,deleterecord,restore } = req.body;
   const salt = await bcyrpt.genSalt(10);
+  let actor = req.user.userInfo
   let rawResetToken = crypto.randomBytes(32).toString("hex");
    console.log(rawResetToken);
   let resetUserPayload = {
@@ -113,11 +115,11 @@ exports.UpdateUser = asynHandler(async (req, res, next) => {
   let result = await GlobalModel.Update('users', switchActionPayload, 'userId', userId);
 
   if (result.affectedRows === 1) {
-    CatchHistory({ event: 'UPDATE ADMIN USER', functionName: 'UpdateUser', response: `Record Updated`, dateStarted: req.date, state: 1, requestStatus: 200, }, req);
+    CatchHistory({ event: 'UPDATE ADMIN USER', functionName: 'UpdateUser', response: `Record Updated`, dateStarted: req.date, state: 1, requestStatus: 200,actor:actor.userId }, req);
     return sendResponse(res, 1, 200, 'Record Updated')
 
   } else {
-    CatchHistory({ event: 'UPDATE ADMIN USER', functionName: 'UpdateUser', response: `Error Updating Record`, dateStarted: req.date, state: 0, requestStatus: 200, }, req);
+    CatchHistory({ event: 'UPDATE ADMIN USER', functionName: 'UpdateUser', response: `Error Updating Record`, dateStarted: req.date, state: 0, requestStatus: 200,actor:actor.userId  }, req);
     return sendResponse(res, 0, 200, 'Error Updating Record')
   }
 

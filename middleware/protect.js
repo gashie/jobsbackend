@@ -1,6 +1,5 @@
 const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
-const bcrypt = require("bcrypt");
 const asynHandler = require("./async");
 const { sendResponse, CatchHistory } = require("../helper/utilfunc");
 const { DetectDevice, DetectIp, MainDec } = require("../helper/devicefuncs");
@@ -33,6 +32,8 @@ exports.protect = asynHandler(async (req, res, next) => {
     let checkDevice = decryptToken?.devcrb
     if (checkIp === userIp && checkDevice === device) {
       req.user = decryptToken;
+      req.date = systemDate
+
       return next()
     } else {
       console.log('DeviceCheck =', checkDevice === device);
