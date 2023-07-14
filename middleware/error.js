@@ -7,6 +7,7 @@ const errorHandler = (err, req, res, next) => {
     //Log to console for dev
 
     console.log(err);
+    logger.error(err);
     //mysql bad ObjectId
 
     //42601  --invalid query
