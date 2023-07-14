@@ -1,9 +1,9 @@
 const Crypto = require("crypto");
 const dotenv = require("dotenv");
-
+const uuidV4 = require('uuid');
 dotenv.config({ path: "./config/config.env" });
 module.exports = {
-  
+
   Token: (size) => {
     return Crypto.randomBytes(size).toString("base64").slice(0, size);
   },
@@ -33,6 +33,23 @@ module.exports = {
   getUniqueListBy(arr, key) {
     return [...new Map(arr.map((item) => [item[key], item])).values()];
   },
+  prePareQuestionOptions(qOption, questionId) {
+    let arrayqOptionObj = qOption.map(item => {
+      return { questionId, ...item };
+    });
 
+    let sqlOptionValues = arrayqOptionObj.map(obj => Object.values(obj));
+    return sqlOptionValues
+  },
+  prePareLocations(jobLocation, jobId) {
+    let arrayObj = jobLocation.map(item => {
+      return { jobId, ...item };
+    });
+    let sqlValues = arrayObj.map(obj => Object.values(obj));
+    return sqlValues
+  },
+  spreadLocations(jobLocation){
+    return jobLocation.map((item) => { return item.locationName }).join(',')
+  }
 
 };

@@ -16,6 +16,11 @@ const { checkDuplicateaccount } = require("../middleware/duplicate");
 const { verifyAccountActivate, verifyAccountReactivate, verifyResetAccount, verifyAccountReset, verifyUser } = require("../middleware/verify");
 const { CreateSkills, ViewSkills,ViewMySkills,UpdateSkills} = require("../controllers/jobs/skills");
 const { CreateJobCategory, ViewJobCategory,UpdateJobCategory} = require("../controllers/jobs/jobcategory");
+const { CreateQuestionnaire} = require("../controllers/jobs/questionnaire");
+
+const { CreateJobStatus,UpdateJobStatus,ViewJobStatus} = require("../controllers/jobs/jobstatus");
+const { CreateIndustry,ViewIndustry,UpdateIndustry} = require("../controllers/company/industry");
+const { CreateJobInfo} = require("../controllers/jobs/jobinfo");
 
 
 
@@ -57,4 +62,25 @@ router.route("/updateskill").post(protect, UpdateSkills);
 router.route("/createjobcategory").post(protect, CreateJobCategory);
 router.route("/viewjobcategory").post(protect, ViewJobCategory);
 router.route("/updatejobcategory").post(protect, UpdateJobCategory);
+
+//manage jobstatus
+router.route("/createjobstatus").post(protect, CreateJobStatus);
+router.route("/viewjobstatus").post(protect, ViewJobStatus);
+router.route("/updatejobstatus").post(protect, UpdateJobStatus);
+
+
+//manage industry
+router.route("/createindustry").post(protect, CreateIndustry);
+router.route("/viewindustry").post(protect, ViewIndustry);
+router.route("/updateindustry").post(protect, UpdateIndustry);
+
+//setup job
+router.route("/setupjob").post(protect, CreateJobInfo);
+
+
+//manage jobcategory
+router.route("/createquestion").post(protect,CreateQuestionnaire);
+
+
+
 module.exports = router;
