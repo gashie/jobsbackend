@@ -1,9 +1,10 @@
 const asynHandler = require("../../middleware/async");
 const uuidV4 = require('uuid');
 const GlobalModel = require("../../models/Global");
+const QuestionsModel = require("../../models/Questions");
 const { sendResponse, CatchHistory } = require("../../helper/utilfunc");
 const { prePareQuestionOptions } = require("../../helper/func");
-const { autoSaveWithOptions, autoSaveNoOptions } = require("../../helper/autoSavers");
+const { autoSaveWithOptions, autoSaveNoOptions, autoLinkQuestionJob, autoSaveBulkWithOptions, autoSaveBulkNoOptions } = require("../../helper/autoSavers");
 
 exports.ViewSkills = asynHandler(async (req, res, next) => {
   let { viewAction } = req.body
@@ -47,6 +48,8 @@ exports.CreateQuestionnaire = asynHandler(async (req, res, next) => {
   let questionPayload = {
     questionId,
     questionTitle: payload.questionTitle,
+    minimumValue: payload.minimumValue,
+    maximumValue: payload.maximumValue,
     questionType: payload.questionType,
     jobId: payload.jobId,
     benchMark: payload.benchMark,
@@ -88,5 +91,76 @@ exports.UpdateSkills = asynHandler(async (req, res, next) => {
     CatchHistory({ event: 'UPDATE ADMIN USER', functionName: 'UpdateUser', response: `Error Updating Record`, dateStarted: req.date, state: 0, requestStatus: 200, actor: actor.userId }, req);
     return sendResponse(res, 0, 200, 'Error Updating Record')
   }
+
+})
+
+exports.LinkQuestionnaire = asynHandler(async (req, res, next) => {
+  let payload = req.body;
+  let actor = req?.user?.userInfo
+  return autoLinkQuestionJob(payload, actor, req, res)
+})
+
+exports.DeleteLinkage = asynHandler(async (req, res, next) => {
+  const { id } = req.body;
+  let actor = req.user.userInfo
+
+  let result = await QuestionsModel.RemoveLinkage(id);
+  console.log(result);
+  if (result.affectedRows === 1) {
+    CatchHistory({ event: 'Remove link between job and question', functionName: 'UpdateUser', response: `Job and question linked with id ${id} has been removed by ${actor.userId}`, dateStarted: req.date, state: 1, requestStatus: 200, actor: actor.userId }, req);
+    return sendResponse(res, 1, 200, 'Record Updated')
+
+  } else {
+    CatchHistory({ event: 'Remove link between job and question', functionName: 'UpdateUser', response: `System failed to unlink job to question with id ${id}`, dateStarted: req.date, state: 0, requestStatus: 200, actor: actor.userId }, req);
+    return sendResponse(res, 0, 200, 'Error Updating Record')
+  }
+
+})
+exports.CreateBulkQuestionnaire = asynHandler(async (req, res, next) => {
+  let bulk = req.body.questions;
+  let jobId = req.body.jobId;
+  let actor = req?.user?.userInfo
+  let itemCount = bulk.length;
+  let isDone = false
+  let jobInfo = req.job
+
+  if (jobInfo.jobState === 'approved') {
+    return sendResponse(res, 0, 200, "Sorry this job has already been approved", [])
+
+  }
+  for (const payload of bulk) {
+    let qOption = payload?.questionOption
+    let questionId = uuidV4.v4()
+    let preparedOptions = payload?.questionType === 'multi' || payload?.questionType === 'single' ? prePareQuestionOptions(qOption, questionId) : ""
+
+
+    let questionPayload = {
+      questionId,
+      questionTitle: payload.questionTitle,
+      minimumValue: payload.minimumValue,
+      maximumValue: payload.maximumValue,
+      questionType: payload.questionType,
+      jobId,
+      benchMark: payload.benchMark,
+      createdByName: actor.fullName,
+      createdById: actor.userId
+    }
+
+
+    payload?.questionType === 'multi' || payload?.questionType === 'single' ? autoSaveBulkWithOptions(questionPayload, preparedOptions, actor, req, res) : autoSaveBulkNoOptions(questionPayload, actor, req, res)
+
+    if (!--itemCount) {
+      isDone = true;
+      console.log(" => This is the last iteration...");
+
+    } else {
+      console.log(" => Still saving data...");
+
+    }
+  }
+  if (isDone) {
+    return sendResponse(res, 1, 200, "Saved successfully", [])
+  }
+
 
 })

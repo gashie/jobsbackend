@@ -118,4 +118,37 @@ exports.verifyUser = asynHandler(async (req, res, next) => {
      req.date = systemDate
      return next();
   });
+
+exports.findBanner = asynHandler(async (req, res, next) => {
+    let bannerId = req.body.bannerId;
+  
+    //check if banner table if bannerId exist
+  
+    let findbanner = await GlobalModel.Find('banner','bannerId',bannerId);
+    //if banner exist
+    if (!findbanner) {
+      CatchHistory({ api_response: `Sorry, banner does not exist :${bannerId}`, function_name: 'findBanner/middleware', date_started: systemDate, sql_action: "UPDATE", event: "Find and update banner", actor: userId }, req)
+      return sendResponse(res, 0, 200, "Sorry, banner does not exist")
+  
+    }
+    req.date = systemDate
+    req.banner = findbanner
+     return next();
+  });
+  exports.findJob = asynHandler(async (req, res, next) => {
+    let jobId = req.body.jobId;
+  
+    //check if banner table if jobId exist
+  
+    let findjob = await GlobalModel.Find('job_info','jobId',jobId);
+    //if banner exist
+    if (!findjob) {
+      CatchHistory({ api_response: `Sorry, job does not exist :${jobId}`, function_name: 'findjob/middleware', date_started: systemDate, sql_action: "UPDATE", event: "Find and create questions", actor: userId }, req)
+      return sendResponse(res, 0, 200, "Sorry, job does not exist")
+  
+    }
+    req.date = systemDate
+    req.job = findjob
+     return next();
+  });
   

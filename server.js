@@ -1,6 +1,7 @@
 const express = require("express");
 const helmet = require("helmet");
 const xss = require("xss-clean");
+const fileupload = require("express-fileupload");
 const dotenv = require("dotenv");
 const errorHandler = require("./middleware/error");
 const { logger, morganMiddleware } = require("./logs/winston");
@@ -16,6 +17,8 @@ const app = express();
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+//fileuploader middleware
+app.use(fileupload());
 
 //Set Security Headers
 app.use(helmet({ crossOriginResourcePolicy: false }));

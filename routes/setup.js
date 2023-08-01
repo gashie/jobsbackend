@@ -13,15 +13,16 @@ const { protect } = require("../middleware/protect");
 const { checkBaseId, checkOriginatorBaseId, checkUserMenuBaseId } = require("../middleware/rolemenu");
 const { SetupRoleMenu, AllRoleMenu, SingleRoleMenu, RemoveRoleMenu, UpdateRoleMenu, AllMenus, DeleteRoleMenu } = require("../controllers/user/rolemenu");
 const { checkDuplicateaccount } = require("../middleware/duplicate");
-const { verifyAccountActivate, verifyAccountReactivate, verifyResetAccount, verifyAccountReset, verifyUser } = require("../middleware/verify");
+const { verifyAccountActivate, verifyAccountReactivate, verifyResetAccount, verifyAccountReset, verifyUser, findBanner, findJob } = require("../middleware/verify");
 const { CreateSkills, ViewSkills,ViewMySkills,UpdateSkills} = require("../controllers/jobs/skills");
 const { CreateJobCategory, ViewJobCategory,UpdateJobCategory} = require("../controllers/jobs/jobcategory");
-const { CreateQuestionnaire} = require("../controllers/jobs/questionnaire");
+const { CreateQuestionnaire,CreateBulkQuestionnaire,LinkQuestionnaire,DeleteLinkage} = require("../controllers/jobs/questionnaire");
 
 const { CreateJobStatus,UpdateJobStatus,ViewJobStatus} = require("../controllers/jobs/jobstatus");
 const { CreateIndustry,ViewIndustry,UpdateIndustry} = require("../controllers/company/industry");
-const { CreateJobInfo} = require("../controllers/jobs/jobinfo");
+const { CreateJobInfo,UpdateJobInfo,AdminApproveJobInfo,ViewMyJobs} = require("../controllers/jobs/jobinfo");
 
+const { CreateBanner,ViewBanners,UpdateBanner} = require("../controllers/admin/banner");
 
 
 //user account
@@ -76,10 +77,22 @@ router.route("/updateindustry").post(protect, UpdateIndustry);
 
 //setup job
 router.route("/setupjob").post(protect, CreateJobInfo);
+router.route("/updatejob").post(protect, UpdateJobInfo);
+router.route("/approvejob").post(protect, AdminApproveJobInfo);
+router.route("/viewmyjobs").post(protect, ViewMyJobs);
 
 
-//manage jobcategory
+
+//manage questions
 router.route("/createquestion").post(protect,CreateQuestionnaire);
+router.route("/createbulkquestion").post(protect,findJob,CreateBulkQuestionnaire);
+router.route("/linkquestion").post(protect,LinkQuestionnaire);
+router.route("/unlinkquestion").post(protect,DeleteLinkage);
+
+//manage banner
+router.route("/createbanner").post(protect,CreateBanner);
+router.route("/updatebanner").post(protect,findBanner,UpdateBanner);
+router.route("/viewbanner").post(protect,ViewBanners);
 
 
 

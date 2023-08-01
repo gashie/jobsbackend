@@ -2,7 +2,7 @@ const dotenv = require("dotenv");
 const { logger } = require("../logs/winston");
 dotenv.config({ path: "./config/config.env" });
 const jwt = require('jsonwebtoken');
-const { DetectDevice, DetectIp,MainEnc } = require("./devicefuncs")
+const { DetectDevice, DetectIp, MainEnc } = require("./devicefuncs")
 const systemDate = new Date().toISOString().slice(0, 19).replace("T", " ");
 // const { ApiCall } = require("./autoCalls");
 
@@ -24,7 +24,7 @@ module.exports = {
         const accessToken = jwt.sign({ EncUserInfo }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '6hrs' })
 
         // // Create secure cookie with refresh token 
-        const options =  {
+        const options = {
             httpOnly: true, //accessible only by web server 
             secure: false, //https
             // sameSite: 'None', //cross-site cookie 
@@ -34,11 +34,11 @@ module.exports = {
         // res.status(code).json({
         //     status: status,
         //     message: 'Logged in successfully',
-    
-       return res
-        .status(code)
-        .cookie("jwt", accessToken, options)
-        .json({ status: 1, message: "Logged in" });
+
+        return res
+            .status(code)
+            .cookie("jwt", accessToken, options)
+            .json({ status: 1, message: "Logged in" });
     },
     clearResponse: (req, res) => {
         const cookies = req.cookies
@@ -51,23 +51,30 @@ module.exports = {
 
     CatchHistory: async (data, req) => {
         data.service_name = process.env.ServiceName,
-        // data.service_info,
-        // data.location_info,
-        // data.extra_data,
-        data.date_ended = systemDate
+            // data.service_info,
+            // data.location_info,
+            // data.extra_data,
+            data.date_ended = systemDate
         data.created_at = systemDate
         data.device = await DetectDevice(req.headers['user-agent'], req)
         data.ip = DetectIp(req)
         data.url = req.path
 
         console.log(data);
-    //    ApiCall(`${process.env.AuditUrl}api/v1/savelogs`, 'POST', ``, data)
+        //    ApiCall(`${process.env.AuditUrl}api/v1/savelogs`, 'POST', ``, data)
 
     },
     accessCode: () => {
         require('crypto').randomBytes(48, function (err, buffer) {
             var token = buffer.toString('hex');
         });
+    },
+    removeFile: async (dir, file) => {
+        const fs = require('fs').promises;
+        const path = require('path');
+        console.log('Deleted',file)
+       return await fs.unlink(path.join(dir, file))
+
     },
 
 };

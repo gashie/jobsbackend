@@ -2,6 +2,7 @@ const uuidV4 = require('uuid');
 const GlobalModel = require("../models/Global");
 const QuestionModel = require("../models/Questions");
 const { sendResponse, CatchHistory } = require('./utilfunc');
+const { autoFindLinkage } = require('./autoFinder');
 module.exports = {
   autoSaveCompany: async (payload, req, res) => {
     let comapanyId = uuidV4.v4()
@@ -64,16 +65,15 @@ module.exports = {
 
     let results = await GlobalModel.Create('job_question', questionPayload);
     let optionresults = await QuestionModel.create(preparedOptions);
-
-
-    if (results.affectedRows === 1 & optionresults.affectedRows > 0) {
+    if (questionPayload?.jobId !== "") {
+      autoFindLinkage(questionPayload)
+    }
+    if (results.affectedRows === 1 && optionresults.affectedRows > 0) {
       CatchHistory({ event: `user with id: ${actor.userId} added new questionnaire `, functionName: 'CreateQuestionnaire', dateStarted: req.date, sql_action: "INSERT", actor: actor.userId }, req)
-
       return sendResponse(res, 1, 200, "Record saved", [])
     } else {
       CatchHistory({ event: `Sorry, error saving record for user  with id :${actor.userId}`, functionName: 'CreateQuestionnaire', dateStarted: req.date, sql_action: "INSERT", actor: actor.userId }, req)
-
-      return sendResponse(res, 0, 200, "Sorry, error saving record", [])
+     return sendResponse(res, 0, 200, "Sorry, error saving record", [])
     }
 
 
@@ -81,19 +81,68 @@ module.exports = {
   autoSaveNoOptions: async (questionPayload, actor, req, res) => {
 
     let results = await GlobalModel.Create('job_question', questionPayload);
-
+    if (questionPayload?.jobId !== "") {
+      autoFindLinkage(questionPayload)
+    }
 
     if (results.affectedRows === 1) {
       CatchHistory({ event: `user with id: ${actor.userId} added new questionnaire `, functionName: 'CreateQuestionnaire', dateStarted: req.date, sql_action: "INSERT", actor: actor.userId }, req)
-
       return sendResponse(res, 1, 200, "Record saved", [])
     } else {
       CatchHistory({ event: `Sorry, error saving record for user  with id :${actor.userId}`, stack: results, functionName: 'CreateQuestionnaire', dateStarted: req.date, sql_action: "INSERT", actor: actor.userId }, req)
-
       return sendResponse(res, 0, 200, "Sorry, error saving record", [])
     }
 
 
   },
+  autoLinkQuestionJob: async (payload, actor, req, res) => {
+    let linkedResult = await QuestionModel.FindLinkage(payload.jobId, payload.questionId);
+    if (linkedResult) {
+      return sendResponse(res, 0, 200, `Sorry,job with id: ${payload.jobId} has already been linked to question with id ${payload.questionId}`, [])
+    }
+    let results = await GlobalModel.Create('job_linked_question', payload);
+    if (results.affectedRows === 1) {
+      CatchHistory({ event: `user with id: ${actor.userId} linked job with id: ${payload.jobId} to question with id ${payload.questionId} `, functionName: 'autoLinkQuestionJob', dateStarted: req.date, sql_action: "SELECT|INSERT", actor: actor.userId }, req)
+      return sendResponse(res, 1, 200, "Record saved", [])
+    } else {
+      CatchHistory({ event: `Sorry, error saving or linking record for job with id: ${payload.jobId} to question with id ${payload.questionId} `, functionName: 'autoLinkQuestionJob', dateStarted: req.date, sql_action: "SELECT|INSERT", actor: actor.userId }, req)
+      return sendResponse(res, 0, 200, "Sorry, error saving record", [])
+    }
 
+
+  },
+  autoSaveBulkWithOptions: async (questionPayload, preparedOptions, actor, req, res) => {
+
+    let results = await GlobalModel.Create('job_question', questionPayload);
+    let optionresults = await QuestionModel.create(preparedOptions);
+    if (questionPayload?.jobId !== "") {
+      autoFindLinkage(questionPayload)
+    }
+    if (results.affectedRows === 1 && optionresults.affectedRows > 0) {
+      CatchHistory({ event: `user with id: ${actor.userId} added new questionnaire `, functionName: 'CreateQuestionnaire', dateStarted: req.date, sql_action: "INSERT", actor: actor.userId }, req)
+      return;
+    } else {
+      CatchHistory({ event: `Sorry, error saving record for user  with id :${actor.userId}`, functionName: 'CreateQuestionnaire', dateStarted: req.date, sql_action: "INSERT", actor: actor.userId }, req)
+     return ;
+    }
+
+
+  },
+  autoSaveBulkNoOptions: async (questionPayload, actor, req, res) => {
+
+    let results = await GlobalModel.Create('job_question', questionPayload);
+    if (questionPayload?.jobId !== "") {
+      autoFindLinkage(questionPayload)
+    }
+
+    if (results.affectedRows === 1) {
+      CatchHistory({ event: `user with id: ${actor.userId} added new questionnaire `, functionName: 'CreateQuestionnaire', dateStarted: req.date, sql_action: "INSERT", actor: actor.userId }, req)
+      return;
+    } else {
+      CatchHistory({ event: `Sorry, error saving record for user  with id :${actor.userId}`, stack: results, functionName: 'CreateQuestionnaire', dateStarted: req.date, sql_action: "INSERT", actor: actor.userId }, req)
+      return;
+    }
+
+
+  },
 }

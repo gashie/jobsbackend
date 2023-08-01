@@ -28,4 +28,29 @@ jobsdb.create = (postData) => {
         });
     });
 };
+
+jobsdb.FindLinkage = (jobId, questionId) => {
+    return new Promise((resolve, reject) => {
+        const sql =
+            "SELECT jobId AND questionId FROM job_linked_question WHERE jobId = ? AND questionId = ?";
+        pool.query(sql, [jobId, questionId], function (error, results, fields) {
+            if (error) {
+                return reject(error);
+            }
+            return resolve(results[0]);
+        });
+    });
+};
+jobsdb.RemoveLinkage = (jobLinkedQId) => {
+    return new Promise((resolve, reject) => {
+        const sql = `DELETE FROM job_linked_question WHERE jobLinkedQId = ?`;
+        pool.query(sql, [jobLinkedQId], function (error, results, fields) {
+            console.log(error, results,);
+            if (error) {
+                return reject(error);
+            }
+            return resolve(results);
+        });
+    });
+};
 module.exports = jobsdb;

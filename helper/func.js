@@ -51,5 +51,6 @@ module.exports = {
   spreadLocations(jobLocation){
     return jobLocation.map((item) => { return item.locationName }).join(',')
   }
+  
 
 };
