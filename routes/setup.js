@@ -27,12 +27,17 @@ const { CreateBanner,ViewBanners,UpdateBanner} = require("../controllers/admin/b
 
 /***
  * *****
- * ----JOBSEEKER CONTROLERS
+ * ----JOBSEEKER CONTROLERS ->START
  */
 
-const { CreateCv,ViewMyCv,UpdateCv} = require("../controllers/jobseeker/cv")
+const { CreateResume,ViewMyCv,UpdateCv} = require("../controllers/jobseeker/resume")
+ const { CreateCoverLetter,ViewMyCoverLetter,UpdateCoverLetter} = require("../controllers/jobseeker/coverletter")
+ const { CreateJobAlert,ViewMyJobAlert,UpdateJobAlert} = require("../controllers/jobseeker/jobalert")
 
-
+/***
+ * *****
+ * ----JOBSEEKER CONTROLERS <-END
+ */
 
 //user account
 router.route("/signup")["post"](checkDuplicateaccount, CreateUser);
@@ -105,9 +110,20 @@ router.route("/viewbanner").post(protect,ViewBanners);
 
 
 //manage resume
-router.route("/createresume").post(protect,CreateCv);
+router.route("/createresume").post(protect,CreateResume);
 router.route("/updateresume").post(protect,findResume,UpdateCv);
 router.route("/myresume").post(protect,ViewMyCv);
+
+//manage coverletter
+router.route("/createcv").post(protect,CreateCoverLetter);
+router.route("/updatecv").post(protect,UpdateCoverLetter);
+router.route("/mycv").post(protect,ViewMyCoverLetter);
+
+
+//manage jobalert
+router.route("/createjobalert").post(protect,CreateJobAlert);
+router.route("/updatejobalert").post(protect,UpdateJobAlert);
+router.route("/myjobalert").post(protect,ViewMyJobAlert);
 
 
 

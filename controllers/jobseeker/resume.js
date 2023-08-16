@@ -21,7 +21,7 @@ exports.ViewMyCv = asynHandler(async (req, res, next) => {
 
 
 
-exports.CreateCv = asynHandler(async (req, res, next) => {
+exports.CreateResume = asynHandler(async (req, res, next) => {
     let payload = req.body;
     let actor = req.user.userInfo
     let resumeId = uuidV4.v4()
@@ -48,11 +48,11 @@ exports.CreateCv = asynHandler(async (req, res, next) => {
 
         let results = await GlobalModel.Create('resume', payload);
         if (results.affectedRows === 1) {
-            CatchHistory({ event: `user with id: ${actor.userId} added new resume `, functionName: 'CreateCv', dateStarted: req.date, sql_action: "INSERT", actor: actor.userId }, req)
+            CatchHistory({ event: `user with id: ${actor.userId} added new resume `, functionName: 'CreateResume', dateStarted: req.date, sql_action: "INSERT", actor: actor.userId }, req)
 
             return sendResponse(res, 1, 200, "Record saved", [])
         } else {
-            CatchHistory({ event: `Sorry, error saving record for resume  with name :${myCv.name}`, functionName: 'CreateCv', dateStarted: req.date, sql_action: "INSERT", actor: actor.userId }, req)
+            CatchHistory({ event: `Sorry, error saving record for resume  with name :${myCv.name}`, functionName: 'CreateResume', dateStarted: req.date, sql_action: "INSERT", actor: actor.userId }, req)
 
             return sendResponse(res, 0, 200, "Sorry, error saving record", [])
         }
