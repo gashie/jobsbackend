@@ -151,4 +151,20 @@ exports.findBanner = asynHandler(async (req, res, next) => {
     req.job = findjob
      return next();
   });
+  exports.findResume = asynHandler(async (req, res, next) => {
+    let resumeId = req.body.resumeId;
+  
+    //check if resume table if file exist
+  
+    let objectExist = await GlobalModel.Find('resume','resumeId',resumeId);
+    //if resumeo exist
+    if (!objectExist) {
+      CatchHistory({ api_response: `Sorry, job does not exist :${resumeId}`, function_name: 'findResume/middleware', date_started: systemDate, sql_action: "UPDATE", event: "Find and update resume", actor: userId }, req)
+      return sendResponse(res, 0, 200, "Sorry, job does not exist")
+  
+    }
+    req.date = systemDate
+    req.resume = objectExist
+     return next();
+  });
   

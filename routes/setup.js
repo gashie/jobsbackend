@@ -13,7 +13,7 @@ const { protect } = require("../middleware/protect");
 const { checkBaseId, checkOriginatorBaseId, checkUserMenuBaseId } = require("../middleware/rolemenu");
 const { SetupRoleMenu, AllRoleMenu, SingleRoleMenu, RemoveRoleMenu, UpdateRoleMenu, AllMenus, DeleteRoleMenu } = require("../controllers/user/rolemenu");
 const { checkDuplicateaccount } = require("../middleware/duplicate");
-const { verifyAccountActivate, verifyAccountReactivate, verifyResetAccount, verifyAccountReset, verifyUser, findBanner, findJob } = require("../middleware/verify");
+const { verifyAccountActivate, verifyAccountReactivate, verifyResetAccount, verifyAccountReset, verifyUser, findBanner, findJob, findResume } = require("../middleware/verify");
 const { CreateSkills, ViewSkills,ViewMySkills,UpdateSkills} = require("../controllers/jobs/skills");
 const { CreateJobCategory, ViewJobCategory,UpdateJobCategory} = require("../controllers/jobs/jobcategory");
 const { CreateQuestionnaire,CreateBulkQuestionnaire,LinkQuestionnaire,DeleteLinkage} = require("../controllers/jobs/questionnaire");
@@ -23,6 +23,15 @@ const { CreateIndustry,ViewIndustry,UpdateIndustry} = require("../controllers/co
 const { CreateJobInfo,UpdateJobInfo,AdminApproveJobInfo,ViewMyJobs} = require("../controllers/jobs/jobinfo");
 
 const { CreateBanner,ViewBanners,UpdateBanner} = require("../controllers/admin/banner");
+
+
+/***
+ * *****
+ * ----JOBSEEKER CONTROLERS
+ */
+
+const { CreateCv,ViewMyCv,UpdateCv} = require("../controllers/jobseeker/cv")
+
 
 
 //user account
@@ -93,6 +102,12 @@ router.route("/unlinkquestion").post(protect,DeleteLinkage);
 router.route("/createbanner").post(protect,CreateBanner);
 router.route("/updatebanner").post(protect,findBanner,UpdateBanner);
 router.route("/viewbanner").post(protect,ViewBanners);
+
+
+//manage resume
+router.route("/createresume").post(protect,CreateCv);
+router.route("/updateresume").post(protect,findResume,UpdateCv);
+router.route("/myresume").post(protect,ViewMyCv);
 
 
 
