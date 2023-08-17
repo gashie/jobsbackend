@@ -14,15 +14,15 @@ const { checkBaseId, checkOriginatorBaseId, checkUserMenuBaseId } = require("../
 const { SetupRoleMenu, AllRoleMenu, SingleRoleMenu, RemoveRoleMenu, UpdateRoleMenu, AllMenus, DeleteRoleMenu } = require("../controllers/user/rolemenu");
 const { checkDuplicateaccount } = require("../middleware/duplicate");
 const { verifyAccountActivate, verifyAccountReactivate, verifyResetAccount, verifyAccountReset, verifyUser, findBanner, findJob, findResume } = require("../middleware/verify");
-const { CreateSkills, ViewSkills,ViewMySkills,UpdateSkills} = require("../controllers/jobs/skills");
-const { CreateJobCategory, ViewJobCategory,UpdateJobCategory} = require("../controllers/jobs/jobcategory");
-const { CreateQuestionnaire,CreateBulkQuestionnaire,LinkQuestionnaire,DeleteLinkage} = require("../controllers/jobs/questionnaire");
+const { CreateSkills, ViewSkills, ViewMySkills, UpdateSkills } = require("../controllers/jobs/skills");
+const { CreateJobCategory, ViewJobCategory, UpdateJobCategory } = require("../controllers/jobs/jobcategory");
+const { CreateQuestionnaire, CreateBulkQuestionnaire, LinkQuestionnaire, DeleteLinkage } = require("../controllers/jobs/questionnaire");
 
-const { CreateJobStatus,UpdateJobStatus,ViewJobStatus} = require("../controllers/jobs/jobstatus");
-const { CreateIndustry,ViewIndustry,UpdateIndustry} = require("../controllers/company/industry");
-const { CreateJobInfo,UpdateJobInfo,AdminApproveJobInfo,ViewMyJobs} = require("../controllers/jobs/jobinfo");
+const { CreateJobStatus, UpdateJobStatus, ViewJobStatus } = require("../controllers/jobs/jobstatus");
+const { CreateIndustry, ViewIndustry, UpdateIndustry } = require("../controllers/company/industry");
+const { CreateJobInfo, UpdateJobInfo, AdminApproveJobInfo, ViewMyJobs } = require("../controllers/jobs/jobinfo");
 
-const { CreateBanner,ViewBanners,UpdateBanner} = require("../controllers/admin/banner");
+const { CreateBanner, ViewBanners, UpdateBanner } = require("../controllers/admin/banner");
 
 
 /***
@@ -30,9 +30,10 @@ const { CreateBanner,ViewBanners,UpdateBanner} = require("../controllers/admin/b
  * ----JOBSEEKER CONTROLERS ->START
  */
 
-const { CreateResume,ViewMyCv,UpdateCv} = require("../controllers/jobseeker/resume")
- const { CreateCoverLetter,ViewMyCoverLetter,UpdateCoverLetter} = require("../controllers/jobseeker/coverletter")
- const { CreateJobAlert,ViewMyJobAlert,UpdateJobAlert} = require("../controllers/jobseeker/jobalert")
+const { CreateResume, ViewMyCv, UpdateCv } = require("../controllers/jobseeker/resume")
+const { CreateCoverLetter, ViewMyCoverLetter, UpdateCoverLetter } = require("../controllers/jobseeker/coverletter")
+const { CreateJobAlert, ViewMyJobAlert, UpdateJobAlert } = require("../controllers/jobseeker/jobalert")
+const { SaveJob,ViewMySavedJobs,UpdateSavedJob } = require("../controllers/jobseeker/savedjobs")
 
 /***
  * *****
@@ -98,32 +99,38 @@ router.route("/viewmyjobs").post(protect, ViewMyJobs);
 
 
 //manage questions
-router.route("/createquestion").post(protect,CreateQuestionnaire);
-router.route("/createbulkquestion").post(protect,findJob,CreateBulkQuestionnaire);
-router.route("/linkquestion").post(protect,LinkQuestionnaire);
-router.route("/unlinkquestion").post(protect,DeleteLinkage);
+router.route("/createquestion").post(protect, CreateQuestionnaire);
+router.route("/createbulkquestion").post(protect, findJob, CreateBulkQuestionnaire);
+router.route("/linkquestion").post(protect, LinkQuestionnaire);
+router.route("/unlinkquestion").post(protect, DeleteLinkage);
 
 //manage banner
-router.route("/createbanner").post(protect,CreateBanner);
-router.route("/updatebanner").post(protect,findBanner,UpdateBanner);
-router.route("/viewbanner").post(protect,ViewBanners);
+router.route("/createbanner").post(protect, CreateBanner);
+router.route("/updatebanner").post(protect, findBanner, UpdateBanner);
+router.route("/viewbanner").post(protect, ViewBanners);
 
 
 //manage resume
-router.route("/createresume").post(protect,CreateResume);
-router.route("/updateresume").post(protect,findResume,UpdateCv);
-router.route("/myresume").post(protect,ViewMyCv);
+router.route("/createresume").post(protect, CreateResume);
+router.route("/updateresume").post(protect, findResume, UpdateCv);
+router.route("/myresume").post(protect, ViewMyCv);
 
 //manage coverletter
-router.route("/createcv").post(protect,CreateCoverLetter);
-router.route("/updatecv").post(protect,UpdateCoverLetter);
-router.route("/mycv").post(protect,ViewMyCoverLetter);
+router.route("/createcv").post(protect, CreateCoverLetter);
+router.route("/updatecv").post(protect, UpdateCoverLetter);
+router.route("/mycv").post(protect, ViewMyCoverLetter);
 
 
 //manage jobalert
-router.route("/createjobalert").post(protect,CreateJobAlert);
-router.route("/updatejobalert").post(protect,UpdateJobAlert);
-router.route("/myjobalert").post(protect,ViewMyJobAlert);
+router.route("/createjobalert").post(protect, CreateJobAlert);
+router.route("/updatejobalert").post(protect, UpdateJobAlert);
+router.route("/myjobalert").post(protect, ViewMyJobAlert);
+
+
+//manage jobalert
+router.route("/savejob").post(protect, SaveJob);
+router.route("/updatesavedjob").post(protect, UpdateSavedJob);
+router.route("/mysavedjobs").post(protect, ViewMySavedJobs);
 
 
 
