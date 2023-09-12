@@ -3,8 +3,9 @@ const GlobalModel = require("../models/Global");
 const QuestionModel = require("../models/Questions");
 const { sendResponse, CatchHistory } = require('./utilfunc');
 const { autoFindLinkage } = require('./autoFinder');
+const { SendEmailApi } = require('../sevices/comm');
 module.exports = {
-  autoSaveCompany: async (payload, req, res) => {
+  autoSaveCompany: async (payload, req, res,rawResetToken) => {
     let comapanyId = uuidV4.v4()
     let { location, website, companyName, userType, roleid, username, companySize, companyProfile, companyLogo, userId, fullName, email, phone, password, address, country, birthDate, maritalStatus, gender, highestEducation } = payload
     let companyPayload = {
@@ -38,6 +39,16 @@ module.exports = {
       CatchHistory({ api_response: `New user signup with id :${userId}`, function_name: 'CreateUser', date_started: req.date, sql_action: "INSERT", event: "User Signup", actor: userId }, req)
       let results = await GlobalModel.Create('company', companyPayload);
       if (results.affectedRows === 1) {
+        SendEmailApi("gashie@asimeglobal.com",
+        `Hi ${payload.fullName},
+  
+        You have created an account on the Jobsinghana web site. To fully enjoy our services, please confirm registration by clicking the link below:
+        http://www.jobsinghana.com/login/emailaction.php?rqby=${rawResetToken}
+        
+        If the link above does not work, please copy and paste it into your browser's address bar and press the Enter key.
+        
+        After successful confirmation, you can login and enjoy all the features of Jobsinghana.`
+        ,"Confirm your Account Details",payload.email)
         CatchHistory({ api_response: `User with id :${userId} created new company `, function_name: 'autoSave', date_started: req.date, sql_action: "INSERT", event: "Company Signup", actor: userId }, req)
         return sendResponse(res, 1, 200, "Record saved", [])
       } else {
@@ -49,9 +60,19 @@ module.exports = {
 
 
   },
-  autoSaveUser: async (payload, req, res) => {
+  autoSaveUser: async (payload, req, res,rawResetToken) => {
     let results = await GlobalModel.Create('users', payload);
     if (results.affectedRows === 1) {
+      SendEmailApi("gashie@asimeglobal.com",
+      `Hi ${payload.fullName},
+
+      You have created an account on the Jobsinghana web site. To fully enjoy our services, please confirm registration by clicking the link below:
+      http://www.jobsinghana.com/login/emailaction.php?rqby=${rawResetToken}
+      
+      If the link above does not work, please copy and paste it into your browser's address bar and press the Enter key.
+      
+      After successful confirmation, you can login and enjoy all the features of Jobsinghana.`
+      ,"Confirm your Account Details",payload.email)
       CatchHistory({ api_response: `New user signup with id :${payload.userId}`, function_name: 'CreateUser', date_started: req.date, sql_action: "INSERT", event: "User Signup", actor: payload.userId }, req)
       return sendResponse(res, 1, 200, "User Signup Record Saved", [])
     } else {

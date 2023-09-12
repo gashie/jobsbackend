@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 //user account
-const { CreateUser, ActivateAccount, SendActivation, PasswordReset, GetAllUsers, UpdateUser } = require("../controllers/user/user")
+const { CreateUser, ActivateAccount, SendActivation, PasswordReset, GetAllUsers, UpdateUser,GoogleAuth,GoogleAuthFetchUser } = require("../controllers/user/user")
 
 //USER AUTH
 const {
@@ -13,7 +13,7 @@ const { protect } = require("../middleware/protect");
 const { checkBaseId, checkOriginatorBaseId, checkUserMenuBaseId } = require("../middleware/rolemenu");
 const { SetupRoleMenu, AllRoleMenu, SingleRoleMenu, RemoveRoleMenu, UpdateRoleMenu, AllMenus, DeleteRoleMenu } = require("../controllers/user/rolemenu");
 const { checkDuplicateaccount } = require("../middleware/duplicate");
-const { verifyAccountActivate, verifyAccountReactivate, verifyResetAccount, verifyAccountReset, verifyUser, findBanner, findJob, findResume } = require("../middleware/verify");
+const { verifyAccountActivate, verifyAccountReactivate, verifyResetAccount, verifyAccountReset, verifyUser, findBanner, findJob, findResume, findSettings, findAppSettings } = require("../middleware/verify");
 const { CreateSkills, ViewSkills, ViewMySkills, UpdateSkills } = require("../controllers/jobs/skills");
 const { CreateJobCategory, ViewJobCategory, UpdateJobCategory } = require("../controllers/jobs/jobcategory");
 const { CreateQuestionnaire, CreateBulkQuestionnaire, LinkQuestionnaire, DeleteLinkage } = require("../controllers/jobs/questionnaire");
@@ -23,6 +23,8 @@ const { CreateIndustry, ViewIndustry, UpdateIndustry } = require("../controllers
 const { CreateJobInfo, UpdateJobInfo, AdminApproveJobInfo, ViewMyJobs } = require("../controllers/jobs/jobinfo");
 
 const { CreateBanner, ViewBanners, UpdateBanner } = require("../controllers/admin/banner");
+const { CreateFeed,UpdateFeed,ViewFeeds } = require("../controllers/admin/feed");
+
 
 
 /***
@@ -33,7 +35,9 @@ const { CreateBanner, ViewBanners, UpdateBanner } = require("../controllers/admi
 const { CreateResume, ViewMyCv, UpdateCv } = require("../controllers/jobseeker/resume")
 const { CreateCoverLetter, ViewMyCoverLetter, UpdateCoverLetter } = require("../controllers/jobseeker/coverletter")
 const { CreateJobAlert, ViewMyJobAlert, UpdateJobAlert } = require("../controllers/jobseeker/jobalert")
-const { SaveJob,ViewMySavedJobs,UpdateSavedJob } = require("../controllers/jobseeker/savedjobs")
+const { SaveJob,ViewMySavedJobs,UpdateSavedJob } = require("../controllers/jobseeker/savedjobs");
+const { FetchVariousUsers } = require("../controllers/admin/manage_users");
+const { CreateSystemSettings, UpdateSystemSettings } = require("../controllers/admin/app_settings");
 
 /***
  * *****
@@ -42,6 +46,9 @@ const { SaveJob,ViewMySavedJobs,UpdateSavedJob } = require("../controllers/jobse
 
 //user account
 router.route("/signup")["post"](checkDuplicateaccount, CreateUser);
+router.route("/activate")["post"](verifyAccountActivate, ActivateAccount);
+router.route("/oauth")["get"](GoogleAuthFetchUser);
+router.route("/request")["get"](GoogleAuth);
 router.route("/activate")["post"](verifyAccountActivate, ActivateAccount);
 router.route("/resendactivatecode")["post"](verifyAccountReactivate, SendActivation);
 router.route("/sendresetcode")["post"](verifyResetAccount, SendActivation);
@@ -59,7 +66,7 @@ router.route("/updaterolemenu")["post"](UpdateRoleMenu);
 
 
 //users table
-router.route("/allusers").post(protect, GetAllUsers);
+router.route("/allusers").post(protect, FetchVariousUsers);
 router.route("/updateuser").post(protect, verifyUser, UpdateUser);
 
 
@@ -132,6 +139,16 @@ router.route("/savejob").post(protect, SaveJob);
 router.route("/updatesavedjob").post(protect, UpdateSavedJob);
 router.route("/mysavedjobs").post(protect, ViewMySavedJobs);
 
+
+//manage feeds
+router.route("/savefeed").post(protect, CreateFeed);
+router.route("/updatesavedfeed").post(protect, UpdateFeed);
+router.route("/viewsavedfeeds").post(protect, ViewFeeds);
+
+
+//manage settings--logo|
+router.route("/savesettings").post(protect,findSettings, CreateSystemSettings);
+router.route("/updatesavedsetting").post(protect,findAppSettings, UpdateSystemSettings);
 
 
 module.exports = router;

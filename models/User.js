@@ -16,6 +16,20 @@ jobsdb.all = (viewAction) => {
     });
   });
 };
+jobsdb.VariousUsers = (viewAction, type = 2) => {
+  return new Promise((resolve, reject) => {
+    let noDelsql = `SELECT m.userId,m.fullName,m.username,m.email,m.phone,m.address,m.country,m.gender,m.maritalStatus,m.userType,m.status,m.createdAt,m.birthDate,m.highestEducation FROM users m WHERE m.deletedAt IS  NULL AND roleid = ?`
+    let Delsql = `SELECT m.userId,m.fullName,m.username,m.email,m.phone,m.address,m.country,m.gender,m.maritalStatus,m.userType,m.status,m.createdAt,m.birthDate,m.highestEducation FROM users m WHERE m.deletedAt IS NOT  NULL AND roleid = 1;`
+    let allsql = `SELECT m.userId,m.fullName,m.username,m.email,m.phone,m.address,m.country,m.gender,m.maritalStatus,m.userType,m.status,m.createdAt,m.birthDate,m.highestEducation FROM users m`
+
+    pool.query(viewAction === 'notdeleted' ? noDelsql : viewAction === 'deleted' ? Delsql : allsql, [type], (err, results) => {
+      if (err) {
+        return reject(err);
+      }
+      return resolve(results);
+    });
+  });
+};
 
 
 

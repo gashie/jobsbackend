@@ -153,18 +153,50 @@ exports.findBanner = asynHandler(async (req, res, next) => {
   });
   exports.findResume = asynHandler(async (req, res, next) => {
     let resumeId = req.body.resumeId;
+    let actor = req.user.userInfo
   
     //check if resume table if file exist
   
     let objectExist = await GlobalModel.Find('resume','resumeId',resumeId);
     //if resumeo exist
     if (!objectExist) {
-      CatchHistory({ api_response: `Sorry, job does not exist :${resumeId}`, function_name: 'findResume/middleware', date_started: systemDate, sql_action: "UPDATE", event: "Find and update resume", actor: userId }, req)
+      CatchHistory({ api_response: `Sorry, job does not exist :${resumeId}`, function_name: 'findResume/middleware', date_started: systemDate, sql_action: "UPDATE", event: "Find and update resume", actor: actor.userId }, req)
       return sendResponse(res, 0, 200, "Sorry, job does not exist")
   
     }
     req.date = systemDate
     req.resume = objectExist
+     return next();
+  });
+  
+  exports.findSettings = asynHandler(async (req, res, next) => {
+    let actor = req.user.userInfo
+    //check if resume table if file exist
+  
+    let objectExist = await GlobalModel.Findall('app_settings');
+    //if resumeo exist
+    if (objectExist) {
+      CatchHistory({ api_response: `Sorry, you can only update the settings`, function_name: 'findSettings/middleware', date_started: systemDate, sql_action: "UPDATE", event: "Find all settings", actor: actor.userId }, req)
+      return sendResponse(res, 0, 200, "Sorry, you can only update the settings")
+  
+    }
+    req.date = systemDate
+     return next();
+  });
+  
+  exports.findAppSettings = asynHandler(async (req, res, next) => {
+    let actor = req.user.userInfo
+    //check if resume table if file exist
+  
+    let objectExist = await GlobalModel.Findall('app_settings');
+    //if resumeo exist
+    if (!objectExist) {
+      CatchHistory({ api_response: `Sorry, please create settings before updating`, function_name: 'findAppSettings/middleware', date_started: systemDate, sql_action: "UPDATE", event: "Find all settings", actor: actor.userId }, req)
+      return sendResponse(res, 0, 200, "Sorry, please create settings before updating")
+  
+    }
+    req.date = systemDate
+    req.app_settings = objectExist
      return next();
   });
   

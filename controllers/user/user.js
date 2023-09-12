@@ -1,6 +1,7 @@
 const bcyrpt = require("bcrypt");
 const crypto = require("crypto");
 const uuidV4 = require('uuid');
+const { OAuth2Client } = require('google-auth-library')
 const USERS = require("../../models/User");
 const GlobalModel = require("../../models/Global");
 const COMPANY = require("../../models/Company");
@@ -45,7 +46,7 @@ exports.CreateUser = asynHandler(async (req, res, next) => {
         roleid: 3,
 
       }
-      await autoSaveUser(userPayload, req, res)
+      await autoSaveUser(userPayload, req, res, rawResetToken)
 
     } else {
       autoSaveCompany(payload, req, res)
@@ -53,21 +54,21 @@ exports.CreateUser = asynHandler(async (req, res, next) => {
     }
 
   } else {
-    await autoSaveUser(payload, req, res)
+    await autoSaveUser(payload, req, res, rawResetToken)
 
   }
 
 
 })
 exports.GetAllUsers = asynHandler(async (req, res, next) => {
-  let {viewAction} = req.body
+  let { viewAction } = req.body
   let actor = req.user.userInfo
   let results = await USERS.all(viewAction);
   if (results.length == 0) {
-    CatchHistory({ event:  `user with id: ${actor.userId} viewed ${results.length} user's`, functionName: 'GetAllUsers', response: `No Record Found`, dateStarted: req.date,requestStatus: 200,actor: actor.userId }, req);
+    CatchHistory({ event: `user with id: ${actor.userId} viewed ${results.length} user's`, functionName: 'GetAllUsers', response: `No Record Found`, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
     return sendResponse(res, 0, 200, 'No Record Found')
   }
-  CatchHistory({ event:  `user with id: ${actor.userId} viewed ${results.length} user's`, functionName: 'GetAllUsers', response: `Record Found`, dateStarted: req.date,  requestStatus: 200,actor: actor.userId }, req);
+  CatchHistory({ event: `user with id: ${actor.userId} viewed ${results.length} user's`, functionName: 'GetAllUsers', response: `Record Found`, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
 
   return sendResponse(res, 1, 200, 'Record Found', results)
 
@@ -76,50 +77,50 @@ exports.GetAllUsers = asynHandler(async (req, res, next) => {
 
 
 exports.UpdateUser = asynHandler(async (req, res, next) => {
-  const { reset,blockUser,allow,userId,patch, profile,deleterecord,restore } = req.body;
+  const { reset, blockUser, allow, userId, patch, profile, deleterecord, restore } = req.body;
   const salt = await bcyrpt.genSalt(10);
   let actor = req.user.userInfo
   let rawResetToken = crypto.randomBytes(32).toString("hex");
-   console.log(rawResetToken);
+  console.log(rawResetToken);
   let resetUserPayload = {
-    updatedAt :req.date,
-    resetToken : await bcyrpt.hash(rawResetToken, salt),
-    resetPeriod : req.date,
+    updatedAt: req.date,
+    resetToken: await bcyrpt.hash(rawResetToken, salt),
+    resetPeriod: req.date,
   };
   let blockUserPayload = {
-    updatedAt :req.date,
-    status :allow,
+    updatedAt: req.date,
+    status: allow,
   };
   let deleteUserPayload = {
-    updatedAt :req.date,
-    deletedAt :!restore ? req.date : null,
+    updatedAt: req.date,
+    deletedAt: !restore ? req.date : null,
   };
   let patchUserPayload = {
-    updatedAt :req.date,
-    email:profile.email,
-    username:profile.username,
-    fullName:profile.fullName,
-    phone:profile.phone,
-    address:profile.address,
-    country:profile.country,
-    birthDate:profile.birthDate,
-    maritalStatus:profile.maritalStatus,
-    gender:profile.gender,
-    highestEducation:profile.highestEducation,
-    userType:profile.userType,
-    roleid:profile.roleid,
+    updatedAt: req.date,
+    email: profile.email,
+    username: profile.username,
+    fullName: profile.fullName,
+    phone: profile.phone,
+    address: profile.address,
+    country: profile.country,
+    birthDate: profile.birthDate,
+    maritalStatus: profile.maritalStatus,
+    gender: profile.gender,
+    highestEducation: profile.highestEducation,
+    userType: profile.userType,
+    roleid: profile.roleid,
   };
 
-   let switchActionPayload = reset? resetUserPayload : blockUser ? blockUserPayload :deleterecord ? deleteUserPayload : patchUserPayload
- 
+  let switchActionPayload = reset ? resetUserPayload : blockUser ? blockUserPayload : deleterecord ? deleteUserPayload : patchUserPayload
+
   let result = await GlobalModel.Update('users', switchActionPayload, 'userId', userId);
 
   if (result.affectedRows === 1) {
-    CatchHistory({ event: 'UPDATE ADMIN USER', functionName: 'UpdateUser', response: `Record Updated`, dateStarted: req.date, state: 1, requestStatus: 200,actor:actor.userId }, req);
+    CatchHistory({ event: 'UPDATE ADMIN USER', functionName: 'UpdateUser', response: `Record Updated`, dateStarted: req.date, state: 1, requestStatus: 200, actor: actor.userId }, req);
     return sendResponse(res, 1, 200, 'Record Updated')
 
   } else {
-    CatchHistory({ event: 'UPDATE ADMIN USER', functionName: 'UpdateUser', response: `Error Updating Record`, dateStarted: req.date, state: 0, requestStatus: 200,actor:actor.userId  }, req);
+    CatchHistory({ event: 'UPDATE ADMIN USER', functionName: 'UpdateUser', response: `Error Updating Record`, dateStarted: req.date, state: 0, requestStatus: 200, actor: actor.userId }, req);
     return sendResponse(res, 0, 200, 'Error Updating Record')
   }
 
@@ -154,7 +155,7 @@ exports.SendActivation = asynHandler(async (req, res, next) => {
   let { email } = req.body
   let payload = {};
   let rawResetToken = crypto.randomBytes(32).toString("hex");
-   console.log(rawResetToken);
+  console.log(rawResetToken);
   payload.updatedAt = req.date;
   payload.resetToken = await bcyrpt.hash(rawResetToken, salt);
   payload.resetPeriod = req.date
@@ -175,15 +176,15 @@ exports.SendActivation = asynHandler(async (req, res, next) => {
 
 exports.PasswordReset = asynHandler(async (req, res, next) => {
   let user = req.user;
-  let email  = req.body.email;
+  let email = req.body.email;
   const salt = await bcyrpt.genSalt(10);
   let payload = req.body
 
   let newPayload = {
-    password : await bcyrpt.hash(payload.password, salt),
-    updatedAt : req.date,
-    resetPeriod : null,
-    resetToken : null
+    password: await bcyrpt.hash(payload.password, salt),
+    updatedAt: req.date,
+    resetPeriod: null,
+    resetToken: null
   }
 
   let result = await GlobalModel.Update('users', newPayload, 'userId', user.userId);
@@ -197,4 +198,63 @@ exports.PasswordReset = asynHandler(async (req, res, next) => {
     return sendResponse(res, 0, 200, 'Failed to save new password, please try again later')
   }
 
+})
+
+
+exports.GoogleAuth = asynHandler(async (req, res, next) => {
+  res.header('Access-Control-Allow-Origin', 'http://loclahost:5050')
+  res.header('Referrer-Policy', 'no-referrer-whendowngrade');
+
+  const redirectUrl = 'https://127.0.0.1:3000/oauth';
+
+  const oAuth2Client = new OAuth2Client(
+    process.env.GOOGLE_CLIENT_ID,
+    process.env.GOOGLE_CLIENT_SECRET,
+    redirectUrl
+
+  )
+
+  const authroizeUrl = oAuth2Client.generateAuthUrl({
+    access_type: 'offline',
+    scope: 'https://www.googleapis.com/auth/userinfo.profile',
+    prompt: 'consent'
+  })
+
+  res.json({ authroizeUrl })
+})
+
+exports.GoogleAuthFetchUser = asynHandler(async (req, res, next) => {
+  async function getUserData(access_token) {
+
+    const response = await fetch(`https://www.googleapis.com/oauth2/v3/userinfo?access_token=${access_token}`);
+
+    //console.log('response',response);
+    const data = await response.json();
+    console.log('data', data);
+  }
+
+  const code = req.query.code;
+
+  console.log(code);
+  try {
+    const redirectURL = "http://127.0.0.1:3000/oauth"
+    const oAuth2Client = new OAuth2Client(
+      process.env.CLIENT_ID,
+      process.env.CLIENT_SECRET,
+      redirectURL
+    );
+    const r = await oAuth2Client.getToken(code);
+    // Make sure to set the credentials on the OAuth2 client.
+    await oAuth2Client.setCredentials(r.tokens);
+    console.info('Tokens acquired.');
+    const user = oAuth2Client.credentials;
+    console.log('credentials', user);
+    await getUserData(oAuth2Client.credentials.access_token);
+
+  } catch (err) {
+    console.log('Error logging in with OAuth2 user', err);
+  }
+
+
+  res.redirect(303, 'http://localhost:5050/');
 })
