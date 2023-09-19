@@ -13,7 +13,7 @@ const { protect } = require("../middleware/protect");
 const { checkBaseId, checkOriginatorBaseId, checkUserMenuBaseId } = require("../middleware/rolemenu");
 const { SetupRoleMenu, AllRoleMenu, SingleRoleMenu, RemoveRoleMenu, UpdateRoleMenu, AllMenus, DeleteRoleMenu } = require("../controllers/user/rolemenu");
 const { checkDuplicateaccount } = require("../middleware/duplicate");
-const { verifyAccountActivate, verifyAccountReactivate, verifyResetAccount, verifyAccountReset, verifyUser, findBanner, findJob, findResume, findSettings, findAppSettings } = require("../middleware/verify");
+const { verifyAccountActivate, verifyAccountReactivate, verifyResetAccount, verifyAccountReset, verifyUser, findBanner, findJob, findResume, findSettings, findAppSettings, findFeedBedoreApprove, findRateCardBedoreApprove, findCourseBedoreApprove, findCourse, findFeed, findCourseContent, findCoursePartnerships } = require("../middleware/verify");
 const { CreateSkills, ViewSkills, ViewMySkills, UpdateSkills } = require("../controllers/jobs/skills");
 const { CreateJobCategory, ViewJobCategory, UpdateJobCategory } = require("../controllers/jobs/jobcategory");
 const { CreateQuestionnaire, CreateBulkQuestionnaire, LinkQuestionnaire, DeleteLinkage } = require("../controllers/jobs/questionnaire");
@@ -24,8 +24,12 @@ const { CreateJobInfo, UpdateJobInfo, AdminApproveJobInfo, ViewMyJobs } = requir
 
 const { CreateBanner, ViewBanners, UpdateBanner } = require("../controllers/admin/banner");
 const { CreateFeed,UpdateFeed,ViewFeeds } = require("../controllers/admin/feed");
-
-
+const { CreateUserFeeds,ViewUserFeeds,UpdateUserFeed,ApproveUserFeed,ViewMyUserFeeds } = require("../controllers/admin/userfeeds");
+const { ViewRateCards,ApproveRateCard,UpdateRateCard,CreateRateCard } = require("../controllers/admin/ratecard");
+const { CreateCourse,ViewCourse,ViewMyCourses,UpdateCourse,ApproveCourse } = require("../controllers/admin/courses");
+const { CreateCourseContent,ViewCourseContent,UpdateCourseContent } = require("../controllers/admin/courses_content");
+const { ViewCoursePartners,UpdateCoursePartners,CreateCoursePartners } = require("../controllers/admin/courses_partnership");
+const { CreateCourseSchedule,UpdateCourseSchedule,ViewCourseSchedule } = require("../controllers/admin/courses_schedule");
 
 /***
  * *****
@@ -144,6 +148,11 @@ router.route("/mysavedjobs").post(protect, ViewMySavedJobs);
 router.route("/savefeed").post(protect, CreateFeed);
 router.route("/updatesavedfeed").post(protect, UpdateFeed);
 router.route("/viewsavedfeeds").post(protect, ViewFeeds);
+router.route("/saveuserfeed").post(protect, CreateUserFeeds);
+router.route("/updateusersavedfeed").post(protect,findFeed, UpdateUserFeed);
+router.route("/viewsaveduserfeeds").post(protect, ViewUserFeeds);
+router.route("/viewmysavedfeeds").post(protect, ViewMyUserFeeds);
+router.route("/approveuserfeeds").post(protect,findFeedBedoreApprove, ApproveUserFeed);
 
 
 //manage settings--logo|
@@ -151,4 +160,26 @@ router.route("/savesettings").post(protect,findSettings, CreateSystemSettings);
 router.route("/updatesavedsetting").post(protect,findAppSettings, UpdateSystemSettings);
 
 
+
+//manage ratecard
+router.route("/saveratecard").post(protect, CreateRateCard);
+router.route("/updateratecard").post(protect, UpdateRateCard);
+router.route("/viewratecards").post(protect, ViewRateCards);
+router.route("/approveratecards").post(protect,findRateCardBedoreApprove, ApproveRateCard);
+
+//manage course
+router.route("/savecourse").post(protect, CreateCourse);
+router.route("/updatesavedcourse").post(protect,findCourse, UpdateCourse);
+router.route("/mysavedcourses").post(protect, ViewMyCourses);
+router.route("/viewsavedcourses").post(protect, ViewCourse);
+router.route("/approvecourses").post(protect,findCourseBedoreApprove, ApproveCourse);
+router.route("/saveschedule").post(protect, CreateCourseSchedule);
+router.route("/updateschedule").post(protect, UpdateCourseSchedule);
+router.route("/viewschedule").post(protect, ViewCourseSchedule);
+router.route("/savecontent").post(protect, CreateCourseContent);
+router.route("/updatecontent").post(protect,findCourseContent, UpdateCourseContent);
+router.route("/viewcontent").post(protect, ViewCourseContent);
+router.route("/savepartnerships").post(protect, CreateCoursePartners);
+router.route("/updatepartnerships").post(protect,findCoursePartnerships, UpdateCoursePartners);
+router.route("/viewpartnerships").post(protect, ViewCoursePartners);
 module.exports = router;

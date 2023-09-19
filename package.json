@@ -38,6 +38,7 @@
     "mysql": "^2.18.1",
     "mysql2": "^3.6.1",
     "node-device-detector": "^2.0.14",
+    "pcap": "^3.1.0",
     "rss-feed-emitter": "^3.2.3",
     "rss-url-parser": "^3.0.0",
     "simple-encryptor": "^4.0.0",
@@ -45,5 +46,8 @@
     "winston": "^3.9.0",
     "winston-daily-rotate-file": "^4.7.1",
     "xss-clean": "^0.1.4"
+  },
+  "devDependencies": {
+    "http-proxy-middleware": "^2.0.6"
   }
 }
