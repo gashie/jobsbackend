@@ -5,3 +5,4 @@ config/config.env
 config/configprod.env
 mini.zip
 uploads/
+gcc*
