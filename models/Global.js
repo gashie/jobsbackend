@@ -54,6 +54,24 @@ jobsdb.Findall = (table) => {
     });
   });
 };
+jobsdb.QueryDynamic = (tableName, columnsToSelect, conditions) => {
+  return new Promise((resolve, reject) => {
+    // Build the dynamic SQL query with the dynamic conditions
+ // Build the dynamic SQL query with the dynamic conditions
+// Build the dynamic SQL query with the dynamic conditions
+const conditionClauses = conditions.map((conditionObj) => conditionObj.condition).join(' AND ');
+const conditionValues = conditions.map((conditionObj) => conditionObj.value);
+
+const sql = `SELECT ${columnsToSelect.join(', ')} FROM ${tableName} WHERE (${conditionClauses})`;
+
+    pool.query(sql, [...conditionValues], function (error, results, fields) {
+      if (error) {
+        return reject(error);
+      }
+      return resolve(results[0]);
+    });
+  });
+};
 
 jobsdb.ViewWithAction = (table, showDelete) => {
   console.log(showDelete);
