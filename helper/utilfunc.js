@@ -16,19 +16,21 @@ module.exports = {
         })
     },
     sendCookie: async (UserInfo, status, code, res, req) => {
-        let device = await DetectDevice(req.headers['user-agent'], req)
+        const timestamp = new Date().getTime(); // current time
+        const exp = timestamp + (60 * 60 * 24 * 1000 * 7)
+        // let device = await DetectDevice(req.headers['user-agent'], req)
         let userIp = DetectIp(req)
-        UserInfo.devcrb = device
+        // UserInfo.devcrb = device
         UserInfo.devirb = userIp
         let EncUserInfo = MainEnc(UserInfo)  //encrypt entire user information
-        const accessToken = jwt.sign({ EncUserInfo }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '6hrs' })
+        const accessToken = jwt.sign({ EncUserInfo }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '2d' })
 
         // // Create secure cookie with refresh token 
         const options = {
             httpOnly: true, //accessible only by web server 
             secure: false, //https
             // sameSite: 'None', //cross-site cookie 
-            maxAge: 1 * 6 * 60 * 60 * 1000 //cookie expiry: set to match rT
+            maxAge: 2 * 24 * 3600000 //cookie expiry: set to match rT
         }
         logger.info('Logged in successfully')
         // res.status(code).json({
@@ -37,13 +39,13 @@ module.exports = {
 
         return res
             .status(code)
-            .cookie("jwt", accessToken, options)
+            .cookie("jtsid", accessToken, options)
             .json({ status: 1, message: "Logged in" });
     },
     clearResponse: (req, res) => {
         const cookies = req.cookies
-        if (!cookies?.jwt) return res.sendStatus(204) //No content
-        res.clearCookie('jwt', { httpOnly: true, sameSite: 'None', secure: true, expires: new Date(Date.now() + 10 * 1000), })
+        if (!cookies?.jtsid) return res.sendStatus(204) //No content
+        res.clearCookie('jtsid', { httpOnly: true, sameSite: 'None', secure: true, expires: new Date(Date.now() + 10 * 1000), })
         logger.info('Logged out')
         res.json({ Message: 'Logged out' })
     },
@@ -73,7 +75,7 @@ module.exports = {
         const fs = require('fs').promises;
         const path = require('path');
         await fs.unlink(path.join(dir, file))
-        console.log('Deleted',file)
+        console.log('Deleted', file)
         return
 
     },

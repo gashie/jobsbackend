@@ -337,7 +337,7 @@ exports.findRateCardBedoreApprove = asynHandler(async (req, res, next) => {
   // Define an array of conditions (each condition is an object with condition and value)
   const conditions = [
     { condition: 'rateId = ?', value: rateId },
-    { condition: 'rateStatus > ?', value: 'approved' },
+    { condition: 'rateStatus = ?', value: 'approved' },
     // Add more conditions as needed
   ];
 

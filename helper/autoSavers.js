@@ -7,7 +7,7 @@ const { SendEmailApi } = require('../sevices/comm');
 module.exports = {
   autoSaveCompany: async (payload, req, res,rawResetToken) => {
     let comapanyId = uuidV4.v4()
-    let { location, website, companyName, userType, roleid, username, companySize, companyProfile, companyLogo, userId, fullName, email, phone, password, address, country, birthDate, maritalStatus, gender, highestEducation } = payload
+    let { location, website, companyName, userType, roleid, username, companySize, companyProfile, companyLogo, userId, fullName, email, phone, password, address, country, birthDate, maritalStatus, gender, highestEducation,industryId } = payload
     let companyPayload = {
       comapanyId,
       companyName,
@@ -17,6 +17,7 @@ module.exports = {
       companyProfile,
       website,
       companySize,
+      industryId,
     };
     let userPayload = {
       userId,
@@ -43,7 +44,7 @@ module.exports = {
         `Hi ${payload.fullName},
   
         You have created an account on the Jobsinghana web site. To fully enjoy our services, please confirm registration by clicking the link below:
-        http://www.jobsinghana.com/login/emailaction.php?rqby=${rawResetToken}
+        http://localhost:3000/emailaction?token=${rawResetToken}&email=${email}
         
         If the link above does not work, please copy and paste it into your browser's address bar and press the Enter key.
         
@@ -67,7 +68,7 @@ module.exports = {
       `Hi ${payload.fullName},
 
       You have created an account on the Jobsinghana web site. To fully enjoy our services, please confirm registration by clicking the link below:
-      http://www.jobsinghana.com/login/emailaction.php?rqby=${rawResetToken}
+      http://localhost:3000/emailaction?token=${rawResetToken}&email=${payload.email}
       
       If the link above does not work, please copy and paste it into your browser's address bar and press the Enter key.
       

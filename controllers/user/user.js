@@ -9,6 +9,7 @@ const dotenv = require("dotenv");
 const asynHandler = require("../../middleware/async");
 const { sendResponse, CatchHistory } = require("../../helper/utilfunc");
 const { autoSaveUser, autoSaveCompany } = require("../../helper/autoSavers");
+const { SendEmailApi } = require("../../sevices/comm");
 dotenv.config({ path: "./config/config.env" });
 const systemDate = new Date().toISOString().slice(0, 19).replace("T", " ");
 
@@ -46,15 +47,15 @@ exports.CreateUser = asynHandler(async (req, res, next) => {
         roleid: 3,
 
       }
-      await autoSaveUser(userPayload, req, res, rawResetToken)
+     return await autoSaveUser(userPayload, req, res, rawResetToken)
 
     } else {
-      autoSaveCompany(payload, req, res)
+     return autoSaveCompany(payload, req, res)
 
     }
 
   } else {
-    await autoSaveUser(payload, req, res, rawResetToken)
+   return await autoSaveUser(payload, req, res, rawResetToken)
 
   }
 
@@ -164,6 +165,17 @@ exports.SendActivation = asynHandler(async (req, res, next) => {
   let result = await GlobalModel.Update('users', payload, 'userId', user.userId);
 
   if (result.affectedRows === 1) {
+    SendEmailApi("gashie@asimeglobal.com",
+    `Hi,
+
+    You have created an account on the Jobsinghana web site. To fully enjoy our services, please confirm activation by clicking the link below:
+    http://localhost:3000/emailaction?token=${rawResetToken}&email=${email}
+
+    
+    If the link above does not work, please copy and paste it into your browser's address bar and press the Enter key.
+    
+    After successful confirmation, you can login and enjoy all the features of Jobsinghana.`
+    ,"Confirm your Account Details",email)
     CatchHistory({ api_response: `Activation token sent to ${email}`, function_name: 'ActivateAccount', date_started: req.date, sql_action: "UPDATE", event: "User Account Activate", actor: email }, req)
     return sendResponse(res, 1, 200, 'Activation token has been sent to your email successfully')
 
