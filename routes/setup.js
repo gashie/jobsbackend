@@ -13,7 +13,7 @@ const { protect } = require("../middleware/protect");
 const { checkBaseId, checkOriginatorBaseId, checkUserMenuBaseId } = require("../middleware/rolemenu");
 const { SetupRoleMenu, AllRoleMenu, SingleRoleMenu, RemoveRoleMenu, UpdateRoleMenu, AllMenus, DeleteRoleMenu } = require("../controllers/user/rolemenu");
 const { checkDuplicateaccount } = require("../middleware/duplicate");
-const { verifyAccountActivate, verifyAccountReactivate, verifyResetAccount, verifyAccountReset, verifyUser, findBanner, findJob, findResume, findSettings, findAppSettings, findFeedBedoreApprove, findRateCardBedoreApprove, findCourseBedoreApprove, findCourse, findFeed, findCourseContent, findCoursePartnerships } = require("../middleware/verify");
+const { verifyAccountActivate, verifyAccountReactivate, verifyResetAccount, verifyAccountReset, verifyUser, findBanner, findJob, findResume, findSettings, findAppSettings, findFeedBedoreApprove, findRateCardBedoreApprove, findCourseBedoreApprove, findCourse, findFeed, findCourseContent, findCoursePartnerships, findRate, findBeforePay } = require("../middleware/verify");
 const { CreateSkills, ViewSkills, ViewMySkills, UpdateSkills } = require("../controllers/jobs/skills");
 const { CreateJobCategory, ViewJobCategory, UpdateJobCategory } = require("../controllers/jobs/jobcategory");
 const { CreateQuestionnaire, CreateBulkQuestionnaire, LinkQuestionnaire, DeleteLinkage,ViewMyQuestionnaire,AdminViewQuestionnaire,ViewJointQuestionnaire} = require("../controllers/jobs/questionnaire");
@@ -47,6 +47,10 @@ const { CreateSystemSettings, UpdateSystemSettings } = require("../controllers/a
  * *****
  * ----JOBSEEKER CONTROLERS <-END
  */
+
+
+const { GeneralPayment,VerifyPayment } = require("../controllers/jobs/pay");
+
 
 //user account
 router.route("/signup")["post"](checkDuplicateaccount, CreateUser);
@@ -186,4 +190,9 @@ router.route("/viewcontent").post(protect, ViewCourseContent);
 router.route("/savepartnerships").post(protect, CreateCoursePartners);
 router.route("/updatepartnerships").post(protect,findCoursePartnerships, UpdateCoursePartners);
 router.route("/viewpartnerships").post(protect, ViewCoursePartners);
+
+
+//manage course
+router.route("/pay").post(protect,findRate,findBeforePay, GeneralPayment);
+router.route("/verifypayment").post(protect,VerifyPayment);
 module.exports = router;

@@ -118,7 +118,7 @@ exports.ViewApprovedRateCards = asynHandler(async (req, res, next) => {
 
 
   let results = await GlobalModel.QueryDynamic(tableName, columnsToSelect, conditions);
-  if (results.length == 0) {
+  if (!results) {
     CatchHistory({ event: `user with id: ${actor.userId} viewed ${results.length} approved rate_card`, functionName: 'ViewApprovedRateCards', response: `No Record Found For Rate Card `, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
     return sendResponse(res, 0, 200, 'No Record Found')
   }

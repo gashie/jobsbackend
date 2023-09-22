@@ -20,7 +20,15 @@ const errorHandler = (err, req, res, next) => {
     
 
     //mysql db access denied to user
-    if (err.code === "ER_DUP_ENTRY") {
+    if (err.code === "ERR_BAD_REQUEST") {
+        const message = err?.response?.data?.message;
+        error = new ErrorResponse(message, 404);
+      }
+      if (err.code === "ECONNREFUSED") {
+        const message = 'Connectivity issue';
+        error = new ErrorResponse(message, 404);
+      }
+      if (err.code === "ER_DUP_ENTRY") {
         const message = `Duplicate entry found in request`;
         error = new ErrorResponse(message, 404);
       }

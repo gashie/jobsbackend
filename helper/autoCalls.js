@@ -35,6 +35,8 @@ module.exports = {
 
 
   makeApiCall: async (url, method = 'GET', headers = {}, requestData = null) => {
+    const axios = require('axios');
+    const FormData = require('form-data');
     /**
      * Dynamic function to make API calls with either JSON or FormData.
      * @param {string} url - The API endpoint URL.
@@ -73,7 +75,7 @@ module.exports = {
     }
   }
 
-  
+
 
 
 

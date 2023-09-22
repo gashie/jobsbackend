@@ -351,3 +351,73 @@ exports.findRateCardBedoreApprove = asynHandler(async (req, res, next) => {
   req.ratecard = objectExist
   return next();
 });
+
+exports.findRate = asynHandler(async (req, res, next) => {
+  let actor = req.user.userInfo
+  let { rateId } = req.body
+
+
+  // Define your dynamic query parameters
+  const tableName = 'rate_card';
+  const columnsToSelect = ['rateId', 'ratePrice']; // Replace with your desired columns
+
+  // Define an array of conditions (each condition is an object with condition and value
+
+  const conditions = [
+    { column: 'rateStatus', operator: '=', value: 'approved' },
+    { column: 'rateId', operator: '=', value: rateId },
+    // Add more conditions as needed
+  ];
+
+
+  let objectExist = await GlobalModel.QueryDynamic(tableName, columnsToSelect, conditions);
+  if (!objectExist) {
+    CatchHistory({ event: `user with id: ${actor.userId} tried payment with rate ${rateId}`, functionName: 'FindRate', response: `No Record Found For Rate Card `, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
+    return sendResponse(res, 0, 200, 'No Record Found')
+  }
+  req.date = systemDate
+  req.mainrate = objectExist
+  return next();
+
+
+});
+
+exports.findBeforePay = asynHandler(async (req, res, next) => {
+  let actor = req.user.userInfo
+  let { rateId, jobId, courseId, transactionFor } = req.body
+
+
+  // Define your dynamic query parameters
+  const tableNameOne = 'job_info';
+  const columnsToSelectOne = ['jobId']; // Replace with your desired columns
+
+  // Define an array of conditions (each condition is an object with condition and value
+
+  const conditionOne = [
+    { column: 'jobId', operator: '=', value: jobId },
+    { column: 'deletedAt', operator: 'IS', value: null },
+    // Add more conditions as needed
+  ];
+
+  // Define your dynamic query parameters
+  const tableNameTwo = 'course';
+  const columnsToSelectTwo = ['courseId']; // Replace with your desired columns
+
+  // Define an array of conditions (each condition is an object with condition and value
+
+  const conditionTwo = [
+    { column: 'courseId', operator: '=', value: courseId },
+    { column: 'deletedAt', operator: 'IS', value: null },
+    // Add more conditions as needed
+  ];
+  let objectExist = transactionFor === "job" ? await GlobalModel.QueryDynamic(tableNameOne, columnsToSelectOne, conditionOne) : await GlobalModel.QueryDynamic(tableNameTwo, columnsToSelectTwo, conditionTwo)
+
+  if (!objectExist) {
+    CatchHistory({ event: `user with id: ${actor.userId} tried paying for  ${transactionFor}`, functionName: 'findBeforePay', response: `No Record Found for ${transactionFor}`, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
+    return sendResponse(res, 0, 200, 'No Record Found')
+  }
+  req.date = systemDate
+  return next();
+
+
+});
