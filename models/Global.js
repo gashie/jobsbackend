@@ -57,18 +57,82 @@ jobsdb.Findall = (table) => {
 jobsdb.QueryDynamic = (tableName, columnsToSelect, conditions) => {
   return new Promise((resolve, reject) => {
     // Build the dynamic SQL query with the dynamic conditions
- // Build the dynamic SQL query with the dynamic conditions
-// Build the dynamic SQL query with the dynamic conditions
-const conditionClauses = conditions.map((conditionObj) => conditionObj.condition).join(' AND ');
-const conditionValues = conditions.map((conditionObj) => conditionObj.value);
+    console.log('Columns to Select:', columnsToSelect);
+    console.log('Conditions:', conditions);
 
-const sql = `SELECT ${columnsToSelect.join(', ')} FROM ${tableName} WHERE (${conditionClauses})`;
+    // Build the dynamic SQL query with the dynamic conditions
+    // Build the dynamic SQL query with the dynamic conditions
+    const conditionClauses = conditions.map((conditionObj) =>
+      conditionObj.operator === 'IS NOT NULL'
+        ? `${conditionObj.column} IS NOT NULL`
+        : `${conditionObj.column} ${conditionObj.operator} ?`
+    );
+    const conditionValues = conditions.filter((conditionObj) => conditionObj.operator !== 'IS NOT NULL').map((conditionObj) => conditionObj.value);
 
-    pool.query(sql, [...conditionValues], function (error, results, fields) {
+
+    console.log('Condition Clauses:', conditionClauses);
+    console.log('Condition Values:', conditionValues);
+
+    // Construct the SELECT clause based on whether columnsToSelect is empty
+    const selectClause = columnsToSelect.length > 0 ? columnsToSelect.join(', ') : '*';
+
+    console.log('Select Clause:', selectClause);
+
+    const whereClause = conditionClauses.length > 0 ? `WHERE ${conditionClauses.join(' AND ')}` : '';
+
+    console.log('Where Clause:', whereClause);
+
+    const sql = `SELECT ${selectClause} FROM ${tableName} ${whereClause}`;
+
+    console.log('Final Query:', sql);
+
+
+    pool.query(sql, conditionValues, function (error, results, fields) {
       if (error) {
         return reject(error);
       }
       return resolve(results[0]);
+    });
+  });
+};
+jobsdb.QueryDynamicArray = (tableName, columnsToSelect, conditions) => {
+  return new Promise((resolve, reject) => {
+    // Build the dynamic SQL query with the dynamic conditions
+    console.log('Columns to Select:', columnsToSelect);
+    console.log('Conditions:', conditions);
+
+    // Build the dynamic SQL query with the dynamic conditions
+    // Build the dynamic SQL query with the dynamic conditions
+    const conditionClauses = conditions.map((conditionObj) =>
+      conditionObj.operator === 'IS NOT NULL'
+        ? `${conditionObj.column} IS NOT NULL`
+        : `${conditionObj.column} ${conditionObj.operator} ?`
+    );
+    const conditionValues = conditions.filter((conditionObj) => conditionObj.operator !== 'IS NOT NULL').map((conditionObj) => conditionObj.value);
+
+
+    console.log('Condition Clauses:', conditionClauses);
+    console.log('Condition Values:', conditionValues);
+
+    // Construct the SELECT clause based on whether columnsToSelect is empty
+    const selectClause = columnsToSelect.length > 0 ? columnsToSelect.join(', ') : '*';
+
+    console.log('Select Clause:', selectClause);
+
+    const whereClause = conditionClauses.length > 0 ? `WHERE ${conditionClauses.join(' AND ')}` : '';
+
+    console.log('Where Clause:', whereClause);
+
+    const sql = `SELECT ${selectClause} FROM ${tableName} ${whereClause}`;
+
+    console.log('Final Query:', sql);
+
+
+    pool.query(sql, conditionValues, function (error, results, fields) {
+      if (error) {
+        return reject(error);
+      }
+      return resolve(results);
     });
   });
 };

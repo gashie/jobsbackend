@@ -16,7 +16,7 @@ const { checkDuplicateaccount } = require("../middleware/duplicate");
 const { verifyAccountActivate, verifyAccountReactivate, verifyResetAccount, verifyAccountReset, verifyUser, findBanner, findJob, findResume, findSettings, findAppSettings, findFeedBedoreApprove, findRateCardBedoreApprove, findCourseBedoreApprove, findCourse, findFeed, findCourseContent, findCoursePartnerships } = require("../middleware/verify");
 const { CreateSkills, ViewSkills, ViewMySkills, UpdateSkills } = require("../controllers/jobs/skills");
 const { CreateJobCategory, ViewJobCategory, UpdateJobCategory } = require("../controllers/jobs/jobcategory");
-const { CreateQuestionnaire, CreateBulkQuestionnaire, LinkQuestionnaire, DeleteLinkage } = require("../controllers/jobs/questionnaire");
+const { CreateQuestionnaire, CreateBulkQuestionnaire, LinkQuestionnaire, DeleteLinkage,ViewMyQuestionnaire,AdminViewQuestionnaire,ViewJointQuestionnaire} = require("../controllers/jobs/questionnaire");
 
 const { CreateJobStatus, UpdateJobStatus, ViewJobStatus } = require("../controllers/jobs/jobstatus");
 const { CreateIndustry, ViewIndustry, UpdateIndustry } = require("../controllers/company/industry");
@@ -25,7 +25,7 @@ const { CreateJobInfo, UpdateJobInfo, AdminApproveJobInfo, ViewMyJobs } = requir
 const { CreateBanner, ViewBanners, UpdateBanner } = require("../controllers/admin/banner");
 const { CreateFeed,UpdateFeed,ViewFeeds } = require("../controllers/admin/feed");
 const { CreateUserFeeds,ViewUserFeeds,UpdateUserFeed,ApproveUserFeed,ViewMyUserFeeds } = require("../controllers/admin/userfeeds");
-const { ViewRateCards,ApproveRateCard,UpdateRateCard,CreateRateCard } = require("../controllers/admin/ratecard");
+const { ViewRateCards,ApproveRateCard,UpdateRateCard,CreateRateCard, ViewApprovedRateCards} = require("../controllers/admin/ratecard");
 const { CreateCourse,ViewCourse,ViewMyCourses,UpdateCourse,ApproveCourse } = require("../controllers/admin/courses");
 const { CreateCourseContent,ViewCourseContent,UpdateCourseContent } = require("../controllers/admin/courses_content");
 const { ViewCoursePartners,UpdateCoursePartners,CreateCoursePartners } = require("../controllers/admin/courses_partnership");
@@ -111,6 +111,9 @@ router.route("/viewmyjobs").post(protect, ViewMyJobs);
 
 //manage questions
 router.route("/createquestion").post(protect, CreateQuestionnaire);
+router.route("/viewquestions").post(protect, AdminViewQuestionnaire);
+router.route("/viewmyquestions").post(protect, ViewMyQuestionnaire);
+router.route("/viewjointquestions").post(protect, ViewJointQuestionnaire);
 router.route("/createbulkquestion").post(protect, findJob, CreateBulkQuestionnaire);
 router.route("/linkquestion").post(protect, LinkQuestionnaire);
 router.route("/unlinkquestion").post(protect, DeleteLinkage);
@@ -165,6 +168,7 @@ router.route("/updatesavedsetting").post(protect,findAppSettings, UpdateSystemSe
 router.route("/saveratecard").post(protect, CreateRateCard);
 router.route("/updateratecard").post(protect, UpdateRateCard);
 router.route("/viewratecards").post(protect, ViewRateCards);
+router.route("/rate").post(protect, ViewApprovedRateCards);
 router.route("/approveratecards").post(protect,findRateCardBedoreApprove, ApproveRateCard);
 
 //manage course

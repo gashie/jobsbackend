@@ -271,24 +271,22 @@ exports.findAppSettings = asynHandler(async (req, res, next) => {
 });
 exports.findFeedBedoreApprove = asynHandler(async (req, res, next) => {
   let actor = req.user.userInfo
-  let {feedId} = req.body
+  let { feedId } = req.body
   //check if resume table if file exist
   // Define your dynamic query parameters
   const tableName = 'generated_feeds';
   const columnsToSelect = ['feedId', 'status']; // Replace with your desired columns
 
-  // Define an array of conditions (each condition is an object with condition and value)
-  // const conditions = [
-  //   { condition: 'feedId = ?', value: feedId },
-  //   { condition: 'status = ?', value: 'approved' },
-  //   // Add more conditions as needed
-  // ];
+  // Define an array of conditions (each condition is an object with condition and value
+
   const conditions = [
-    { condition: 'feedId = ?', value: '357a6524-e872-4de8-8f2a-8c40aab94a61' },
-    { condition: 'status = ?', value: 'approved' },
+    { column: 'feedId', operator: '=', value: feedId },
+    { column: 'status', operator: '=', value: 'approved' },
     // Add more conditions as needed
   ];
-  let objectExist = await GlobalModel.QueryDynamic(tableName,columnsToSelect,conditions);
+
+
+  let objectExist = await GlobalModel.QueryDynamic(tableName, columnsToSelect, conditions);
   //if resumeo exist
   if (objectExist) {
     CatchHistory({ api_response: `Sorry, this feed has already been approved`, function_name: 'findFeedBedoreApprove/middleware', date_started: systemDate, sql_action: "UPDATE", event: "Find feed before approving", actor: actor.userId }, req)
@@ -301,20 +299,21 @@ exports.findFeedBedoreApprove = asynHandler(async (req, res, next) => {
 });
 exports.findCourseBedoreApprove = asynHandler(async (req, res, next) => {
   let actor = req.user.userInfo
-  let {courseId} = req.body
+  let { courseId } = req.body
   //check if resume table if file exist
   // Define your dynamic query parameters
   const tableName = 'course';
   const columnsToSelect = ['courseId', 'courseStatus']; // Replace with your desired columns
 
   // Define an array of conditions (each condition is an object with condition and value)
+
   const conditions = [
-    { condition: 'courseId = ?', value: courseId },
-    { condition: 'courseStatus > ?', value: 'approved' },
+    { column: 'courseId', operator: '=', value: courseId },
+    { column: 'courseStatus', operator: '=', value: 'approved' },
     // Add more conditions as needed
   ];
 
-  let objectExist = await GlobalModel.QueryDynamic(tableName,columnsToSelect,conditions);
+  let objectExist = await GlobalModel.QueryDynamic(tableName, columnsToSelect, conditions);
   //if resumeo exist
   if (objectExist) {
     CatchHistory({ api_response: `Sorry, this record has already been approved`, function_name: 'findCourseBedoreApprove/middleware', date_started: systemDate, sql_action: "UPDATE", event: "Find course before approving", actor: actor.userId }, req)
@@ -328,20 +327,20 @@ exports.findCourseBedoreApprove = asynHandler(async (req, res, next) => {
 
 exports.findRateCardBedoreApprove = asynHandler(async (req, res, next) => {
   let actor = req.user.userInfo
-  let {rateId} = req.body
+  let { rateId } = req.body
   //check if resume table if file exist
   // Define your dynamic query parameters
   const tableName = 'rate_card';
   const columnsToSelect = ['rateId', 'rateStatus']; // Replace with your desired columns
 
   // Define an array of conditions (each condition is an object with condition and value)
+
   const conditions = [
-    { condition: 'rateId = ?', value: rateId },
-    { condition: 'rateStatus = ?', value: 'approved' },
+    { column: 'rateId', operator: '=', value: rateId },
+    { column: 'rateStatus', operator: '=', value: 'approved' },
     // Add more conditions as needed
   ];
-
-  let objectExist = await GlobalModel.QueryDynamic(tableName,columnsToSelect,conditions);
+  let objectExist = await GlobalModel.QueryDynamic(tableName, columnsToSelect, conditions);
   //if resumeo exist
   if (objectExist) {
     CatchHistory({ api_response: `Sorry, this record has already been approved`, function_name: 'findRateCardBedoreApprove/middleware', date_started: systemDate, sql_action: "UPDATE", event: "Find rate card before approving", actor: actor.userId }, req)

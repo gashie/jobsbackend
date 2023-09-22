@@ -34,4 +34,48 @@ module.exports = {
   },
 
 
+  makeApiCall: async (url, method = 'GET', headers = {}, requestData = null) => {
+    /**
+     * Dynamic function to make API calls with either JSON or FormData.
+     * @param {string} url - The API endpoint URL.
+     * @param {string} method - The HTTP method (e.g., 'GET', 'POST').
+     * @param {object} headers - HTTP headers as key-value pairs.
+     * @param {object|FormData} requestData - Request data, which can be JSON object or FormData.
+     * @returns {Promise} - A promise that resolves with the response data or rejects with an error.
+     */
+    try {
+      const config = {
+        method,
+        url,
+        headers: {
+          ...headers,
+        },
+      };
+
+      if (requestData instanceof FormData) {
+        // If requestData is FormData, set FormData in the request
+        config.headers = {
+          ...config.headers,
+          ...requestData.getHeaders(),
+        };
+        config.data = requestData;
+      } else {
+        // If requestData is a JSON object, set it as the request data
+        config.headers['Content-Type'] = 'application/json';
+        config.data = JSON.stringify(requestData);
+      }
+
+      const response = await axios(config);
+
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  
+
+
+
+
 }

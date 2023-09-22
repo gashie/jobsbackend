@@ -78,12 +78,12 @@ exports.UpdateRateCard = asynHandler(async (req, res, next) => {
 exports.ApproveRateCard = asynHandler(async (req, res, next) => {
   const { status, rateId } = req.body;
   let actor = req.user.userInfo
-    //find rate card with id,and status !approved
+  //find rate card with id,and status !approved
 
   let patchUserPayload = {
     approvedAt: req.date,
     approvedById: actor.userId,
-    rateStatus: status == true ? "approved":"declined",
+    rateStatus: status == true ? "approved" : "declined",
 
   };
 
@@ -91,7 +91,7 @@ exports.ApproveRateCard = asynHandler(async (req, res, next) => {
   let result = await GlobalModel.Update('rate_card', patchUserPayload, 'rateId', rateId);
 
   if (result.affectedRows === 1) {
-    CatchHistory({ event: 'Approve/Deny feed', functionName: 'ApproveRateCard', response: `rate card record with id ${rateId} was ${status == true ? "approved":"declined"} by ${actor.userId}`, dateStarted: req.date, state: 1, requestStatus: 200, actor: actor.userId }, req);
+    CatchHistory({ event: 'Approve/Deny feed', functionName: 'ApproveRateCard', response: `rate card record with id ${rateId} was ${status == true ? "approved" : "declined"} by ${actor.userId}`, dateStarted: req.date, state: 1, requestStatus: 200, actor: actor.userId }, req);
     return sendResponse(res, 1, 200, 'Record Updated')
 
   } else {
@@ -100,3 +100,30 @@ exports.ApproveRateCard = asynHandler(async (req, res, next) => {
   }
 
 })
+
+exports.ViewApprovedRateCards = asynHandler(async (req, res, next) => {
+  let actor = req.user.userInfo
+
+
+  // Define your dynamic query parameters
+  const tableName = 'rate_card';
+  const columnsToSelect = ['rateId','rateTitle','rateDescription','ratePrice']; // Replace with your desired columns
+
+  // Define an array of conditions (each condition is an object with condition and value
+
+  const conditions = [
+    { column: 'rateStatus', operator: '=', value: 'approved' },
+    // Add more conditions as needed
+  ];
+
+
+  let results = await GlobalModel.QueryDynamic(tableName, columnsToSelect, conditions);
+  if (results.length == 0) {
+    CatchHistory({ event: `user with id: ${actor.userId} viewed ${results.length} approved rate_card`, functionName: 'ViewApprovedRateCards', response: `No Record Found For Rate Card `, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
+    return sendResponse(res, 0, 200, 'No Record Found')
+  }
+  CatchHistory({ event: `user with id: ${actor.userId} viewed ${results.length} approved rate_card`, functionName: 'ViewApprovedRateCards', response: `Record Found, Rate Card  contains ${results.length} record's`, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
+
+  return sendResponse(res, 1, 200, 'Record Found', results)
+
+});

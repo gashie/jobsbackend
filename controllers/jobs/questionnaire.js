@@ -47,6 +47,7 @@ exports.CreateQuestionnaire = asynHandler(async (req, res, next) => {
 
   let questionPayload = {
     questionId,
+    isAdmin: actor?.roleid == 1 ? 'yes' : no,
     questionTitle: payload.questionTitle,
     minimumValue: payload.minimumValue,
     maximumValue: payload.maximumValue,
@@ -135,6 +136,7 @@ exports.CreateBulkQuestionnaire = asynHandler(async (req, res, next) => {
 
 
     let questionPayload = {
+      isAdmin: actor?.roleid == 1 ? 'yes' : no,
       questionId,
       questionTitle: payload.questionTitle,
       minimumValue: payload.minimumValue,
@@ -164,3 +166,98 @@ exports.CreateBulkQuestionnaire = asynHandler(async (req, res, next) => {
 
 
 })
+
+exports.AdminViewQuestionnaire = asynHandler(async (req, res, next) => {
+  let actor = req.user.userInfo
+
+
+  // Define your dynamic query parameters
+  const tableName = 'job_question';
+  const columnsToSelect = ['questionId', 'questionTitle', 'jobId', 'questionType', 'benchMark', 'minimumValue', 'maximumValue', 'createdAt', 'updatedAt', 'createdByName']; // Replace with your desired columns
+
+  // Define an array of conditions (each condition is an object with condition and value
+
+  const conditions = [
+    { column: 'deletedAt', operator: 'IS', value: null },
+    // Add more conditions as needed
+  ];
+
+
+  let results = await GlobalModel.QueryDynamicArray(tableName, columnsToSelect, conditions);
+
+  if (results.length == 0) {
+    CatchHistory({ event: `user with id: ${actor.userId} viewed ${results?.length} approved job_question`, functionName: 'ViewApprovedRateCards', response: `No Record Found For Rate Card `, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
+    return sendResponse(res, 0, 200, 'No Record Found')
+  } else {
+    CatchHistory({ event: `user with id: ${actor.userId} viewed ${results?.length} approved job_question`, functionName: 'ViewApprovedRateCards', response: `Record Found, Rate Card  contains ${results?.length} record's`, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
+
+    return sendResponse(res, 1, 200, 'Record Found', results)
+  }
+
+});
+exports.ViewMyQuestionnaire = asynHandler(async (req, res, next) => {
+  let actor = req.user.userInfo
+
+
+  // Define your dynamic query parameters
+  const tableName = 'job_question';
+  const columnsToSelect = ['questionId', 'questionTitle', 'jobId', 'questionType', 'benchMark', 'minimumValue', 'maximumValue', 'createdAt', 'updatedAt', 'createdByName']; // Replace with your desired columns
+
+  // Define an array of conditions (each condition is an object with condition and value
+
+  const conditions = [
+    { column: 'deletedAt', operator: 'IS', value: null },
+    { column: 'createdById', operator: '=', value: actor.userId }
+    // Add more conditions as needed
+  ];
+
+
+  let results = await GlobalModel.QueryDynamicArray(tableName, columnsToSelect, conditions);
+
+  if (results.length == 0) {
+    CatchHistory({ event: `user with id: ${actor.userId} viewed ${results?.length}  job_questions`, functionName: 'ViewMyQuestionnaire', response: `No Record Found For Rate Card `, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
+    return sendResponse(res, 0, 200, 'No Record Found')
+  } else {
+    CatchHistory({ event: `user with id: ${actor.userId} viewed ${results?.length}  job_questions`, functionName: 'ViewMyQuestionnaire', response: `Record Found, Rate Card  contains ${results?.length} record's`, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
+
+    return sendResponse(res, 1, 200, 'Record Found', results)
+  }
+
+});
+exports.ViewJointQuestionnaire = asynHandler(async (req, res, next) => {
+  let actor = req.user.userInfo
+
+
+  // Define your dynamic query parameters
+  const tableName = 'job_question';
+  const columnsToSelect = ['questionId', 'questionTitle', 'jobId', 'questionType', 'benchMark', 'minimumValue', 'maximumValue', 'createdAt', 'updatedAt', 'createdByName']; // Replace with your desired columns
+
+  // Define an array of conditions (each condition is an object with condition and value
+  const conditionsTwo = [
+    { column: 'deletedAt', operator: 'IS', value: null },
+    { column: 'createdById', operator: '=', value: actor.userId },
+    // Add more conditions as needed
+  ];
+
+
+  let results = await GlobalModel.QueryDynamicArray(tableName, columnsToSelect, conditionsTwo);
+
+  const conditionsOne = [
+    { column: 'deletedAt', operator: 'IS', value: null },
+    { column: 'isAdmin', operator: '=', value: 'yes' }
+    // Add more conditions as needed
+  ];
+
+
+  let adminQuestions = await GlobalModel.QueryDynamicArray(tableName, columnsToSelect, conditionsOne);
+
+  if (results.length == 0) {
+    CatchHistory({ event: `user with id: ${actor.userId} viewed ${results?.length}  joint job_questions`, functionName: 'ViewJointQuestionnaire', response: `No Record Found For Rate Card `, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
+    return sendResponse(res, 0, 200, 'No Record Found')
+  } else {
+    CatchHistory({ event: `user with id: ${actor.userId} viewed ${results?.length}  joint job_questions`, functionName: 'ViewJointQuestionnaire', response: `Record Found, Rate Card  contains ${results?.length} record's`, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
+
+    return sendResponse(res, 1, 200, 'Record Found', [...results,...adminQuestions])
+  }
+
+});
