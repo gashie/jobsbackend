@@ -47,7 +47,7 @@ exports.CreateQuestionnaire = asynHandler(async (req, res, next) => {
 
   let questionPayload = {
     questionId,
-    isAdmin: actor?.roleid == 1 ? 'yes' : no,
+    isAdmin: actor?.roleid == 1 ? 'yes' : 'no',
     questionTitle: payload.questionTitle,
     minimumValue: payload.minimumValue,
     maximumValue: payload.maximumValue,
@@ -136,7 +136,7 @@ exports.CreateBulkQuestionnaire = asynHandler(async (req, res, next) => {
 
 
     let questionPayload = {
-      isAdmin: actor?.roleid == 1 ? 'yes' : no,
+      isAdmin: actor?.roleid == 1 ? 'yes' : 'no',
       questionId,
       questionTitle: payload.questionTitle,
       minimumValue: payload.minimumValue,
