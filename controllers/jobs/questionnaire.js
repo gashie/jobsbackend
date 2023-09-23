@@ -125,10 +125,10 @@ exports.CreateBulkQuestionnaire = asynHandler(async (req, res, next) => {
   let isDone = false
   let jobInfo = req.job
 
-  if (jobInfo.jobState === 'approved') {
-    return sendResponse(res, 0, 200, "Sorry this job has already been approved", [])
+  // if (jobInfo.jobState === 'approved') {
+  //   return sendResponse(res, 0, 200, "Sorry this job has already been approved", [])
 
-  }
+  // }
   for (const payload of bulk) {
     let qOption = payload?.questionOption
     let questionId = uuidV4.v4()
