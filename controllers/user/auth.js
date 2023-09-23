@@ -39,9 +39,20 @@ exports.Auth = asynHandler(async (req, res) => {
 
     }
 
+    if (UserInfo.roleid === 3) {
+        const tableName = 'company';
+        const columnsToSelect = []; // Replace with your desired columns
+      
+        // Define an array of conditions (each condition is an object with condition and value)
+      
+        const conditions = [
+          { column: 'userId', operator: '=', value: UserInfo.userId },
+          // Add more conditions as needed
+        ];
+        UserInfo.company =await GlobalModel.QueryDynamic(tableName, columnsToSelect, conditions);
+    }
     let getUserinfo = await FilterMenu(UserInfo)
-
-    // CatchHistory({ payload: JSON.stringify({ email }), api_response: "User logged in", function_name: 'Auth', date_started: systemDate, sql_action: "SELECT", event: "User Authentication", actor: email }, req)
+  CatchHistory({ payload: JSON.stringify({ email }), api_response: "User logged in", function_name: 'Auth', date_started: systemDate, sql_action: "SELECT", event: "User Authentication", actor: email }, req)
     return sendCookie(getUserinfo, 1, 200, res, req)
 })
 

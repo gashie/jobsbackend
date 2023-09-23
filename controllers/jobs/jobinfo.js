@@ -43,7 +43,7 @@ exports.CreateJobInfo = asynHandler(async (req, res, next) => {
   payload.jobId = uuidV4.v4()
   let preparedLocations = prePareLocations(payload?.jobLocation, payload.jobId)
   payload.jobLocation = spreadLocations(payload?.jobLocation)
-
+  payload.jobSkills = req.body.jobSkills.join(',')
   payload.createdByName = actor.fullName
   payload.createdById = actor.userId
 

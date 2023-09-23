@@ -8,10 +8,10 @@ exports.ViewJobStatus = asynHandler(async (req, res, next) => {
 
     let results = await GlobalModel.ViewWithAction('job_status', viewAction);
     if (results.length == 0) {
-        CatchHistory({ event: `user with id: ${actor.userId} viewed ${results.length} job_status`, functionName: 'ViewJoStatus', response: `No Record Found For Job Status`, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
+        CatchHistory({ event: `user with id: ${actor.userId} viewed ${results.length} job_status`, functionName: 'ViewJobStatus', response: `No Record Found For Job Status`, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
         return sendResponse(res, 0, 200, 'No Record Found')
     }
-    CatchHistory({ event: `user with id: ${actor.userId} viewed ${results.length} job_status`, functionName: 'ViewJoStatus', response: `Record Found, Job Status contains ${results.length} record's`, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
+    CatchHistory({ event: `user with id: ${actor.userId} viewed ${results.length} job_status`, functionName: 'ViewJobStatus', response: `Record Found, Job Status contains ${results.length} record's`, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
 
     return sendResponse(res, 1, 200, 'Record Found', results)
 
