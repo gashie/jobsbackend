@@ -47,15 +47,15 @@ exports.CreateUser = asynHandler(async (req, res, next) => {
         roleid: 3,
 
       }
-     return await autoSaveUser(userPayload, req, res, rawResetToken)
+      return await autoSaveUser(userPayload, req, res, rawResetToken)
 
     } else {
-     return autoSaveCompany(payload, req, res)
+      return autoSaveCompany(payload, req, res)
 
     }
 
   } else {
-   return await autoSaveUser(payload, req, res, rawResetToken)
+    return await autoSaveUser(payload, req, res, rawResetToken)
 
   }
 
@@ -98,21 +98,10 @@ exports.UpdateUser = asynHandler(async (req, res, next) => {
   };
   let patchUserPayload = {
     updatedAt: req.date,
-    email: profile.email,
-    username: profile.username,
-    fullName: profile.fullName,
-    phone: profile.phone,
-    address: profile.address,
-    country: profile.country,
-    birthDate: profile.birthDate,
-    maritalStatus: profile.maritalStatus,
-    gender: profile.gender,
-    highestEducation: profile.highestEducation,
-    userType: profile.userType,
-    roleid: profile.roleid,
+    ...profile,
   };
 
-  let switchActionPayload = reset ? resetUserPayload : blockUser ? blockUserPayload : deleterecord ? deleteUserPayload : patchUserPayload
+  let switchActionPayload = reset ? resetUserPayload : blockUser ? blockUserPayload : deleterecord ? deleteUserPayload : patch ? patchUserPayload :''
 
   let result = await GlobalModel.Update('users', switchActionPayload, 'userId', userId);
 
@@ -166,7 +155,7 @@ exports.SendActivation = asynHandler(async (req, res, next) => {
 
   if (result.affectedRows === 1) {
     SendEmailApi("gashie@asimeglobal.com",
-    `Hi,
+      `Hi,
 
     You have created an account on the Jobsinghana web site. To fully enjoy our services, please confirm activation by clicking the link below:
     http://localhost:3000/emailaction?token=${rawResetToken}&email=${email}
@@ -175,7 +164,7 @@ exports.SendActivation = asynHandler(async (req, res, next) => {
     If the link above does not work, please copy and paste it into your browser's address bar and press the Enter key.
     
     After successful confirmation, you can login and enjoy all the features of Jobsinghana.`
-    ,"Confirm your Account Details",email)
+      , "Confirm your Account Details", email)
     CatchHistory({ api_response: `Activation token sent to ${email}`, function_name: 'ActivateAccount', date_started: req.date, sql_action: "UPDATE", event: "User Account Activate", actor: email }, req)
     return sendResponse(res, 1, 200, 'Activation token has been sent to your email successfully')
 
