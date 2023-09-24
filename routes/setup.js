@@ -20,7 +20,7 @@ const { CreateQuestionnaire, CreateBulkQuestionnaire, LinkQuestionnaire, DeleteL
 
 const { CreateJobStatus, UpdateJobStatus, ViewJobStatus } = require("../controllers/jobs/jobstatus");
 const { CreateIndustry, ViewIndustry, UpdateIndustry } = require("../controllers/company/industry");
-const { CreateJobInfo, UpdateJobInfo, AdminApproveJobInfo, ViewMyJobs } = require("../controllers/jobs/jobinfo");
+const { CreateJobInfo, UpdateJobInfo, AdminApproveJobInfo, ViewMyJobs,ViewJobDetails, ViewJobsData } = require("../controllers/jobs/jobinfo");
 
 const { CreateBanner, ViewBanners, UpdateBanner } = require("../controllers/admin/banner");
 const { CreateFeed,UpdateFeed,ViewFeeds } = require("../controllers/admin/feed");
@@ -145,10 +145,12 @@ router.route("/updatejobalert").post(protect, UpdateJobAlert);
 router.route("/myjobalert").post(protect, ViewMyJobAlert);
 
 
-//manage jobalert
+//manage job
 router.route("/savejob").post(protect, SaveJob);
 router.route("/updatesavedjob").post(protect, UpdateSavedJob);
 router.route("/mysavedjobs").post(protect, ViewMySavedJobs);
+router.route("/jobdetails").post(protect, ViewJobDetails);
+router.route("/public/jobdata").post(ViewJobsData);
 
 
 //manage feeds

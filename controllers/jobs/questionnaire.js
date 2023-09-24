@@ -161,7 +161,9 @@ exports.CreateBulkQuestionnaire = asynHandler(async (req, res, next) => {
     }
   }
   if (isDone) {
-    return sendResponse(res, 1, 200, "Saved successfully", [])
+    GlobalModel.Update('job_info', { hasQuestions: true }, 'jobsId', jobId);
+
+    return sendResponse(res, 1, 200, "Saved successfully", { jobId: payload.jobId })
   }
 
 
@@ -257,7 +259,7 @@ exports.ViewJointQuestionnaire = asynHandler(async (req, res, next) => {
   } else {
     CatchHistory({ event: `user with id: ${actor.userId} viewed ${results?.length}  joint job_questions`, functionName: 'ViewJointQuestionnaire', response: `Record Found, Rate Card  contains ${results?.length} record's`, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
 
-    return sendResponse(res, 1, 200, 'Record Found', [...results,...adminQuestions])
+    return sendResponse(res, 1, 200, 'Record Found', [...results, ...adminQuestions])
   }
 
 });

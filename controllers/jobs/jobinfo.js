@@ -7,6 +7,7 @@ const JobModel = require("../../models/Job");
 const { sendResponse, CatchHistory } = require("../../helper/utilfunc");
 const { prePareLocations, spreadLocations } = require('../../helper/func');
 const { makeApiCall } = require('../../helper/autoCalls');
+const { autoFindQuestionsWithJobId } = require('../../helper/autoFinder');
 
 exports.ViewJobCategory = asynHandler(async (req, res, next) => {
   let { viewAction } = req.body
@@ -76,17 +77,18 @@ exports.UpdateJobInfo = asynHandler(async (req, res, next) => {
     updatedAt: req.date,
     updatedByName: actor.fullName,
     updatedById: actor.userId,
-    jobTitle: patchData.jobTitle,
-    jobCategoryId: patchData.jobCategoryId,
-    jobSalaryAmount: patchData.jobSalaryAmount,
-    companyId: patchData.companyId,
-    isCompanyConfidential: patchData.isCompanyConfidential,
-    jobDescription: patchData.jobDescription,
-    jobSkillsId: patchData.jobSkillsId,
-    jobSalaryCurrency: patchData.jobSalaryCurrency,
-    jobStatusId: patchData.jobStatusId,
-    applyMode: patchData.applyMode,
-    applyLink: patchData.applyLink
+    ...patchData
+    // jobTitle: patchData.jobTitle,
+    // jobCategoryId: patchData.jobCategoryId,
+    // jobSalaryAmount: patchData.jobSalaryAmount,
+    // companyId: patchData.companyId,
+    // isCompanyConfidential: patchData.isCompanyConfidential,
+    // jobDescription: patchData.jobDescription,
+    // jobSkillsId: patchData.jobSkillsId,
+    // jobSalaryCurrency: patchData.jobSalaryCurrency,
+    // jobStatusId: patchData.jobStatusId,
+    // applyMode: patchData.applyMode,
+    // applyLink: patchData.applyLink
   };
 
   let switchActionPayload = patch ? patchUserPayload : deletePayload
@@ -125,5 +127,27 @@ exports.AdminApproveJobInfo = asynHandler(async (req, res, next) => {
     CatchHistory({ event: 'Approve Job Info', functionName: 'AdminApproveJobInfo', response: `Error Updating Record with id ${jobId}`, dateStarted: req.date, state: 0, requestStatus: 200, actor: actor.userId }, req);
     return sendResponse(res, 0, 200, 'Error Updating Record')
   }
+
+})
+
+exports.ViewJobDetails = asynHandler(async (req, res, next) => {
+  let {jobId} = req.body
+  let actor = req.user.userInfo
+  let results = await JobModel.OpenJob(jobId);
+  if (results) {
+    let getQuestionsData = await autoFindQuestionsWithJobId(jobId)
+     return sendResponse(res, 1, 200, 'Record Found', {jobInfo:results,Questions:getQuestionsData})
+  }
+  return sendResponse(res, 0, 200, 'No Record Found')
+
+})
+
+exports.ViewJobsData = asynHandler(async (req, res, next) => {
+  let results = await JobModel.PublicOpenJob();
+  if (results.length == 0) {
+    return sendResponse(res, 0, 200, 'No Record Found')
+  }
+
+  return sendResponse(res, 1, 200, 'Record Found', results)
 
 })
