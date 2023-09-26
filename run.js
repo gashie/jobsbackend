@@ -1,298 +1,274 @@
-// const express = require('express');
-// const { createProxyMiddleware } = require('http-proxy-middleware');
-
-// const app = express();
-// const port = 3000;
-
-// // Define an array of URLs to monitor
-// const urlsToMonitor = [
-//   "http://localhost:5050",
-// ];
-
-// // Create a proxy middleware for each URL
-// urlsToMonitor.forEach((url) => {
-//   const proxyMiddleware = createProxyMiddleware({
-//     target: url,
-//     changeOrigin: true,
-//     onProxyReq: (proxyReq, req, res) => {
-//       const start = new Date();
-
-//       // Log request details
-//       console.log(`Captured request to: ${req.url}`);
-//       console.log(`Method: ${req.method}`);
-//       console.log(`Headers: ${JSON.stringify(req.headers, null, 2)}`);
-
-//       // If you want to capture the request body, you can do so like this:
-//       let requestBody = '';
-//       req.on('data', (chunk) => {
-//         requestBody += chunk;
-//       });
-//       req.on('end', () => {
-//         console.log(`Request Body: `);
-//       });
-
-//       proxyReq.on('response', (proxyRes) => {
-//         console.log('====================================');
-//         console.log(proxyRes);
-//         console.log('====================================');
-//         const end = new Date();
-//         const duration = end - start;
-
-//         // Log response details
-//         console.log(`Response Code: ${proxyRes.statusCode}`);
-//         console.log(`Response Headers: ${JSON.stringify(proxyRes.headers, null, 2)}`);
-//         console.log(`Request Duration: ${duration} ms`);
-
-//         // You can also log the response body if needed
-//         // proxyRes.on('data', (chunk) => {
-//         //   console.log(`Response Body Chunk: ${chunk}`);
-//         // });
-
-//         // Log errors if any
-//         proxyRes.on('error', (err) => {
-//           console.error(`Error in response: ${err.message}`);
-//         });
-//       });
-
-//       // If you want to modify request headers, you can do so like this:
-//       // proxyReq.setHeader('X-Custom-Header', 'Custom-Value');
-
-//       // If you want to modify the request body, you can do so like this:
-//       // const modifiedRequestBody = 'Modified Data';
-//       // proxyReq.setHeader('content-length', Buffer.byteLength(modifiedRequestBody));
-//       // proxyReq.write(modifiedRequestBody);
-//       // proxyReq.end();
-//     },
-//   });
-
-//   // Use the proxy middleware for each URL
-//   app.use('/', proxyMiddleware);
-// });
-
-// app.listen(port, () => {
-//   console.log(`Proxy server listening on port ${port}`);
-// });
 
 
-const pcap = require('pcap');
-var util = require('util'),
-    count = 0,
-    start_time = new Date(),
-    dns_cache = pcap.dns_cache,
-    tcp_tracker = new pcap.TCPTracker(),
-    http = require('http'),
-    url = require('url'),
-    path = require('path'),
-    fs = require('fs'),
-    track_ids = {}
-    bulk_data='';
+// function checkAnswers(questions, userAnswers) {
+//   const results = [];
 
-if (process.argv.length !== 4) {
-    console.error("usage speed_server interface filter");
-    console.error("Examples: ");
-    console.error('  speed_server "" "tcp port 80"');
-    console.error('  speed_server eth1 ""');
-    console.error('  speed_server lo0 "ip proto \\tcp and tcp port 80"');
-    process.exit(1);
+//   for (const userAnswer of userAnswers.answers) {
+//     const question = questions.Questions.find(q => q.questionId === userAnswer.questionId);
+
+//     if (!question) {
+//       // Handle the case where the question ID is not found in the questions data.
+//       results.push({ questionId: userAnswer.questionId, result: 'Question not found' });
+//       continue;
+//     }
+
+//     let isCorrect = false;
+
+//     if (question.questionType === 'yesno') {
+//       // For 'yesno' questions, compare user's answer to the benchmark.
+//       isCorrect = userAnswer.ans === question.benchMark;
+//     } else if (question.questionType === 'single') {
+//       // For 'single' questions, find options with non-empty optionBenchMark and compare user's answer.
+//       const correctOption = question.optionsData.find(opt => opt.optionBenchMark === userAnswer.ans);
+//       isCorrect = !!correctOption; // Check if a correct option was found.
+//     } else if (question.questionType === 'multi') {
+//       // For 'multi' questions, compare user's answers to option benchmarks.
+//         // For 'multi' questions, compare user's answers to option benchmarks.
+//         const userSelectedOptions = userAnswer.ans;
+//         const correctOptionBenchmarks = question.optionsData
+//           .filter(opt => opt.optionBenchMark !== '')
+//           .map(opt => opt.optionBenchMark);
+
+//         isCorrect = userSelectedOptions.length === correctOptionBenchmarks.length &&
+//           userSelectedOptions.every(option => correctOptionBenchmarks.includes(option));
+//     }
+
+//     results.push({
+//       questionId: userAnswer.questionId,
+//       result: isCorrect ? 'Correct' : 'Incorrect'
+//     });
+//   }
+
+//   return results;
+// }
+
+
+
+
+
+//*****working
+
+
+//mark earch
+function checkAnswersBRingsPercentageForEachQuestion(questions, userAnswers) {
+  const results = [];
+
+  for (const userAnswer of userAnswers.answers) {
+    const question = questions.Questions.find(q => q.questionId === userAnswer.questionId);
+
+    if (!question) {
+      // Handle the case where the question ID is not found in the questions data.
+      results.push({ questionId: userAnswer.questionId, result: 'Question not found' });
+      continue;
+    }
+
+    let isCorrect = false;
+    let scorePercentage = 0; // Initialize the score percentage.
+
+    if (question.questionType === 'yesno') {
+      // For 'yesno' questions, compare user's answer to the benchmark.
+      isCorrect = userAnswer.ans === question.benchMark;
+      if (isCorrect) {
+        scorePercentage = 100; // If correct, score is 100%.
+      }
+    } else if (question.questionType === 'single') {
+      // For 'single' questions, find options with non-empty optionBenchMark and compare user's answer.
+      const correctOption = question.optionsData.find(opt => opt.optionBenchMark === userAnswer.ans);
+      isCorrect = !!correctOption; // Check if a correct option was found.
+      if (isCorrect) {
+        scorePercentage = 100; // If correct, score is 100%.
+      }
+    } else if (question.questionType === 'multi') {
+      // For 'multi' questions, compare user's answers to option benchmarks.
+      const userSelectedOptions = userAnswer.ans;
+      const correctOptionBenchmarks = question.optionsData
+        .filter(opt => opt.optionBenchMark !== '')
+        .map(opt => opt.optionBenchMark);
+      isCorrect = userSelectedOptions.length === correctOptionBenchmarks.length &&
+        userSelectedOptions.every(option => correctOptionBenchmarks.includes(option));
+
+      if (isCorrect) {
+        // Calculate the score as a percentage of correct answers.
+        scorePercentage = (userSelectedOptions.length / correctOptionBenchmarks.length) * 100;
+      }
+    }
+
+    results.push({
+      questionId: userAnswer.questionId,
+      result: isCorrect ? 'Correct' : 'Incorrect',
+      scorePercentage: scorePercentage
+    });
+  }
+
+  return results;
 }
 
-bulk_data = new Buffer(1024 * 1024);
-for (var i = 0; i < (1024 * 1024); i += 1) {
-    bulk_data[i] = 33;
+function checkAnswers(questions, userAnswers) {
+  const results = [];
+
+  let totalCorrect = 0; // Initialize the total number of correct answers.
+  let totalQuestions = 0; // Initialize the total number of questions.
+
+  for (const userAnswer of userAnswers) {
+    const question = questions.find(q => q.questionId === userAnswer.questionId);
+
+    if (!question) {
+      // Handle the case where the question ID is not found in the questions data.
+      results.push({ questionId: userAnswer.questionId, result: 'Question not found' });
+      continue;
+    }
+
+    let isCorrect = false;
+
+    if (question.questionType === 'yesno') {
+      // For 'yesno' questions, compare user's answer to the benchmark.
+      isCorrect = userAnswer.ans === question.benchMark;
+    } else if (question.questionType === 'single') {
+      // For 'single' questions, find options with non-empty optionBenchMark and compare user's answer.
+      const correctOption = question.optionsData.find(opt => opt.optionBenchMark === userAnswer.ans);
+      isCorrect = !!correctOption; // Check if a correct option was found.
+    } else if (question.questionType === 'multi') {
+      // For 'multi' questions, compare user's answers to option benchmarks.
+      const userSelectedOptions = userAnswer.ans;
+      const correctOptionBenchmarks = question.optionsData
+        .filter(opt => opt.optionBenchMark !== '')
+        .map(opt => opt.optionBenchMark);
+      isCorrect = userSelectedOptions.length === correctOptionBenchmarks.length &&
+        userSelectedOptions.every(option => correctOptionBenchmarks.includes(option));
+    } else if (question.questionType === 'range') {
+      // For 'range' questions, check if the user's answer is within the specified range and matches the benchmark.
+      // For 'range' questions, compare the values as strings.
+      const userAge = Number(userAnswer.ans);
+      const minAge = Number(question.minimumValue);
+      const maxAge = Number(question.maximumValue);
+      isCorrect = userAge >= minAge && userAge <= maxAge || userAge === question.benchMark;
+
+    }
+
+    if (isCorrect) {
+      totalCorrect++; // Increment the total correct count.
+    }
+    totalQuestions++; // Increment the total questions count.
+
+    results.push({
+      questionId: userAnswer.questionId,
+      result: isCorrect ? 'Correct' : 'Incorrect'
+    });
+  }
+
+  const overallScore = (totalCorrect / totalQuestions) * 100; // Calculate overall score.
+
+  return { results, overallScore };
 }
-
-const pcap_session = pcap.createSession(process.argv[2], { filter: process.argv[3] });
-
-// Print all devices, currently listening device prefixed with an asterisk
-console.log("All devices:");
-pcap_session.findalldevs().forEach(function (dev) {
-    if (pcap_session.device_name === dev.name) {
-        console.log("* ");
+// Example usage:
+const questionsData = {
+  "Questions": [
+    {
+      "questionId": "5eb4086c-d598-4b78-b450-122732d041fa",
+      "questionTitle": "What is your age now",
+      "questionType": "range",
+      "benchMark": "42",
+      "minimumValue": "30",
+      "maximumValue": "45",
+      "optionsData": []
     }
-    console.log(dev.name + " ");
-    if (dev.addresses.length > 0) {
-        dev.addresses.forEach(function (address) {
-            console.log(address.addr + "/" + address.netmask);
-        });
-        console.log("\n");
-    } else {
-        console.log("no address\n");
-    }
-});
-
-setInterval(function () {
-    var stats = pcap_session.stats();
-    if (stats.ps_drop > 0) {
-        console.log("pcap dropped packets: " + util.inspect(stats));
-    }
-}, 5000);
-
-tcp_tracker.on('start', function (session) {
-    console.log("Start of TCP session between " + session.src + " and " + session.dst);
-});
-
-tcp_tracker.on('http request', function (session, http) {
-    var matches = /send_file\?id=(\d+)/.exec(http.request.url);
-    if (matches && matches[1]) {
-        session.track_id = matches[1];
-        console.log("Added tracking for " + matches[1]);
-    }
-    else {
-        console.log("Didn't add tracking for " + http.request.url);
-    }
-});
-
-tcp_tracker.on('end', function (session) {
-    console.log("End of TCP session between " + session.src + " and " + session.dst);
-    if (session.track_id) {
-        track_ids[session.track_id] = tcp_tracker.session_stats(session);
-    }
-});
-
-// listen for packets, decode them, and feed TCP to the tracker
-pcap_session.on('packet', function (raw_packet) {
-    var packet = pcap.decode.packet(raw_packet);
-    
-    tcp_tracker.track_packet(packet);
-});
-
-function lookup_mime_type(file_name) {
-    var mime_types = {
-            html: "text/html",
-            txt: "text/plain",
-            js: "application/javascript",
-            css: "text/css",
-            ico: "image/x-icon",
-            jpg: "image/jpeg"
+    ,
+    {
+      "questionId": "b796d1cd-5bef-443b-a88c-e3db7c3d163c",
+      "questionTitle": "Are you married",
+      "questionType": "yesno",
+      "benchMark": "yes",
+      "minimumValue": null,
+      "maximumValue": null,
+      "optionsData": []
+    },
+    {
+      "questionId": "706e5955-fe58-4f15-8267-a42020892df0",
+      "questionTitle": "Choose one word",
+      "questionType": "single",
+      "benchMark": null,
+      "minimumValue": null,
+      "maximumValue": null,
+      "optionsData": [
+        {
+          "questionOptionId": 35,
+          "questionId": "706e5955-fe58-4f15-8267-a42020892df0",
+          "optionLabel": "Good",
+          "optionValue": "Good",
+          "optionBenchMark": "1"
         },
-        index = file_name.lastIndexOf('.'),
-        suffix;
-    // TODO - use path.extname() here
-    if (index > 0 && index < (file_name.length - 2)) {
-        suffix = file_name.substring(index + 1);
-        if (mime_types[suffix] !== undefined) {
-            return mime_types[suffix];
+        {
+          "questionOptionId": 36,
+          "questionId": "706e5955-fe58-4f15-8267-a42020892df0",
+          "optionLabel": "Better",
+          "optionValue": "Better",
+          "optionBenchMark": ""
         }
+      ]
+    },
+    {
+      "questionId": "80850181-0694-4096-98bb-6a1ab5169c80",
+      "questionTitle": "Are you a boy",
+      "questionType": "yesno",
+      "benchMark": "yes",
+      "minimumValue": null,
+      "maximumValue": null,
+      "optionsData": []
+    },
+    {
+      "questionId": "3547ab23-bce2-4f47-b151-a4b04bb6e62d",
+      "questionTitle": "Choose the programming languages you're familiar with please",
+      "questionType": "multi",
+      "benchMark": null,
+      "minimumValue": null,
+      "maximumValue": null,
+      "optionsData": [
+        {
+          "questionOptionId": 37,
+          "questionId": "3547ab23-bce2-4f47-b151-a4b04bb6e62d",
+          "optionLabel": "Java",
+          "optionValue": "Java",
+          "optionBenchMark": "1"
+        },
+        {
+          "questionOptionId": 38,
+          "questionId": "3547ab23-bce2-4f47-b151-a4b04bb6e62d",
+          "optionLabel": "Php",
+          "optionValue": "Php",
+          "optionBenchMark": "2"
+        }
+      ]
     }
-    return "text/plain";
+  ]
+} /* The array of questions from your JSON data */
+const userAnswersData = {
+  "answers": [
+    {
+      "questionId": "b796d1cd-5bef-443b-a88c-e3db7c3d163c",
+      "ans": "yes"
+    },
+    {
+      "questionId": "706e5955-fe58-4f15-8267-a42020892df0",
+      "ans": "1"
+    },
+    {
+      "questionId": "5eb4086c-d598-4b78-b450-122732d041fa",
+      "ans": "42"
+    },
+    {
+      "questionId": "80850181-0694-4096-98bb-6a1ab5169c80",
+      "ans": "yes"
+    },
+    {
+      "questionId": "3547ab23-bce2-4f47-b151-a4b04bb6e62d",
+      "ans": [
+        "1",
+        "2"
+      ]
+    }
+  ]
 }
 
-function do_error(response, code, message) {
-    console.log("do_error: " + code + " - " + message);
-    response.writeHead(code, {
-        "Content-Type": "text/plain",
-        "Connection": "close"
-    });
-    response.write(message);
-    response.end();
-}
-
-function handle_file(file_name, in_request, in_response) {
-    var local_name = file_name.replace(/^\//, __dirname + "/"),
-        file;
-
-    if (local_name.match(/\/$/)) {
-        local_name += "index.html";
-    }
-
-    fs.exists(local_name, function (exists) {
-        if (exists) {
-            file = fs.readFile(local_name, function (err, data) {
-                var out_headers = {
-                    "Content-Type": lookup_mime_type(local_name),
-                    "Content-Length": data.length,
-                    "Connection": "close"
-                };
-                if (err) {
-                    do_error(in_response, 404, "Error opening " + local_name + ": " + err);
-                    return;
-                }
-                if (in_request.headers.origin) {
-                    out_headers["access-control-allow-origin"] = in_request.headers.origin;
-                }
-
-                in_response.writeHead(200, out_headers);
-                in_response.write(data);
-                in_response.end();
-            });
-        }
-        else {
-            do_error(in_response, 404, local_name + " does not exist");
-        }
-    });
-}
-
-function send_start(url, request, response) {
-    if (url.query && url.query.id) {
-        track_ids[url.query.id] = {};
-        var out_headers = {
-            "Content-Type": "text/plain",
-            "Content-Length": bulk_data.length,
-            "Connection": "close"
-        };
-        response.writeHead(200, out_headers);
-        response.write(bulk_data);
-        response.end();
-    }
-    else {
-        do_error(response, 400, "Missing id in query string");
-    }
-}
-
-function get_stats(url, request, response) {
-    if (url.query && url.query.id) {
-        response.writeHead(200, {
-            "Content-Type": "text/plain",
-            "Connection": "close"
-        });
-        if (track_ids[url.query.id]) {
-            response.write(JSON.stringify(track_ids[url.query.id]));
-            delete track_ids[url.query.id];
-        }
-        else {
-            response.write(JSON.stringify({
-                error: "Can't find id in session table"
-            }));
-        }
-        response.end();
-    }
-    else {
-        do_error(response, 400, "Missing id in query string");
-    }
-}
-
-function new_client(new_request, new_response) {
-    console.log(new_request.connection.remoteAddress + " " + new_request.method + " " + new_request.url);
-    if (new_request.method === "GET") {
-        var url_parsed = url.parse(new_request.url, true),
-            pathname = url_parsed.pathname;
-
-        switch (url_parsed.pathname) {
-        case "/":
-        case "/index.html":
-        case "/favicon.ico":
-        case "/jquery.flot.js":
-        case "/jquery.js":
-        case "/jquery.min.js":
-            handle_file(pathname, new_request, new_response);
-            break;
-        case "/send_file":
-            send_start(url_parsed, new_request, new_response);
-            break;
-        case "/get_stats":
-            get_stats(url_parsed, new_request, new_response);
-            break;
-        default:
-            do_error(new_response, 404, "Not found");
-        }
-    } else {
-        do_error(new_response, 404, "WTF");
-    }
-}
-
-http.createServer(new_client).listen(80);
-console.log("Listening for HTTP");
-
-process.addListener("uncaughtException", function (event) {
-    console.log("Uncaught Exception: " + event.stack);
-});
+const { results, overallScore } = checkAnswers(questionsData.Questions, userAnswersData.answers);
+console.log('Results:', results);
+console.log('Overall Score:', overallScore);

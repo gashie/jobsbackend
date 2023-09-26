@@ -5,9 +5,9 @@ const asynHandler = require("../../middleware/async");
 const GlobalModel = require("../../models/Global");
 const JobModel = require("../../models/Job");
 const { sendResponse, CatchHistory } = require("../../helper/utilfunc");
-const { prePareLocations, spreadLocations } = require('../../helper/func');
+const { prePareLocations, spreadLocations, scoring } = require('../../helper/func');
 const { makeApiCall } = require('../../helper/autoCalls');
-const { autoFindQuestionsWithJobId } = require('../../helper/autoFinder');
+const { autoFindQuestionsWithJobId, autoFindProcessQuestionsWithJobId } = require('../../helper/autoFinder');
 
 exports.ViewJobCategory = asynHandler(async (req, res, next) => {
   let { viewAction } = req.body
@@ -131,12 +131,12 @@ exports.AdminApproveJobInfo = asynHandler(async (req, res, next) => {
 })
 
 exports.ViewJobDetails = asynHandler(async (req, res, next) => {
-  let {jobId} = req.body
-  let actor = req.user.userInfo
+  let { jobId } = req.body
+  // let actor = req.user.userInfo
   let results = await JobModel.OpenJob(jobId);
   if (results) {
     let getQuestionsData = await autoFindQuestionsWithJobId(jobId)
-     return sendResponse(res, 1, 200, 'Record Found', {jobInfo:results,Questions:getQuestionsData})
+    return sendResponse(res, 1, 200, 'Record Found', { jobInfo: results, Questions: getQuestionsData })
   }
   return sendResponse(res, 0, 200, 'No Record Found')
 
@@ -149,5 +149,121 @@ exports.ViewJobsData = asynHandler(async (req, res, next) => {
   }
 
   return sendResponse(res, 1, 200, 'Record Found', results)
+
+})
+
+exports.ApplyJob = asynHandler(async (req, res, next) => {
+  let { jobId, fullName, email, phone, answers } = req.body
+  const resume = req.files.resume;
+  let actor = req.user.userInfo   //get userInfo
+  let jobInfo = req.job
+
+  let processAnswers = answers ? JSON.parse(answers) : {}
+  let applicationData = {
+    userId: actor.userId,
+    jobId,
+    applicantName: fullName,
+    applicantEmail: email,
+    applicantPhone: phone,
+    applicationId: uuidV4.v4()
+  }
+  if (jobInfo?.hasQuestions === "no") {
+    //save application info
+    let results = await GlobalModel.Create('job_application', applicationData);
+
+    if (results.affectedRows === 1) {
+      CatchHistory({ event: `user with id: ${actor.userId} applied for job with id ${jobId}  `, functionName: 'ApplyJob', dateStarted: req.date, sql_action: "INSERT", actor: actor.userId }, req)
+      return sendResponse(res, 1, 200, "Record saved", [])
+    } else {
+      CatchHistory({ event: `Sorry, error saving record for job   with name :${payload.jobCategoryName}`, functionName: 'ApplyJob', dateStarted: req.date, sql_action: "INSERT", actor: actor.userId }, req)
+      return sendResponse(res, 0, 200, "Sorry, error saving record", [])
+    }
+
+  }
+  if (jobInfo?.hasQuestions === "yes" && !processAnswers?.answers || processAnswers?.answers?.length < 1) {
+    return sendResponse(res, 0, 200, "Sorry, kindly provide all answers", [])
+  }
+
+  // if has questions and nothing has been answered send error messaeg
+  if (jobInfo?.hasQuestions === "yes" && processAnswers?.answers?.length > 0) {
+    let itemCount = processAnswers?.answers?.length;
+    let isDone = false
+
+    let getQuestionsData = await autoFindQuestionsWithJobId(jobId)
+    const { Scoreresults, overallScore } = scoring(getQuestionsData, processAnswers?.answers)
+
+    for (const iterator of processAnswers?.answers) {
+      let responseId = uuidV4.v4()
+      let responseAnswers = {
+        questionId: iterator.questionId,
+        responseId,
+        answerValue: Array.isArray(iterator.ans)? iterator.ans.toString():iterator.ans ,
+        userId: actor.userId
+
+      }
+      let userResponses = {
+        responseId,
+        userId: actor.userId,
+        jobId
+
+      }
+      await GlobalModel.Create('job_question_response_answers', responseAnswers);
+      await GlobalModel.Create('job_question_response', userResponses);
+
+      if (!--itemCount) {
+        isDone = true;
+        console.log(" => This is the last iteration...");
+
+      } else {
+        console.log(" => Still saving data...");
+
+      }
+    }
+
+    if (isDone) {
+      applicationData.sumQuestions = getQuestionsData.length
+      applicationData.sumAnswers = Scoreresults?.length
+      applicationData.applicationScore = overallScore
+      let results = await GlobalModel.Create('job_application', applicationData);
+
+      if (results.affectedRows === 1) {
+        CatchHistory({ event: `user with id: ${actor.userId} applied for job with id ${jobId}  `, functionName: 'ApplyJob', dateStarted: req.date, sql_action: "INSERT", actor: actor.userId }, req)
+        return sendResponse(res, 1, 200, "Record saved", [])
+      } else {
+        CatchHistory({ event: `Sorry, error saving record for job   with name :${payload.jobCategoryName}`, functionName: 'ApplyJob', dateStarted: req.date, sql_action: "INSERT", actor: actor.userId }, req)
+        return sendResponse(res, 0, 200, "Sorry, error saving record", [])
+      }
+    }
+  }
+
+
+
+
+
+})
+
+exports.ApproveJobApplication = asynHandler(async (req, res, next) => {
+  const { status, applicationId } = req.body;
+  let actor = req.user.userInfo
+  //find rate card with id,and status !approved
+
+  let patchUserPayload = {
+    approvedAt: req.date,
+    approvedById: actor.userId,
+    applicationStatus: status == true ? "approved" : "declined",
+
+  };
+
+
+  let result = await GlobalModel.Update('job_application', patchUserPayload, 'applicationId', applicationId);
+
+  if (result.affectedRows === 1) {
+    CatchHistory({ event: 'Approve/Deny feed', functionName: 'ApproveJobApplication', response: `job application record with id ${applicationId} was ${status == true ? "approved" : "declined"} by ${actor.userId}`, dateStarted: req.date, state: 1, requestStatus: 200, actor: actor.userId }, req);
+    return sendResponse(res, 1, 200, 'Record Updated')
+
+  } else {
+    CatchHistory({ event: 'Approve/Deny feed', functionName: 'ApproveJobApplication', response: `Error Updating Record with id ${applicationId}`, dateStarted: req.date, state: 0, requestStatus: 200, actor: actor.userId }, req);
+    return sendResponse(res, 0, 200, 'Error Updating Record')
+  }
 
 })

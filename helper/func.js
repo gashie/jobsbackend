@@ -50,6 +50,65 @@ module.exports = {
   },
   spreadLocations(jobLocation){
     return jobLocation.map((item) => { return item.locationName }).join(',')
+  },
+  scoring(questions, userAnswers){
+    {
+      const Scoreresults = [];
+    
+      let totalCorrect = 0; // Initialize the total number of correct answers.
+      let totalQuestions = 0; // Initialize the total number of questions.
+    
+      for (const userAnswer of userAnswers) {
+        const question = questions.find(q => q.questionId === userAnswer.questionId);
+    
+        if (!question) {
+          // Handle the case where the question ID is not found in the questions data.
+          Scoreresults.push({ questionId: userAnswer.questionId, result: 'Question not found' });
+          continue;
+        }
+    
+        let isCorrect = false;
+    
+        if (question.questionType === 'yesno') {
+          // For 'yesno' questions, compare user's answer to the benchmark.
+          isCorrect = userAnswer.ans === question.benchMark;
+        } else if (question.questionType === 'single') {
+          // For 'single' questions, find options with non-empty optionBenchMark and compare user's answer.
+          const correctOption = question.optionsData.find(opt => opt.optionBenchMark === userAnswer.ans);
+          isCorrect = !!correctOption; // Check if a correct option was found.
+        } else if (question.questionType === 'multi') {
+          // For 'multi' questions, compare user's answers to option benchmarks.
+          const userSelectedOptions = userAnswer.ans;
+          const correctOptionBenchmarks = question.optionsData
+            .filter(opt => opt.optionBenchMark !== '')
+            .map(opt => opt.optionBenchMark);
+          isCorrect = userSelectedOptions.length === correctOptionBenchmarks.length &&
+            userSelectedOptions.every(option => correctOptionBenchmarks.includes(option));
+        } else if (question.questionType === 'range') {
+          // For 'range' questions, check if the user's answer is within the specified range and matches the benchmark.
+          // For 'range' questions, compare the values as strings.
+          const userAge = Number(userAnswer.ans);
+          const minAge = Number(question.minimumValue);
+          const maxAge = Number(question.maximumValue);
+          isCorrect = userAge >= minAge && userAge <= maxAge || userAge === question.benchMark;
+    
+        }
+    
+        if (isCorrect) {
+          totalCorrect++; // Increment the total correct count.
+        }
+        totalQuestions++; // Increment the total questions count.
+    
+        Scoreresults.push({
+          questionId: userAnswer.questionId,
+          result: isCorrect ? 'Correct' : 'Incorrect'
+        });
+      }
+    
+      const overallScore = (totalCorrect / totalQuestions) * 100; // Calculate overall score.
+    
+      return { Scoreresults, overallScore };
+    }
   }
   
 

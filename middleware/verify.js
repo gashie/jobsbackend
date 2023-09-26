@@ -421,3 +421,35 @@ exports.findBeforePay = asynHandler(async (req, res, next) => {
 
 
 });
+
+exports.findJobBeforeApply = asynHandler(async (req, res, next) => {
+  let actor = req.user.userInfo
+  let { jobId} = req.body
+
+
+  // Define your dynamic query parameters
+  const tableNameOne = 'job_info';
+  const columnsToSelectOne = ['jobId','hasQuestions']; // Replace with your desired columns
+
+  // Define an array of conditions (each condition is an object with condition and value
+
+  const conditionOne = [
+    { column: 'jobId', operator: '=', value: jobId },
+    { column: 'deletedAt', operator: 'IS', value: null },
+    { column: 'jobState', operator: '=', value: 'approved' }
+    // Add more conditions as needed
+  ];
+
+  let objectExist = await GlobalModel.QueryDynamic(tableNameOne, columnsToSelectOne, conditionOne)
+
+  if (!objectExist) {
+    CatchHistory({ event: `user with id: ${actor.userId} tried applying for job with id ${jobId}`, functionName: 'findJobBeforeApply', response: `No Record Found for ${transactionFor}`, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
+    return sendResponse(res, 0, 200, 'No Record Found')
+  }
+  
+  req.date = systemDate
+  req.job = objectExist
+  return next();
+
+
+});
