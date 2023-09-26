@@ -109,23 +109,23 @@ exports.CreateCourse = asynHandler(async (req, res, next) => {
 exports.UpdateCourse = asynHandler(async (req, res, next) => {
     const { patch, patchData, deleterecord, restore, courseId } = req.body;
     let actor = req.user.userInfo
-    const courseImage = req.files.courseImage;
-    const courseBrochure = req.files.courseBrochure;
-    const courseVideoAd = req.files.courseVideoAd;
+    const courseImage = req.files?.courseImage;
+    const courseBrochure = req.files?.courseBrochure;
+    const courseVideoAd = req.files?.courseVideoAd;
     let oldrecord = req.course
-    if (patch && courseImage && !courseImage.mimetype.startsWith("image")) {
+    if (patch === 'true' && courseImage && !courseImage.mimetype.startsWith("image")) {
         return sendResponse(res, 0, 200, "Please make sure to upload an image", [])
 
     }
-    if (patch && courseBrochure && !courseBrochure.mimetype.startsWith("application/pdf")) {
+    if (patch === 'true' && courseBrochure && !courseBrochure.mimetype.startsWith("application/pdf")) {
         return sendResponse(res, 0, 200, "Please make sure to upload a pdf file", [])
 
     }
-    if (patch && courseVideoAd && !courseVideoAd.mimetype.startsWith("video")) {
+    if (patch === 'true' && courseVideoAd && !courseVideoAd.mimetype.startsWith("video")) {
         return sendResponse(res, 0, 200, "Please make sure to upload a video", [])
 
     }
-    if (patch && courseImage && courseImage.mimetype.startsWith("image")) {
+    if (patch === 'true' && courseImage && courseImage.mimetype.startsWith("image")) {
 
         //change filename
         removeFile('./uploads/video/course/', oldrecord.courseImage)
@@ -139,7 +139,7 @@ exports.UpdateCourse = asynHandler(async (req, res, next) => {
         });
 
     }
-    if (patch && courseBrochure && courseBrochure.mimetype.startsWith("application/pdf")) {
+    if (patch === 'true' && courseBrochure && courseBrochure.mimetype.startsWith("application/pdf")) {
 
         //change filename
         removeFile('./uploads/pdf/course/', oldrecord.courseBrochure)
@@ -153,7 +153,7 @@ exports.UpdateCourse = asynHandler(async (req, res, next) => {
         });
 
     }
-    if (patch && courseVideoAd && courseVideoAd.mimetype.startsWith("video")) {
+    if (patch === 'true' && courseVideoAd && courseVideoAd.mimetype.startsWith("video")) {
 
         //change filename
         removeFile('./uploads/video/course/', oldrecord.courseVideoAd)
@@ -176,13 +176,16 @@ exports.UpdateCourse = asynHandler(async (req, res, next) => {
     let patchUserPayload = {
         updatedAt: req.date,
         updatedById: actor.userId,
-        courseImage: courseImage.name,
-        courseVideoAd: courseVideoAd.name,
-        courseBrochure: courseBrochure.name,
-        ...JSON.parse(patchData),
+        courseImage: courseImage?.name,
+        courseVideoAd: courseVideoAd?.name,
+        courseBrochure: courseBrochure?.name,
 
     };
 
+    if (patch === 'true') {
+        const patchData = {}; // Replace this with your actual patchData object
+        Object.assign(patchUserPayload, patchData);
+    }
     let switchActionPayload = patch ? patchUserPayload : deletePayload
 
     let result = await GlobalModel.Update('course', switchActionPayload, 'courseId', courseId);
@@ -206,7 +209,7 @@ exports.ApproveCourse = asynHandler(async (req, res, next) => {
     let patchUserPayload = {
         approvedAt: req.date,
         approvedById: actor.userId,
-        courseStatus: status == true ? "approved":"declined",
+        courseStatus: status == true ? "approved" : "declined",
 
     };
 

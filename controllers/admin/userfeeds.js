@@ -75,11 +75,11 @@ exports.UpdateUserFeed = asynHandler(async (req, res, next) => {
   let actor = req.user.userInfo
   const postImage = req.files.postImage;
   let oldfeed = req.genfeeds
-  if (patch && postImage && !postImage.mimetype.startsWith("image")) {
+  if (patch === 'true' && postImage && !postImage.mimetype.startsWith("image")) {
     return sendResponse(res, 0, 200, "Please make sure to upload an image", [])
 
   }
-  if (patch && postImage && postImage.mimetype.startsWith("image")) {
+  if (patch === 'true' && postImage && postImage.mimetype.startsWith("image")) {
 
     //change filename
     removeFile('./uploads/feeds/', oldfeed.postImage)
@@ -105,7 +105,10 @@ exports.UpdateUserFeed = asynHandler(async (req, res, next) => {
     ...JSON.parse(patchData),
 
   };
-
+  if (patch === 'true') {
+    const patchData = {}; // Replace this with your actual patchData object
+    Object.assign(patchUserPayload, patchData);
+}
 
   
   let switchActionPayload = patch ? patchUserPayload : deletePayload
