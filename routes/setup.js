@@ -20,7 +20,7 @@ const { CreateQuestionnaire, CreateBulkQuestionnaire, LinkQuestionnaire, DeleteL
 
 const { CreateJobStatus, UpdateJobStatus, ViewJobStatus } = require("../controllers/jobs/jobstatus");
 const { CreateIndustry, ViewIndustry, UpdateIndustry } = require("../controllers/company/industry");
-const { CreateJobInfo, UpdateJobInfo, AdminApproveJobInfo, ViewMyJobs,ViewJobDetails, ViewJobsData, ApplyJob, ApproveJobApplication } = require("../controllers/jobs/jobinfo");
+const { CreateJobInfo, UpdateJobInfo, AdminApproveJobInfo, ViewMyJobs,ViewJobDetails, ViewJobsData, ApplyJob, ApproveJobApplication, ViewJobApplications, ViewMyJobApplications, ViewMyShortlistedJobApplicants } = require("../controllers/jobs/jobinfo");
 
 const { CreateBanner, ViewBanners, UpdateBanner } = require("../controllers/admin/banner");
 const { CreateFeed,UpdateFeed,ViewFeeds } = require("../controllers/admin/feed");
@@ -153,6 +153,9 @@ router.route("/jobdetails").post(protect, ViewJobDetails);
 router.route("/public/jobdata").post(ViewJobsData);
 router.route("/apply").post(protect,findJobBeforeApply,ApplyJob);
 router.route("/approveapplication").post(protect,findApplicationBeforeApprove,ApproveJobApplication);
+router.route("/admin/viewapplications").post(protect,ViewJobApplications);
+router.route("/employer/viewmyapplications").post(protect,ViewMyJobApplications);
+router.route("/employer/viewmyshortlisted").post(protect,findJob,ViewMyShortlistedJobApplicants);
 
 //manage feeds
 router.route("/savefeed").post(protect, CreateFeed);

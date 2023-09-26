@@ -6,7 +6,6 @@ const GlobalModel = require("../../models/Global");
 const JobModel = require("../../models/Job");
 const { sendResponse, CatchHistory } = require("../../helper/utilfunc");
 const { prePareLocations, spreadLocations, scoring } = require('../../helper/func');
-const { makeApiCall } = require('../../helper/autoCalls');
 const { autoFindQuestionsWithJobId, autoFindProcessQuestionsWithJobId } = require('../../helper/autoFinder');
 
 exports.ViewJobCategory = asynHandler(async (req, res, next) => {
@@ -197,7 +196,7 @@ exports.ApplyJob = asynHandler(async (req, res, next) => {
       let responseAnswers = {
         questionId: iterator.questionId,
         responseId,
-        answerValue: Array.isArray(iterator.ans)? iterator.ans.toString():iterator.ans ,
+        answerValue: Array.isArray(iterator.ans) ? iterator.ans.toString() : iterator.ans,
         userId: actor.userId
 
       }
@@ -267,3 +266,45 @@ exports.ApproveJobApplication = asynHandler(async (req, res, next) => {
   }
 
 })
+
+exports.ViewJobApplications = asynHandler(async (req, res, next) => {
+  let { jobId } = req.body
+  let actor = req.user.userInfo
+  let results = await JobModel.ViewJobApplicants(jobId);
+  if (results.length == 0) {
+    CatchHistory({ event: `user with id: ${actor.userId} viewed ${results.length} job applications`, functionName: 'ViewJobApplications', response: `No Record Found For Job applications`, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
+    return sendResponse(res, 0, 200, 'No Record Found')
+  }
+  CatchHistory({ event: `user with id: ${actor.userId} viewed ${results.length} job applications`, functionName: 'ViewJobApplications', response: `Record Found, job applications contains ${results.length} record's`, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
+
+  return sendResponse(res, 1, 200, 'Record Found', results)
+
+});
+exports.ViewMyJobApplications = asynHandler(async (req, res, next) => {
+  let { jobId } = req.body
+  let actor = req.user.userInfo
+
+  let results = await JobModel.EmployerViewJobApplicants(jobId,actor?.company?.companyId);
+  if (results.length == 0) {
+    CatchHistory({ event: `user with id: ${actor.userId} viewed ${results.length} job applications`, functionName: 'ViewMyJobApplications', response: `No Record Found For Job applications`, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
+    return sendResponse(res, 0, 200, 'No Record Found')
+  }
+  CatchHistory({ event: `user with id: ${actor.userId} viewed ${results.length} job applications`, functionName: 'ViewMyJobApplications', response: `Record Found, job applications contains ${results.length} record's`, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
+
+  return sendResponse(res, 1, 200, 'Record Found', results)
+
+});
+exports.ViewMyShortlistedJobApplicants = asynHandler(async (req, res, next) => {
+  let { jobId } = req.body
+  let actor = req.user.userInfo
+  let jobInfo = req.job
+  let results = await JobModel.EmployerViewShortlistedJobApplicants(jobId, actor?.company?.companyId, jobInfo?.jobScore);
+  if (results.length == 0) {
+    CatchHistory({ event: `user with id: ${actor.userId} viewed ${results.length} shortlisted job applicants`, functionName: 'ViewMyShortlistedJobApplicants', response: `No Record Found For Shortlisted Job applicants`, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
+    return sendResponse(res, 0, 200, 'No Record Found')
+  }
+  CatchHistory({ event: `user with id: ${actor.userId} viewed ${results.length} shortlisted job applicants`, functionName: 'ViewMyShortlistedJobApplicants', response: `Record Found,shortlisted job applicants contains ${results.length} record's`, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
+
+  return sendResponse(res, 1, 200, 'Record Found', results)
+
+});
