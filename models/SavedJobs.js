@@ -14,7 +14,7 @@ jobsdb.FindMySavedJobs = (userId) => {
         company.companyName
 FROM
           job_info jobs
-          INNER JOIN company company ON company.comapanyId  = jobs.companyId
+          INNER JOIN company company ON company.companyId  = jobs.companyId
           INNER JOIN saved_jobs saved ON saved.jobId = jobs.jobId
           where saved.userId = ?`;
         pool.query(sql, [userId], function (error, results, fields) {
