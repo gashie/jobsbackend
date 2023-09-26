@@ -297,6 +297,34 @@ exports.findFeedBedoreApprove = asynHandler(async (req, res, next) => {
   req.genfeeds = objectExist
   return next();
 });
+exports.findApplicationBeforeApprove = asynHandler(async (req, res, next) => {
+  let actor = req.user.userInfo
+  let { applicationId } = req.body
+  //check if resume table if file exist
+  // Define your dynamic query parameters
+  const tableName = 'job_application';
+  const columnsToSelect = ['applicationId', 'applicationStatus']; // Replace with your desired columns
+
+  // Define an array of conditions (each condition is an object with condition and value
+
+  const conditions = [
+    { column: 'applicationId', operator: '=', value: applicationId },
+    { column: 'applicationStatus', operator: '=', value: 'approved' },
+    // Add more conditions as needed
+  ];
+
+
+  let objectExist = await GlobalModel.QueryDynamic(tableName, columnsToSelect, conditions);
+  //if resumeo exist
+  if (objectExist) {
+    CatchHistory({ api_response: `Sorry, this application has already been approved`, function_name: 'findApplicationBeforeApprove/middleware', date_started: systemDate, sql_action: "UPDATE", event: "Find application before approving", actor: actor.userId }, req)
+    return sendResponse(res, 0, 200, "Sorry, this application has already been approved")
+
+  }
+  req.date = systemDate
+  req.jobapplication = objectExist
+  return next();
+});
 exports.findCourseBedoreApprove = asynHandler(async (req, res, next) => {
   let actor = req.user.userInfo
   let { courseId } = req.body
@@ -424,12 +452,12 @@ exports.findBeforePay = asynHandler(async (req, res, next) => {
 
 exports.findJobBeforeApply = asynHandler(async (req, res, next) => {
   let actor = req.user.userInfo
-  let { jobId} = req.body
+  let { jobId } = req.body
 
 
   // Define your dynamic query parameters
   const tableNameOne = 'job_info';
-  const columnsToSelectOne = ['jobId','hasQuestions']; // Replace with your desired columns
+  const columnsToSelectOne = ['jobId', 'hasQuestions']; // Replace with your desired columns
 
   // Define an array of conditions (each condition is an object with condition and value
 
@@ -446,7 +474,7 @@ exports.findJobBeforeApply = asynHandler(async (req, res, next) => {
     CatchHistory({ event: `user with id: ${actor.userId} tried applying for job with id ${jobId}`, functionName: 'findJobBeforeApply', response: `No Record Found for ${transactionFor}`, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
     return sendResponse(res, 0, 200, 'No Record Found')
   }
-  
+
   req.date = systemDate
   req.job = objectExist
   return next();
