@@ -6,10 +6,10 @@ const { autoFindLinkage } = require('./autoFinder');
 const { SendEmailApi } = require('../sevices/comm');
 module.exports = {
   autoSaveCompany: async (payload, req, res,rawResetToken) => {
-    let comapanyId = uuidV4.v4()
+    let companyId = uuidV4.v4()
     let { location, website, companyName, userType, roleid, username, companySize, companyProfile, companyLogo, userId, fullName, email, phone, password, address, country, birthDate, maritalStatus, gender, highestEducation,industryId } = payload
     let companyPayload = {
-      comapanyId,
+      companyId,
       companyName,
       userId,
       createdByName: fullName,

@@ -158,7 +158,7 @@ exports.SendActivation = asynHandler(async (req, res, next) => {
       `Hi,
 
     You have created an account on the Jobsinghana web site. To fully enjoy our services, please confirm activation by clicking the link below:
-    http://localhost:3000/emailaction?token=${rawResetToken}&email=${email}
+    http://localhost:3000/passwordaction?token=${rawResetToken}&email=${email}
 
     
     If the link above does not work, please copy and paste it into your browser's address bar and press the Enter key.
