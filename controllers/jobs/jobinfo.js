@@ -65,7 +65,14 @@ exports.CreateJobInfo = asynHandler(async (req, res, next) => {
 exports.UpdateJobInfo = asynHandler(async (req, res, next) => {
   const { patch, patchData, deleterecord, restore, jobId } = req.body;
   let actor = req.user.userInfo
-
+let preparedLocations = ''
+  if (patchData.jobLocation) {
+    let preparedLocations = prePareLocations(patchData?.jobLocation,jobId)
+    patchData.jobLocation = spreadLocations(patchData?.jobLocation)
+  }
+  if (patchData.jobSkills) {
+    patchData.jobSkills = patchData.jobSkills.join(',')
+  }
   let deletePayload = {
     updatedAt: req.date,
     deletedById: actor.userId,
@@ -91,8 +98,19 @@ exports.UpdateJobInfo = asynHandler(async (req, res, next) => {
   };
 
   let switchActionPayload = patch ? patchUserPayload : deletePayload
+  console.log('====================================');
+  console.log(req.body);
+  console.log('====================================');
 
-  let result = await GlobalModel.Update('job_info', switchActionPayload, 'jobId', jobId);
+  console.log('====================================');
+  console.log(switchActionPayload);
+  console.log('====================================');
+
+  if (patchData.jobLocation) {
+    let result = await GlobalModel.Update('job_info', switchActionPayload, 'jobId', jobId);
+
+  }
+  let result = await GlobalModel.Update('job_location', preparedLocations, 'jobId', jobId);
 
   if (result.affectedRows === 1) {
     CatchHistory({ event: 'Update Job Info', functionName: 'UpdateJobInfo', response: `Job Info record with id ${jobId} was updated by ${actor.userId}`, dateStarted: req.date, state: 1, requestStatus: 200, actor: actor.userId }, req);
