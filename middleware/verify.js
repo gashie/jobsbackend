@@ -309,7 +309,7 @@ exports.findApplicationBeforeApprove = asynHandler(async (req, res, next) => {
 
   const conditions = [
     { column: 'applicationId', operator: '=', value: applicationId },
-    { column: 'applicationStatus', operator: '=', value: 'approved' },
+    { column: 'applicationStatus', operator: '=', value: 'accepted' },
     // Add more conditions as needed
   ];
 
@@ -317,8 +317,8 @@ exports.findApplicationBeforeApprove = asynHandler(async (req, res, next) => {
   let objectExist = await GlobalModel.QueryDynamic(tableName, columnsToSelect, conditions);
   //if resumeo exist
   if (objectExist) {
-    CatchHistory({ api_response: `Sorry, this application has already been approved`, function_name: 'findApplicationBeforeApprove/middleware', date_started: systemDate, sql_action: "UPDATE", event: "Find application before approving", actor: actor.userId }, req)
-    return sendResponse(res, 0, 200, "Sorry, this application has already been approved")
+    CatchHistory({ api_response: `Sorry, this application has already been accepted`, function_name: 'findApplicationBeforeApprove/middleware', date_started: systemDate, sql_action: "UPDATE", event: "Find application before approving", actor: actor.userId }, req)
+    return sendResponse(res, 0, 200, "Sorry, this application has already been accepted")
 
   }
   req.date = systemDate

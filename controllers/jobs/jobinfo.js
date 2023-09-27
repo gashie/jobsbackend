@@ -262,12 +262,12 @@ exports.ApplyJob = asynHandler(async (req, res, next) => {
 exports.ApproveJobApplication = asynHandler(async (req, res, next) => {
   const { applicationStatus, applicationId } = req.body;
   let actor = req.user.userInfo
-  //find rate card with id,and applicationStatus !approved
+  //find job application with id,and applicationStatus !approved
 
   let patchUserPayload = {
     approvedAt: req.date,
     approvedById: actor.userId,
-    applicationStatus: applicationStatus == true ? "approved" : "declined",
+    applicationStatus: applicationStatus == true ? "accepted" : "rejected",
 
   };
 
@@ -275,7 +275,7 @@ exports.ApproveJobApplication = asynHandler(async (req, res, next) => {
   let result = await GlobalModel.Update('job_application', patchUserPayload, 'applicationId', applicationId);
 
   if (result.affectedRows === 1) {
-    CatchHistory({ event: 'Approve/Deny job application', functionName: 'ApproveJobApplication', response: `job application record with id ${applicationId} was ${applicationStatus == true ? "approved" : "declined"} by ${actor.userId}`, dateStarted: req.date, state: 1, requestStatus: 200, actor: actor.userId }, req);
+    CatchHistory({ event: 'Approve/Deny job application', functionName: 'ApproveJobApplication', response: `job application record with id ${applicationId} was ${applicationStatus == true ? "accepted" : "rejected"} by ${actor.userId}`, dateStarted: req.date, state: 1, requestStatus: 200, actor: actor.userId }, req);
     return sendResponse(res, 1, 200, 'Record Updated')
 
   } else {

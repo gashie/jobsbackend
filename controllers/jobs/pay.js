@@ -117,3 +117,38 @@ exports.VerifyPayment = asynHandler(async (req, res, next) => {
     // }
 
 })
+
+
+exports.PaystackViewTransactionTotal = asynHandler(async (req, res, next) => {
+    let { from, to } = req.body
+    let withDate = `${process.env.paystackUrl}transaction/totals?from=${from}&to=${to}`
+    let withNoDate = `${process.env.paystackUrl}transaction/totals`
+    let actor = req.user.userInfo
+
+    /**
+    * Check if user has no questions and want to pay now.
+    * @param {string} from - The API endpoint URL.
+    * @param {string} to - If user want to pay now.
+    */
+
+    const apiHeaders = {
+        // Add any other headers as needed
+        Authorization: `Bearer ${process.env.public_Secret_Key}`
+    };
+
+    // Example JSON request data
+    const jsonRequestData = {
+       
+    };
+
+    // Call the function with either JSON or FormData
+    const jsonResponseData = await makeApiCall(from && from !== "" && to && to !== "" ? withDate : withNoDate, 'GET', apiHeaders, jsonRequestData);
+
+    if (jsonResponseData && !jsonResponseData?.status) {
+        return sendResponse(res, 0, 200, jsonResponseData?.message, [])
+    }
+
+    CatchHistory({ event: 'View PayStack transaction total', functionName: 'PaystackViewTransactionTotal', response: `USER with id ${actor.userId} viewed paystack transaction total`, dateStarted: req.date, state: 1, requestStatus: 200, actor: actor.userId }, req);
+    return sendResponse(res, 1, 200, 'Record Updated',jsonResponseData?.data)
+
+})

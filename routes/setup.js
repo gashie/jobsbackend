@@ -49,7 +49,10 @@ const { CreateSystemSettings, UpdateSystemSettings } = require("../controllers/a
  */
 
 
-const { GeneralPayment,VerifyPayment } = require("../controllers/jobs/pay");
+const { GeneralPayment,VerifyPayment, PaystackViewTransactionTotal } = require("../controllers/jobs/pay");
+const { UpdateLogoSettings } = require("../controllers/admin/logo_settings");
+const { UpdateProfileImageSettings } = require("../controllers/admin/profileimage_settings");
+const { ViewMyAppliedJobs } = require("../controllers/jobs/applications");
 
 
 //user account
@@ -156,6 +159,7 @@ router.route("/approveapplication").post(protect,findApplicationBeforeApprove,Ap
 router.route("/admin/viewapplications").post(protect,ViewJobApplications);
 router.route("/employer/viewmyapplications").post(protect,ViewMyJobApplications);
 router.route("/employer/viewmyshortlisted").post(protect,findJob,ViewMyShortlistedJobApplicants);
+router.route("/jobseeker/viewmyappliedjobs").post(protect,ViewMyAppliedJobs);
 
 //manage feeds
 router.route("/savefeed").post(protect, CreateFeed);
@@ -172,6 +176,10 @@ router.route("/approveuserfeeds").post(protect,findFeedBedoreApprove, ApproveUse
 router.route("/savesettings").post(protect,findSettings, CreateSystemSettings);
 router.route("/updatesavedsetting").post(protect,findAppSettings, UpdateSystemSettings);
 
+//manage employer--logo|
+router.route("/admin/updateemployerlogo").post(protect,UpdateLogoSettings);
+router.route("/employer/updateemployerlogo").post(protect,UpdateLogoSettings);
+router.route("/updateprofileimage").post(protect,UpdateProfileImageSettings);
 
 
 //manage ratecard
@@ -201,4 +209,5 @@ router.route("/viewpartnerships").post(protect, ViewCoursePartners);
 //manage course
 router.route("/pay").post(protect,findRate,findBeforePay, GeneralPayment);
 router.route("/verifypayment").post(protect,VerifyPayment);
+router.route("/viewtransactiontotal").post(protect,PaystackViewTransactionTotal);
 module.exports = router;
