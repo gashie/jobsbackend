@@ -1,5 +1,6 @@
 const express = require("express");
 const helmet = require("helmet");
+const path = require("path")
 const xss = require("xss-clean");
 const fileupload = require("express-fileupload");
 const dotenv = require("dotenv");
@@ -53,6 +54,8 @@ app.use(function (req, res, next) {
 //Mount routes
 app.use("/api/v1/jobs", routes);
 
+var __dirname = path.resolve()
+app.use('/uploads', express.static(path.join(__dirname, '/uploads')))
 app.use(errorHandler);
 
 //errror middleware
