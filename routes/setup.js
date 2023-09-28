@@ -53,6 +53,7 @@ const { GeneralPayment,VerifyPayment, PaystackViewTransactionTotal } = require("
 const { UpdateLogoSettings } = require("../controllers/admin/logo_settings");
 const { UpdateProfileImageSettings } = require("../controllers/admin/profileimage_settings");
 const { ViewMyAppliedJobs } = require("../controllers/jobs/applications");
+const { CreateServiceEnquiry, ViewServiceEnquiry } = require("../controllers/admin/services_enquiry");
 
 
 //user account
@@ -210,4 +211,9 @@ router.route("/viewpartnerships").post(protect, ViewCoursePartners);
 router.route("/pay").post(protect,findRate,findBeforePay, GeneralPayment);
 router.route("/verifypayment").post(protect,VerifyPayment);
 router.route("/viewtransactiontotal").post(protect,PaystackViewTransactionTotal);
+
+//manage frontend
+router.route("/services").post(CreateServiceEnquiry);
+router.route("/viewservices").post(protect,ViewServiceEnquiry);
+
 module.exports = router;
