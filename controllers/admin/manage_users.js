@@ -20,4 +20,17 @@ exports.FetchVariousUsers = asynHandler(async (req, res, next) => {
   
   });
 
+  exports.FetchEmployersUsers = asynHandler(async (req, res, next) => {
+    let actor = req.user.userInfo
+    let results = await USERS.EmployerUser();
+    if (results.length == 0) {
+      CatchHistory({ event: `user with id: ${actor.userId} viewed ${results.length} user's employers`, functionName: 'FetchEmployersUsers', response: `No Record Found`, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
+      return sendResponse(res, 0, 200, 'No Record Found')
+    }
+    CatchHistory({ event: `user with id: ${actor.userId} viewed ${results.length} user's employers`, functionName: 'FetchEmployersUsers', response: `Record Found`, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
+  
+    return sendResponse(res, 1, 200, 'Record Found', results)
+  
+  });
+
 

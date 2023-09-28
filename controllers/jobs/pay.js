@@ -3,10 +3,9 @@ const dotenv = require("dotenv");
 dotenv.config({ path: "./config/config.env" });
 const asynHandler = require("../../middleware/async");
 const GlobalModel = require("../../models/Global");
-const JobModel = require("../../models/Job");
 const { sendResponse, CatchHistory } = require("../../helper/utilfunc");
-const { prePareLocations, spreadLocations } = require('../../helper/func');
 const { makeApiCall } = require('../../helper/autoCalls');
+const { TransactionHistory, EmployerTransactionHistory } = require('../../models/Payment');
 
 
 exports.GeneralPayment = asynHandler(async (req, res, next) => {
@@ -57,7 +56,7 @@ exports.GeneralPayment = asynHandler(async (req, res, next) => {
     let results = await GlobalModel.Create('payment_transaction', paymentPayload);
     if (results.affectedRows === 1) {
         CatchHistory({ event: 'General payment for transaction', functionName: 'GeneralPayment', response: `Job Info record with id ${jobId} was approved by ${actor.userId}`, dateStarted: req.date, state: 1, requestStatus: 200, actor: actor.userId }, req);
-        return sendResponse(res, 1, 200, 'Record Updated',jsonResponseData?.data)
+        return sendResponse(res, 1, 200, 'Record Updated', jsonResponseData?.data)
 
     } else {
         CatchHistory({ event: 'General payment for transaction', functionName: 'GeneralPayment', response: `Error Updating Record with id ${jobId}`, dateStarted: req.date, state: 0, requestStatus: 200, actor: actor.userId }, req);
@@ -87,8 +86,8 @@ exports.VerifyPayment = asynHandler(async (req, res, next) => {
     if (jsonResponseData && !jsonResponseData?.status) {
         return sendResponse(res, 0, 200, jsonResponseData?.message, [])
     }
-   res.send(jsonResponseData)
-    
+    res.send(jsonResponseData)
+
 
     // let paymentPayload = {
     //     courseId,
@@ -138,7 +137,7 @@ exports.PaystackViewTransactionTotal = asynHandler(async (req, res, next) => {
 
     // Example JSON request data
     const jsonRequestData = {
-       
+
     };
 
     // Call the function with either JSON or FormData
@@ -149,6 +148,33 @@ exports.PaystackViewTransactionTotal = asynHandler(async (req, res, next) => {
     }
 
     CatchHistory({ event: 'View PayStack transaction total', functionName: 'PaystackViewTransactionTotal', response: `USER with id ${actor.userId} viewed paystack transaction total`, dateStarted: req.date, state: 1, requestStatus: 200, actor: actor.userId }, req);
-    return sendResponse(res, 1, 200, 'Record Updated',jsonResponseData?.data)
+    return sendResponse(res, 1, 200, 'Record Updated', jsonResponseData?.data)
 
+})
+exports.ViewTransactionTotal = asynHandler(async (req, res, next) => {
+    let { transactionFor } = req.body
+    let actor = req.user.userInfo
+
+    let results = await TransactionHistory(transactionFor);
+    if (results.length == 0) {
+        CatchHistory({ event: `user with id: ${actor.userId} viewed ${results.length} transaction history for ${transactionFor}`, functionName: 'ViewTransactionTotal', response: `No Record Found transaction history`, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
+        return sendResponse(res, 0, 200, 'No Record Found')
+    }
+    CatchHistory({ event: `user with id: ${actor.userId} viewed ${results.length} transaction history for ${transactionFor}`, functionName: 'ViewTransactionTotal', response: `Record Found, Transaction history contains ${results.length} record's`, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
+
+    return sendResponse(res, 1, 200, 'Record Found', results)
+})
+
+exports.ViewEmployerTransactionTotal = asynHandler(async (req, res, next) => {
+    let { transactionFor } = req.body
+    let actor = req.user.userInfo
+
+    let results = await EmployerTransactionHistory(transactionFor,actor?.company?.companyId);
+    if (results.length == 0) {
+        CatchHistory({ event: `user with id: ${actor.userId} viewed ${results.length} transaction history for ${transactionFor}`, functionName: 'ViewEmployerTransactionTotal', response: `No Record Found transaction history`, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
+        return sendResponse(res, 0, 200, 'No Record Found')
+    }
+    CatchHistory({ event: `user with id: ${actor.userId} viewed ${results.length} transaction history for ${transactionFor}`, functionName: 'ViewEmployerTransactionTotal', response: `Record Found, Transaction history contains ${results.length} record's`, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
+
+    return sendResponse(res, 1, 200, 'Record Found', results)
 })

@@ -16,6 +16,20 @@ exports.ViewIndustry = asynHandler(async (req, res, next) => {
 
 });
 
+exports.ViewCompany = asynHandler(async (req, res, next) => {
+  let { viewAction } = req.body
+  let actor = req.user.userInfo
+
+  let results = await GlobalModel.ViewWithAction('company', viewAction);
+  if (results.length == 0) {
+    CatchHistory({ event: `user with id: ${actor.userId} viewed ${results.length} company`, functionName: 'ViewCompany', response: `No Record Found For company`, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
+    return sendResponse(res, 0, 200, 'No Record Found')
+  }
+  CatchHistory({ event: `user with id: ${actor.userId} viewed ${results.length} company`, functionName: 'ViewCompany', response: `Record Found, company contains ${results.length} record's`, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
+  return sendResponse(res, 1, 200, 'Record Found', results)
+
+});
+
 
 
 exports.CreateIndustry = asynHandler(async (req, res, next) => {
@@ -36,7 +50,7 @@ exports.CreateIndustry = asynHandler(async (req, res, next) => {
 })
 
 exports.UpdateIndustry = asynHandler(async (req, res, next) => {
-  const { patch, patchData, deleterecord, restore,industryId } = req.body;
+  const { patch, patchData, deleterecord, restore, industryId } = req.body;
   let actor = req.user.userInfo
 
   let deletePayload = {
@@ -51,7 +65,7 @@ exports.UpdateIndustry = asynHandler(async (req, res, next) => {
     industryDescription: patchData.industryDescription,
   };
 
-  let switchActionPayload = patch ? patchUserPayload :deletePayload
+  let switchActionPayload = patch ? patchUserPayload : deletePayload
 
   let result = await GlobalModel.Update('industry', switchActionPayload, 'industryId', industryId);
 

@@ -31,6 +31,47 @@ jobsdb.VariousUsers = (viewAction, type = 2) => {
   });
 };
 
+jobsdb.EmployerUser = (viewAction, type = 2) => {
+  return new Promise((resolve, reject) => {
+    let sql = `
+    SELECT 
+    m.userId,
+    m.fullName,
+    m.username,
+    m.email,
+    m.phone,
+    m.address,
+    m.country,
+    m.gender,
+    m.maritalStatus,
+    m.userType,
+    m.status,
+    m.createdAt,
+    m.birthDate,
+    m.highestEducation, 
+    c.companyName,
+    c.industryId,
+    c.companyId,
+    c.location,
+    c.website,
+    c.companySize,
+    c.companyProfile,
+    c.companyLogo
+    FROM users m 
+    JOIN company c ON m.userId = c.userId 
+    WHERE m.deletedAt IS  NULL
+    AND c.deletedAt IS NULL
+    `
+
+    pool.query(sql, [], (err, results) => {
+      if (err) {
+        return reject(err);
+      }
+      return resolve(results);
+    });
+  });
+};
+
 
 
 jobsdb.Create = (postData = req.body) => {

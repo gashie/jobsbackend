@@ -6,7 +6,7 @@ const { CreateUser, ActivateAccount, SendActivation, PasswordReset, GetAllUsers,
 
 //USER AUTH
 const {
-    Auth, VerifyUser, Logout,
+    Auth, VerifyUser, Logout, ResetInAppPassword,
 } = require("../controllers/user/auth");
 const { protect } = require("../middleware/protect");
 
@@ -19,7 +19,7 @@ const { CreateJobCategory, ViewJobCategory, UpdateJobCategory } = require("../co
 const { CreateQuestionnaire, CreateBulkQuestionnaire, LinkQuestionnaire, DeleteLinkage,ViewMyQuestionnaire,AdminViewQuestionnaire,ViewJointQuestionnaire} = require("../controllers/jobs/questionnaire");
 
 const { CreateJobStatus, UpdateJobStatus, ViewJobStatus } = require("../controllers/jobs/jobstatus");
-const { CreateIndustry, ViewIndustry, UpdateIndustry } = require("../controllers/company/industry");
+const { CreateIndustry, ViewIndustry, UpdateIndustry, ViewCompany } = require("../controllers/company/industry");
 const { CreateJobInfo, UpdateJobInfo, AdminApproveJobInfo, ViewMyJobs,ViewJobDetails, ViewJobsData, ApplyJob, ApproveJobApplication, ViewJobApplications, ViewMyJobApplications, ViewMyShortlistedJobApplicants } = require("../controllers/jobs/jobinfo");
 
 const { CreateBanner, ViewBanners, UpdateBanner } = require("../controllers/admin/banner");
@@ -40,7 +40,7 @@ const { CreateResume, ViewMyCv, UpdateCv } = require("../controllers/jobseeker/r
 const { CreateCoverLetter, ViewMyCoverLetter, UpdateCoverLetter } = require("../controllers/jobseeker/coverletter")
 const { CreateJobAlert, ViewMyJobAlert, UpdateJobAlert } = require("../controllers/jobseeker/jobalert")
 const { SaveJob,ViewMySavedJobs,UpdateSavedJob } = require("../controllers/jobseeker/savedjobs");
-const { FetchVariousUsers } = require("../controllers/admin/manage_users");
+const { FetchVariousUsers, FetchEmployersUsers } = require("../controllers/admin/manage_users");
 const { CreateSystemSettings, UpdateSystemSettings } = require("../controllers/admin/app_settings");
 
 /***
@@ -49,7 +49,7 @@ const { CreateSystemSettings, UpdateSystemSettings } = require("../controllers/a
  */
 
 
-const { GeneralPayment,VerifyPayment, PaystackViewTransactionTotal } = require("../controllers/jobs/pay");
+const { GeneralPayment,VerifyPayment, PaystackViewTransactionTotal, ViewTransactionTotal, ViewEmployerTransactionTotal } = require("../controllers/jobs/pay");
 const { UpdateLogoSettings } = require("../controllers/admin/logo_settings");
 const { UpdateProfileImageSettings } = require("../controllers/admin/profileimage_settings");
 const { ViewMyAppliedJobs } = require("../controllers/jobs/applications");
@@ -65,6 +65,7 @@ router.route("/activate")["post"](verifyAccountActivate, ActivateAccount);
 router.route("/resendactivatecode")["post"](verifyAccountReactivate, SendActivation);
 router.route("/sendresetcode")["post"](verifyResetAccount, SendActivation);
 router.route("/passwordreset")["post"](verifyAccountReset, PasswordReset);
+router.route("/passwordresetinapp")["post"](protect, ResetInAppPassword);
 
 
 
@@ -79,6 +80,7 @@ router.route("/updaterolemenu")["post"](UpdateRoleMenu);
 
 //users table
 router.route("/allusers").post(protect, FetchVariousUsers);
+router.route("/fetchemployers").post(protect, FetchEmployersUsers);
 router.route("/updateuser").post(protect, verifyUser, UpdateUser);
 
 
@@ -114,6 +116,7 @@ router.route("/setupjob").post(protect, CreateJobInfo);
 router.route("/updatejob").post(protect, UpdateJobInfo);
 router.route("/approvejob").post(protect, AdminApproveJobInfo);
 router.route("/viewmyjobs").post(protect, ViewMyJobs);
+router.route("/viewcompanies").post(protect, ViewCompany);
 
 
 
@@ -211,6 +214,8 @@ router.route("/viewpartnerships").post(protect, ViewCoursePartners);
 router.route("/pay").post(protect,findRate,findBeforePay, GeneralPayment);
 router.route("/verifypayment").post(protect,VerifyPayment);
 router.route("/viewtransactiontotal").post(protect,PaystackViewTransactionTotal);
+router.route("/transactionhistory").post(protect,ViewTransactionTotal);
+router.route("/employer/transactionhistory").post(protect,ViewEmployerTransactionTotal);
 
 //manage frontend
 router.route("/services").post(CreateServiceEnquiry);
