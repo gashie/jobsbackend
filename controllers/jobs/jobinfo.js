@@ -98,19 +98,12 @@ let preparedLocations = ''
   };
 
   let switchActionPayload = patch ? patchUserPayload : deletePayload
-  console.log('====================================');
-  console.log(req.body);
-  console.log('====================================');
-
-  console.log('====================================');
-  console.log(switchActionPayload);
-  console.log('====================================');
 
   if (patchData.jobLocation) {
     let result = await GlobalModel.Update('job_info', switchActionPayload, 'jobId', jobId);
 
   }
-  let result = await GlobalModel.Update('job_location', preparedLocations, 'jobId', jobId);
+  // let result = await GlobalModel.Update('job_location', preparedLocations, 'jobId', jobId);
 
   if (result.affectedRows === 1) {
     CatchHistory({ event: 'Update Job Info', functionName: 'UpdateJobInfo', response: `Job Info record with id ${jobId} was updated by ${actor.userId}`, dateStarted: req.date, state: 1, requestStatus: 200, actor: actor.userId }, req);
