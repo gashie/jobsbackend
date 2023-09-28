@@ -25,6 +25,8 @@ app.use(fileupload());
 app.use(helmet({ crossOriginResourcePolicy: false }));
 //Set Security Headers
 
+app.use(express.static(path.join(__dirname,'build')))
+
 //Prevent XSS Attack
 app.use(xss())
 
@@ -56,6 +58,9 @@ app.use("/api/v1/jobs", routes);
 
 var __dirname = path.resolve()
 app.use('/uploads', express.static(path.join(__dirname, '/uploads')))
+app.get('/*',function(req,res){
+    res.sendFile(path.join(__dirname,'build','index.html'))
+  })
 app.use(errorHandler);
 
 //errror middleware
