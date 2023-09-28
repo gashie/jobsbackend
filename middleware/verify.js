@@ -471,7 +471,7 @@ exports.findJobBeforeApply = asynHandler(async (req, res, next) => {
   let objectExist = await GlobalModel.QueryDynamic(tableNameOne, columnsToSelectOne, conditionOne)
 
   if (!objectExist) {
-    CatchHistory({ event: `user with id: ${actor.userId} tried applying for job with id ${jobId}`, functionName: 'findJobBeforeApply', response: `No Record Found for ${transactionFor}`, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
+    CatchHistory({ event: `user with id: ${actor.userId} tried applying for job with id ${jobId}`, functionName: 'findJobBeforeApply', response: `No Record Found for ${jobId}`, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
     return sendResponse(res, 0, 200, 'No Record Found')
   }
 

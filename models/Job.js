@@ -186,6 +186,7 @@ jobsdb.JobSeekerViewJobApplicants = (userId) => {
         job_application.applicantResume,
         job_application.appliedAt,
         job_application.applicationId,
+        job_application.applicationStatus,
          job_info.jobId, 
          job_info.jobTitle, 
          company.companyName,
