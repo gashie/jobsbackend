@@ -54,6 +54,7 @@ const { UpdateLogoSettings } = require("../controllers/admin/logo_settings");
 const { UpdateProfileImageSettings,UpdateUserDataWithImage } = require("../controllers/admin/profileimage_settings");
 const { ViewMyAppliedJobs } = require("../controllers/jobs/applications");
 const { CreateServiceEnquiry, ViewServiceEnquiry } = require("../controllers/admin/services_enquiry");
+const { Utilities } = require("../controllers/admin/utilities");
 
 
 //user account
@@ -222,5 +223,8 @@ router.route("/employer/transactionhistory").post(protect,ViewEmployerTransactio
 //manage frontend
 router.route("/services").post(CreateServiceEnquiry);
 router.route("/viewservices").post(protect,ViewServiceEnquiry);
+
+//manage dashboard
+router.route("/utilities").post(protect,Utilities);
 
 module.exports = router;

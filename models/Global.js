@@ -154,6 +154,22 @@ jobsdb.ViewWithAction = (table, showDelete) => {
     );
   });
 };
+jobsdb.Utilities = (table, start, end) => {
+  return new Promise((resolve, reject) => {
+    const sql = `
+    SELECT count(id) AS total${table}
+    FROM ??
+    WHERE createdAt >= ? AND createdAt < ?
+    `;
+    pool.query(sql,[table, start, end], function (error, results, fields) {
+      if (error) {
+        return reject(error);
+      }
+      return resolve(results[0]);
+    }
+    );
+  });
+};
 
 jobsdb.ViewWithActionById = (table, showDelete, param, value) => {
   return new Promise((resolve, reject) => {
