@@ -98,11 +98,7 @@ let preparedLocations = ''
   };
 
   let switchActionPayload = patch ? patchUserPayload : deletePayload
-
-  if (patchData.jobLocation) {
-    let result = await GlobalModel.Update('job_info', switchActionPayload, 'jobId', jobId);
-
-  }
+  let result = await GlobalModel.Update('job_info', switchActionPayload, 'jobId', jobId);
   // let result = await GlobalModel.Update('job_location', preparedLocations, 'jobId', jobId);
 
   if (result.affectedRows === 1) {

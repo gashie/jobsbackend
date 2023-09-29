@@ -179,6 +179,7 @@ exports.UpdateCourse = asynHandler(async (req, res, next) => {
         courseImage: courseImage?.name,
         courseVideoAd: courseVideoAd?.name,
         courseBrochure: courseBrochure?.name,
+        ...JSON.parse(patchData)
 
     };
 
