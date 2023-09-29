@@ -101,7 +101,7 @@ exports.UpdateUser = asynHandler(async (req, res, next) => {
     ...profile,
   };
 
-  let switchActionPayload = reset ? resetUserPayload : blockUser ? blockUserPayload : deleterecord ? deleteUserPayload : patch ? patchUserPayload :''
+  let switchActionPayload = reset ? resetUserPayload : blockUser ? blockUserPayload : deleterecord ? deleteUserPayload : patch ? patchUserPayload : ''
 
   let result = await GlobalModel.Update('users', switchActionPayload, 'userId', userId);
 
@@ -258,4 +258,36 @@ exports.GoogleAuthFetchUser = asynHandler(async (req, res, next) => {
 
 
   res.redirect(303, 'http://localhost:5050/');
+})
+
+exports.AdminCreateUser = asynHandler(async (req, res, next) => {
+  payload = req.body
+  payload.userId = uuidV4.v4()
+  let rawResetToken = crypto.randomBytes(32).toString("hex");
+  const salt = await bcyrpt.genSalt(10);
+  payload.password = await bcyrpt.hash(payload.password, salt);
+  payload.resetToken = await bcyrpt.hash(rawResetToken, salt);
+  payload.resetPeriod = req.date
+  //set user status to pending and respond
+  let userPayload = {
+    userId: uuidV4.v4(),
+    email: payload.email,
+    username: payload.username,
+    userType: payload.userType,
+    fullName: payload.fullName,
+    password: payload.password,
+    phone: payload.phone,
+    address: payload.address,
+    country: payload.country,
+    birthDate: payload.birthDate,
+    maritalStatus: payload.maritalStatus,
+    gender: payload.gender,
+    highestEducation: payload.highestEducation,
+    status: payload.status || 0,
+    roleid: 1,
+
+  }
+  return await autoSaveUser(userPayload, req, res, rawResetToken)
+
+
 })

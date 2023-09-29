@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 //user account
-const { CreateUser, ActivateAccount, SendActivation, PasswordReset, GetAllUsers, UpdateUser,GoogleAuth,GoogleAuthFetchUser } = require("../controllers/user/user")
+const { CreateUser, ActivateAccount, SendActivation, PasswordReset, GetAllUsers, UpdateUser,GoogleAuth,GoogleAuthFetchUser, AdminCreateUser } = require("../controllers/user/user")
 
 //USER AUTH
 const {
@@ -58,6 +58,7 @@ const { CreateServiceEnquiry, ViewServiceEnquiry } = require("../controllers/adm
 
 //user account
 router.route("/signup")["post"](checkDuplicateaccount, CreateUser);
+router.route("/admincreateuser")["post"](checkDuplicateaccount, AdminCreateUser);
 router.route("/activate")["post"](verifyAccountActivate, ActivateAccount);
 router.route("/oauth")["get"](GoogleAuthFetchUser);
 router.route("/request")["get"](GoogleAuth);
