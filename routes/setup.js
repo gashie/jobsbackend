@@ -51,7 +51,7 @@ const { CreateSystemSettings, UpdateSystemSettings } = require("../controllers/a
 
 const { GeneralPayment,VerifyPayment, PaystackViewTransactionTotal, ViewTransactionTotal, ViewEmployerTransactionTotal } = require("../controllers/jobs/pay");
 const { UpdateLogoSettings } = require("../controllers/admin/logo_settings");
-const { UpdateProfileImageSettings } = require("../controllers/admin/profileimage_settings");
+const { UpdateProfileImageSettings,UpdateUserDataWithImage } = require("../controllers/admin/profileimage_settings");
 const { ViewMyAppliedJobs } = require("../controllers/jobs/applications");
 const { CreateServiceEnquiry, ViewServiceEnquiry } = require("../controllers/admin/services_enquiry");
 
@@ -185,6 +185,7 @@ router.route("/updatesavedsetting").post(protect,findAppSettings, UpdateSystemSe
 router.route("/admin/updateemployerlogo").post(protect,UpdateLogoSettings);
 router.route("/employer/updateemployerlogo").post(protect,UpdateLogoSettings);
 router.route("/updateprofileimage").post(protect,UpdateProfileImageSettings);
+router.route("/updateprofiledata").post(protect,UpdateUserDataWithImage);
 
 
 //manage ratecard
