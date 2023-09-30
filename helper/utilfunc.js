@@ -45,7 +45,9 @@ module.exports = {
     clearResponse: (req, res) => {
         const cookies = req.cookies
         if (!cookies?.jtsid) return res.sendStatus(204) //No content
-        res.clearCookie('jtsid', { httpOnly: true, sameSite: 'None', secure: true, expires: new Date(Date.now() + 10 * 1000), })
+        res.clearCookie('jtsid', { httpOnly: true,  secure: false, expires: new Date(Date.now() + 10 * 1000), })
+        // res.clearCookie('jtsid', { httpOnly: true, sameSite: 'None', secure: true, expires: new Date(Date.now() + 10 * 1000), })
+
         logger.info('Logged out')
         res.json({ Message: 'Logged out' })
     },

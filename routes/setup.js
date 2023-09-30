@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 //user account
-const { CreateUser, ActivateAccount, SendActivation, PasswordReset, GetAllUsers, UpdateUser,GoogleAuth,GoogleAuthFetchUser, AdminCreateUser } = require("../controllers/user/user")
+const { CreateUser, ActivateAccount, SendActivation, PasswordReset, GetAllUsers, UpdateUser,GoogleAuth,GoogleAuthFetchUser, AdminCreateUser, ReSendActivation } = require("../controllers/user/user")
 
 //USER AUTH
 const {
@@ -64,7 +64,7 @@ router.route("/activate")["post"](verifyAccountActivate, ActivateAccount);
 router.route("/oauth")["get"](GoogleAuthFetchUser);
 router.route("/request")["get"](GoogleAuth);
 router.route("/activate")["post"](verifyAccountActivate, ActivateAccount);
-router.route("/resendactivatecode")["post"](verifyAccountReactivate, SendActivation);
+router.route("/resendactivatecode")["post"](verifyAccountReactivate, ReSendActivation);
 router.route("/sendresetcode")["post"](verifyResetAccount, SendActivation);
 router.route("/passwordreset")["post"](verifyAccountReset, PasswordReset);
 router.route("/passwordresetinapp")["post"](protect, ResetInAppPassword);

@@ -20,6 +20,11 @@ exports.Auth = asynHandler(async (req, res) => {
 
     }
 
+    if (foundUser && foundUser?.status == 0) {
+        CatchHistory({ payload: JSON.stringify({ email }), api_response: "Unauthorized access-user not activated", function_name: 'Auth', date_started: systemDate, sql_action: "SELECT", event: "User Authentication", actor: email }, req)
+        return sendResponse(res, 0, 401, 'Unauthorized access,kindly proceed to activate your account')
+
+    }
 
     //check for password
     const match = await bcyrpt.compare(password, foundUser.password)

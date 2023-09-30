@@ -58,6 +58,13 @@ exports.verifyResetAccount = asynHandler(async (req, res, next) => {
   //check if email exist and and status is deactivated or 0
 
   let findemail = await UserModel.ReActivateAccount(email, 1);
+  console.log('====================================');
+  console.log(findemail);
+  console.log('====================================');
+
+  console.log('====================================');
+  console.log(req.body);
+  console.log('====================================');
   //if email exist
   if (!findemail) {
     CatchHistory({ api_response: `Sorry we failed to identify ${email}--activation time expired or email does not exist`, function_name: 'verifyResetAccount', date_started: systemDate, sql_action: "SELECT", event: "User Account Reset", actor: email }, req)

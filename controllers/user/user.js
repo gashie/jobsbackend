@@ -174,6 +174,42 @@ exports.SendActivation = asynHandler(async (req, res, next) => {
   }
 
 })
+exports.ReSendActivation = asynHandler(async (req, res, next) => {
+  let user = req.user;
+  const salt = await bcyrpt.genSalt(10);
+
+  let { email } = req.body
+  let payload = {};
+  let rawResetToken = crypto.randomBytes(32).toString("hex");
+  console.log(rawResetToken);
+  payload.updatedAt = req.date;
+  payload.resetToken = await bcyrpt.hash(rawResetToken, salt);
+  payload.resetPeriod = req.date
+  // payload.status = 1
+
+  let result = await GlobalModel.Update('users', payload, 'userId', user.userId);
+
+  if (result.affectedRows === 1) {
+    SendEmailApi("gashie@asimeglobal.com",
+      `Hi,
+
+    You have created an account on the Jobsinghana web site. To fully enjoy our services, please confirm activation by clicking the link below:
+    http://localhost:3000/emailaction?token=${rawResetToken}&email=${email}
+
+    
+    If the link above does not work, please copy and paste it into your browser's address bar and press the Enter key.
+    
+    After successful confirmation, you can login and enjoy all the features of Jobsinghana.`
+      , "Confirm your Account Details", email)
+    CatchHistory({ api_response: `Activation token sent to ${email}`, function_name: 'ActivateAccount', date_started: req.date, sql_action: "UPDATE", event: "User Account Activate", actor: email }, req)
+    return sendResponse(res, 1, 200, 'Activation token has been sent to your email successfully')
+
+  } else {
+    CatchHistory({ api_response: `Failed to update record or save activation code for  :${email}`, function_name: 'ActivateAccount', date_started: req.date, sql_action: "UPDATE", event: "User Account Activate", actor: email }, req)
+    return sendResponse(res, 0, 200, 'Failed to activation code, please try again later')
+  }
+
+})
 
 exports.PasswordReset = asynHandler(async (req, res, next) => {
   let user = req.user;
