@@ -263,3 +263,123 @@ exports.ViewJointQuestionnaire = asynHandler(async (req, res, next) => {
   }
 
 });
+
+exports.ViewMySingleQuestionnaire = asynHandler(async (req, res, next) => {
+  let actor = req.user.userInfo
+  let { questionId } = req.body
+
+
+
+  // Define your dynamic query parameters
+  const tableName = 'job_question';
+  const columnsToSelect = ['questionId', 'questionTitle', 'jobId', 'questionType', 'benchMark', 'minimumValue', 'maximumValue', 'createdAt', 'updatedAt', 'createdByName']; // Replace with your desired columns
+
+  // Define an array of conditions (each condition is an object with condition and value
+
+  const conditions = [
+    { column: 'deletedAt', operator: 'IS', value: null },
+    { column: 'createdById', operator: '=', value: actor.userId },
+    { column: 'questionId', operator: '=', value: questionId }
+    // Add more conditions as needed
+  ];
+
+
+  let results = await GlobalModel.QueryDynamic(tableName, columnsToSelect, conditions);
+
+  if (results && results?.questionType === "yesno" || results?.questionType === "range") {
+    CatchHistory({ event: `user with id: ${actor.userId} viewed ${results?.length}  job_questions`, functionName: 'ViewMyQuestionnaire', response: `Record Found, Rate Card  contains ${results?.length} record's`, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
+    return sendResponse(res, 1, 200, 'Record Found', results)
+  }
+  if (results && results?.questionType === "multi" || results?.questionType === "single") {
+    let optionsData = []
+    const conditionsTwo = [
+      { column: 'questionId', operator: '=', value: questionId },
+      // Add more conditions as needed
+    ];
+    let optionsArray = await GlobalModel.QueryDynamicArray('job_question_option', [], conditionsTwo)
+    optionsData.push(optionsArray)
+
+    let questionsData = {
+      ...results,
+      optionsData
+    }
+
+    CatchHistory({ event: `user with id: ${actor.userId} viewed ${results?.length}  job_questions`, functionName: 'ViewMyQuestionnaire', response: `Record Found, Rate Card  contains ${results?.length} record's`, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
+    return sendResponse(res, 1, 200, 'Record Found', questionsData)
+  }
+  return sendResponse(res, 1, 200, 'Sorry no record found', [])
+});
+
+exports.UpdateQuestionnaire = asynHandler(async (req, res, next) => {
+  const { patch, patchData, questionId } = req.body;
+  let actor = req.user.userInfo
+
+  let patchUserPayload = {
+    updatedAt: req.date,
+    updatedByName: actor.fullName,
+    updatedById: actor.userId,
+    questionTitle: patchData?.questionTitle,
+    minimumValue: patchData?.minimumValue,
+    maximumValue: patchData?.maximumValue,
+    questionType: patchData?.questionType,
+    jobId: patchData?.jobId,
+    benchMark: patchData?.benchMark,
+  };
+  let result = await GlobalModel.Update('job_question', patchUserPayload, 'questionId', questionId);  //update question with questionId
+  if (patch && patchData?.optionsData) { // if incoming has options, remove old options and insert new
+    let preparedOptions = prePareQuestionOptions(patchData?.optionsData, questionId) // prepare array object for question options
+    let removeoptions = await QuestionsModel.delete(questionId); ///delete old questions
+    let newoptions = await QuestionsModel.create(preparedOptions); //create new questions
+  }
+
+  if (result.affectedRows === 1) {
+    CatchHistory({ event: 'Update Questionnaire', functionName: 'UpdateQuestionnaire', response: `Questionnaire record with id ${questionId} was updated by ${actor.userId}`, dateStarted: req.date, state: 1, requestStatus: 200, actor: actor.userId }, req);
+    return sendResponse(res, 1, 200, 'Record Updated')
+
+  } else {
+    CatchHistory({ event: 'Update Questionnaire', functionName: 'UpdateQuestionnaire', response: `Error Updating Record with id ${questionId}`, dateStarted: req.date, state: 0, requestStatus: 200, actor: actor.userId }, req);
+    return sendResponse(res, 0, 200, 'Error Updating Record')
+  }
+
+})
+exports.DeleteMySingleQuestionnaire = asynHandler(async (req, res, next) => {
+  let actor = req.user.userInfo
+  let { questionId } = req.body
+
+
+
+  // Define your dynamic query parameters
+  const tableName = 'job_question';
+  const columnsToSelect = ['questionId', 'questionTitle', 'jobId', 'questionType', 'benchMark', 'minimumValue', 'maximumValue', 'createdAt', 'updatedAt', 'createdByName']; // Replace with your desired columns
+
+  // Define an array of conditions (each condition is an object with condition and value
+
+  const conditions = [
+    { column: 'createdById', operator: '=', value: actor.userId },
+    { column: 'questionId', operator: '=', value: questionId }
+    // Add more conditions as needed
+  ];
+
+
+  let results = await GlobalModel.QueryDynamic(tableName, columnsToSelect, conditions);
+
+  if (results && results?.questionType === "yesno" || results?.questionType === "range") {
+    let removequestion = await QuestionsModel.deleteQuestion(questionId); ///delete old questions
+    if (removequestion.affectedRows > 0) {
+      CatchHistory({ event: `user with id: ${actor.userId} viewed ${results?.length}  job_questions`, functionName: 'ViewMyQuestionnaire', response: `Record Found, Rate Card  contains ${results?.length} record's`, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
+      return sendResponse(res, 1, 200, 'Record deleted successfully', [])
+
+    }
+  }
+  if (results && results?.questionType === "multi" || results?.questionType === "single") {
+    let removequestion = await QuestionsModel.deleteQuestion(questionId); ///delete old questions
+
+    let removeoptions = await QuestionsModel.delete(questionId); ///delete options
+    if (removequestion.affectedRows > 0 && removeoptions.affectedRows > 0) {
+
+      CatchHistory({ event: `user with id: ${actor.userId} viewed ${results?.length}  job_questions`, functionName: 'ViewMyQuestionnaire', response: `Record Found, Rate Card  contains ${results?.length} record's`, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
+      return sendResponse(res, 1, 200, 'Record Found', questionsData)
+    }
+  }
+  return sendResponse(res, 1, 200, 'Sorry no record found', [])
+});

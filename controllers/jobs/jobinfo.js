@@ -65,10 +65,11 @@ exports.CreateJobInfo = asynHandler(async (req, res, next) => {
 exports.UpdateJobInfo = asynHandler(async (req, res, next) => {
   const { patch, patchData, deleterecord, restore, jobId } = req.body;
   let actor = req.user.userInfo
-let preparedLocations = ''
+  let preparedLocations = ''
   if (patchData.jobLocation) {
-    let preparedLocations = prePareLocations(patchData?.jobLocation,jobId)
+    let arrayLocations = prePareLocations(patchData?.jobLocation, jobId)
     patchData.jobLocation = spreadLocations(patchData?.jobLocation)
+    preparedLocations = arrayLocations
   }
   if (patchData.jobSkills) {
     patchData.jobSkills = patchData.jobSkills.join(',')
@@ -84,22 +85,16 @@ let preparedLocations = ''
     updatedByName: actor.fullName,
     updatedById: actor.userId,
     ...patchData
-    // jobTitle: patchData.jobTitle,
-    // jobCategoryId: patchData.jobCategoryId,
-    // jobSalaryAmount: patchData.jobSalaryAmount,
-    // companyId: patchData.companyId,
-    // isCompanyConfidential: patchData.isCompanyConfidential,
-    // jobDescription: patchData.jobDescription,
-    // jobSkillsId: patchData.jobSkillsId,
-    // jobSalaryCurrency: patchData.jobSalaryCurrency,
-    // jobStatusId: patchData.jobStatusId,
-    // applyMode: patchData.applyMode,
-    // applyLink: patchData.applyLink
   };
 
   let switchActionPayload = patch ? patchUserPayload : deletePayload
   let result = await GlobalModel.Update('job_info', switchActionPayload, 'jobId', jobId);
-  // let result = await GlobalModel.Update('job_location', preparedLocations, 'jobId', jobId);
+  if (patch && patchData.jobLocation) { // if incoming has location, remove old location and insert new
+    let removelocations = await JobModel.delete(jobId);
+    let newlocations = await JobModel.create(preparedLocations);
+
+
+  }
 
   if (result.affectedRows === 1) {
     CatchHistory({ event: 'Update Job Info', functionName: 'UpdateJobInfo', response: `Job Info record with id ${jobId} was updated by ${actor.userId}`, dateStarted: req.date, state: 1, requestStatus: 200, actor: actor.userId }, req);
@@ -291,7 +286,7 @@ exports.ViewMyJobApplications = asynHandler(async (req, res, next) => {
   let { jobId } = req.body
   let actor = req.user.userInfo
 
-  let results = await JobModel.EmployerViewJobApplicants(jobId,actor?.company?.companyId);
+  let results = await JobModel.EmployerViewJobApplicants(jobId, actor?.company?.companyId);
   if (results.length == 0) {
     CatchHistory({ event: `user with id: ${actor.userId} viewed ${results.length} job applications`, functionName: 'ViewMyJobApplications', response: `No Record Found For Job applications`, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
     return sendResponse(res, 0, 200, 'No Record Found')
@@ -315,3 +310,25 @@ exports.ViewMyShortlistedJobApplicants = asynHandler(async (req, res, next) => {
   return sendResponse(res, 1, 200, 'Record Found', results)
 
 });
+
+exports.AdminListJobs = asynHandler(async (req, res, next) => {
+  let actor = req.user.userInfo
+  let arrayData = [];
+  let results = await JobModel.ListJobs();
+  if (results.length == 0) {
+    CatchHistory({ event: `user with id: ${actor.userId} viewed ${results.length} list of jobs`, functionName: 'AdminListJobs', response: `No Record Found For Jobs`, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
+    return sendResponse(res, 0, 200, 'No Record Found')
+  }
+  for (const iterator of results) {
+    let results = await JobModel.CountJobApplicants(iterator?.jobId);
+    let jobData = {
+      ...iterator,
+      applicantCount: results
+    }
+    arrayData.push(jobData)
+  }
+  CatchHistory({ event: `user with id: ${actor.userId} viewed ${results.length} list of jobs`, functionName: 'AdminListJobs', response: `Record Found, Jobs contains ${results.length} record's`, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
+
+  return sendResponse(res, 1, 200, 'Record Found', arrayData)
+
+})

@@ -1,13 +1,14 @@
 const uuidV4 = require('uuid');
+const path = require("path");
 const GlobalModel = require("../models/Global");
 const QuestionModel = require("../models/Questions");
 const { sendResponse, CatchHistory } = require('./utilfunc');
 const { autoFindLinkage } = require('./autoFinder');
 const { SendEmailApi } = require('../sevices/comm');
 module.exports = {
-  autoSaveCompany: async (payload, req, res,rawResetToken) => {
+  autoSaveCompany: async (payload, req, res, rawResetToken) => {
     let companyId = uuidV4.v4()
-    let { location, website, companyName, userType, roleid, username, companySize, companyProfile, companyLogo, userId, fullName, email, phone, password, address, country, birthDate, maritalStatus, gender, highestEducation,industryId } = payload
+    let { location, website, companyName, userType, roleid, username, companySize, companyProfile, companyLogo, userId, fullName, email, phone, password, address, country, birthDate, maritalStatus, gender, highestEducation, industryId, facebook, linkedin, twitter } = payload
     let companyPayload = {
       companyId,
       companyName,
@@ -18,6 +19,9 @@ module.exports = {
       website,
       companySize,
       industryId,
+      facebook,
+      linkedin,
+      twitter
     };
     let userPayload = {
       userId,
@@ -41,7 +45,7 @@ module.exports = {
       let results = await GlobalModel.Create('company', companyPayload);
       if (results.affectedRows === 1) {
         SendEmailApi("gashie@asimeglobal.com",
-        `Hi ${payload.fullName},
+          `Hi ${payload.fullName},
   
         You have created an account on the Jobsinghana web site. To fully enjoy our services, please confirm registration by clicking the link below:
         http://localhost:3000/emailaction?token=${rawResetToken}&email=${email}
@@ -49,7 +53,7 @@ module.exports = {
         If the link above does not work, please copy and paste it into your browser's address bar and press the Enter key.
         
         After successful confirmation, you can login and enjoy all the features of Jobsinghana.`
-        ,"Confirm your Account Details",payload.email)
+          , "Confirm your Account Details", payload.email)
         CatchHistory({ api_response: `User with id :${userId} created new company `, function_name: 'autoSave', date_started: req.date, sql_action: "INSERT", event: "Company Signup", actor: userId }, req)
         return sendResponse(res, 1, 200, "Record saved", [])
       } else {
@@ -61,11 +65,34 @@ module.exports = {
 
 
   },
-  autoSaveUser: async (payload, req, res,rawResetToken) => {
+  autoSaveUser: async (payload, req, res, rawResetToken) => {
+    const myCv = req.files.myCv;
+    let resumeId = uuidV4.v4()
+
+    if (!myCv.mimetype.startsWith("application/pdf")) {
+      return sendResponse(res, 0, 200, "Please make sure to upload a pdf file", [])
+
+    }
+
+    //change filename
+    myCv.name = `resumeId_id_${resumeId}_md_${myCv.md5}_${path.parse(myCv.name).ext}`;
+    myCv.mv(`./uploads/pdf/resume/${myCv.name}`, async (err) => {
+      if (err) {
+        console.log(err);
+        return sendResponse(res, 0, 200, "Problem with file upload", [])
+      }
+    });
+    let resumePayload = {
+      resumeId: resumeId,
+      userId: payload.userId,
+      fileName: myCv.name
+    }
     let results = await GlobalModel.Create('users', payload);
     if (results.affectedRows === 1) {
+      GlobalModel.Create('resume', resumePayload); //save resume silently
+
       SendEmailApi("gashie@asimeglobal.com",
-      `Hi ${payload.fullName},
+        `Hi ${payload.fullName},
 
       You have created an account on the Jobsinghana web site. To fully enjoy our services, please confirm registration by clicking the link below:
       http://localhost:3000/emailaction?token=${rawResetToken}&email=${payload.email}
@@ -73,7 +100,7 @@ module.exports = {
       If the link above does not work, please copy and paste it into your browser's address bar and press the Enter key.
       
       After successful confirmation, you can login and enjoy all the features of Jobsinghana.`
-      ,"Confirm your Account Details",payload.email)
+        , "Confirm your Account Details", payload.email)
       CatchHistory({ api_response: `New user signup with id :${payload.userId}`, function_name: 'CreateUser', date_started: req.date, sql_action: "INSERT", event: "User Signup", actor: payload.userId }, req)
       return sendResponse(res, 1, 200, "User Signup Record Saved", [])
     } else {
@@ -95,7 +122,7 @@ module.exports = {
       return sendResponse(res, 1, 200, "Record saved", [])
     } else {
       CatchHistory({ event: `Sorry, error saving record for user  with id :${actor.userId}`, functionName: 'CreateQuestionnaire', dateStarted: req.date, sql_action: "INSERT", actor: actor.userId }, req)
-     return sendResponse(res, 0, 200, "Sorry, error saving record", [])
+      return sendResponse(res, 0, 200, "Sorry, error saving record", [])
     }
 
 
@@ -145,7 +172,7 @@ module.exports = {
       return;
     } else {
       CatchHistory({ event: `Sorry, error saving record for user  with id :${actor.userId}`, functionName: 'CreateQuestionnaire', dateStarted: req.date, sql_action: "INSERT", actor: actor.userId }, req)
-     return ;
+      return;
     }
 
 

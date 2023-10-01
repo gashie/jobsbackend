@@ -15,6 +15,17 @@ jobsdb.create = (postData) => {
         });
     });
 };
+jobsdb.delete = (postData) => {
+    return new Promise((resolve, reject) => {
+        pool.query('DELETE FROM job_location WHERE jobId = ?', [postData], (err, results) => {
+            if (err) {
+                return reject(err);
+            }
+
+            return resolve(results);
+        });
+    });
+};
 jobsdb.OpenJob = (jobId) => {
     return new Promise((resolve, reject) => {
         pool.query(`
@@ -75,7 +86,7 @@ jobsdb.ViewJobApplicants = (jobId) => {
         });
     });
 };
-jobsdb.EmployerViewJobApplicants = (jobId,companyId) => {
+jobsdb.EmployerViewJobApplicants = (jobId, companyId) => {
     return new Promise((resolve, reject) => {
         pool.query(`
         SELECT 
@@ -99,7 +110,7 @@ jobsdb.EmployerViewJobApplicants = (jobId,companyId) => {
          JOIN job_application ON job_info.jobId = job_application.jobId
          WHERE job_info.companyId = ?
          AND job_info.jobId = ?
-        `, [companyId,jobId], (err, results) => {
+        `, [companyId, jobId], (err, results) => {
             if (err) {
                 return reject(err);
             }
@@ -108,7 +119,7 @@ jobsdb.EmployerViewJobApplicants = (jobId,companyId) => {
         });
     });
 };
-jobsdb.EmployerViewShortlistedJobApplicants = (jobId,companyId,applicationScore) => {
+jobsdb.EmployerViewShortlistedJobApplicants = (jobId, companyId, applicationScore) => {
     return new Promise((resolve, reject) => {
         pool.query(`
         SELECT 
@@ -133,7 +144,7 @@ jobsdb.EmployerViewShortlistedJobApplicants = (jobId,companyId,applicationScore)
          WHERE job_info.companyId = ?
          AND job_info.jobId = ?
          AND job_application.applicationScore >= ?
-        `, [companyId,jobId,applicationScore], (err, results) => {
+        `, [companyId, jobId, applicationScore], (err, results) => {
             if (err) {
                 return reject(err);
             }
@@ -166,6 +177,49 @@ AND job_info.jobState = ?
 
 ; 
         `, ['approved'], (err, results) => {
+            if (err) {
+                return reject(err);
+            }
+
+            return resolve(results);
+        });
+    });
+};
+jobsdb.ListJobs = () => {
+    return new Promise((resolve, reject) => {
+        pool.query(`
+        SELECT 
+    job_info.jobId, 
+    job_info.jobTitle, 
+    job_info.jobLocation, 
+    job_info.jobDescription, 
+    job_info.jobStatus, 
+    job_info.jobSkills, 
+    job_info.goLiveDate,
+    company.companyName, 
+    company.companyLogo, 
+    job_category.jobCategoryName, 
+    industry.industryTitle 
+    FROM job_info 
+    JOIN company ON job_info.companyId = company.companyId 
+    JOIN job_category ON job_info.jobCategoryId = job_category.jobCategoryId 
+    JOIN industry ON company.industryId = industry.industryId`, [], (err, results) => {
+            if (err) {
+                return reject(err);
+            }
+
+            return resolve(results);
+        });
+    });
+};
+jobsdb.CountJobApplicants = (jobId) => {
+    return new Promise((resolve, reject) => {
+        pool.query(`
+        SELECT 
+         COUNT(userId) AS totalApplicants
+         FROM job_application 
+         WHERE jobId = ?
+        `, [jobId], (err, results) => {
             if (err) {
                 return reject(err);
             }

@@ -1,9 +1,6 @@
-const path = require("path");
-const fs = require('fs').promises;
-const uuidV4 = require('uuid');
 const asynHandler = require("../../middleware/async");
 const GlobalModel = require("../../models/Global");
-const { sendResponse, CatchHistory, removeFile } = require("../../helper/utilfunc");
+const { sendResponse} = require("../../helper/utilfunc");
 const { JobApplicationUtilities, JobSeekerUtilities, NewJobsUtilities, ActiveJobsUtilities, PaymentCountUtilities, PaymentSumUtilities } = require("../../models/Utilities");
 
 exports.Utilities = asynHandler(async (req, res, next) => {

@@ -16,11 +16,11 @@ const { checkDuplicateaccount } = require("../middleware/duplicate");
 const { verifyAccountActivate, verifyAccountReactivate, verifyResetAccount, verifyAccountReset, verifyUser, findBanner, findJob, findResume, findSettings, findAppSettings, findFeedBedoreApprove, findRateCardBedoreApprove, findCourseBedoreApprove, findCourse, findFeed, findCourseContent, findCoursePartnerships, findRate, findBeforePay, findJobBeforeApply, findApplicationBeforeApprove } = require("../middleware/verify");
 const { CreateSkills, ViewSkills, ViewMySkills, UpdateSkills } = require("../controllers/jobs/skills");
 const { CreateJobCategory, ViewJobCategory, UpdateJobCategory } = require("../controllers/jobs/jobcategory");
-const { CreateQuestionnaire, CreateBulkQuestionnaire, LinkQuestionnaire, DeleteLinkage,ViewMyQuestionnaire,AdminViewQuestionnaire,ViewJointQuestionnaire} = require("../controllers/jobs/questionnaire");
+const { CreateQuestionnaire, CreateBulkQuestionnaire, LinkQuestionnaire, DeleteLinkage,ViewMyQuestionnaire,AdminViewQuestionnaire,ViewJointQuestionnaire, ViewMySingleQuestionnaire, UpdateQuestionnaire, DeleteMySingleQuestionnaire} = require("../controllers/jobs/questionnaire");
 
 const { CreateJobStatus, UpdateJobStatus, ViewJobStatus } = require("../controllers/jobs/jobstatus");
 const { CreateIndustry, ViewIndustry, UpdateIndustry, ViewCompany } = require("../controllers/company/industry");
-const { CreateJobInfo, UpdateJobInfo, AdminApproveJobInfo, ViewMyJobs,ViewJobDetails, ViewJobsData, ApplyJob, ApproveJobApplication, ViewJobApplications, ViewMyJobApplications, ViewMyShortlistedJobApplicants } = require("../controllers/jobs/jobinfo");
+const { CreateJobInfo, UpdateJobInfo, AdminApproveJobInfo, ViewMyJobs,ViewJobDetails, ViewJobsData, ApplyJob, ApproveJobApplication, ViewJobApplications, ViewMyJobApplications, ViewMyShortlistedJobApplicants, AdminListJobs } = require("../controllers/jobs/jobinfo");
 
 const { CreateBanner, ViewBanners, UpdateBanner } = require("../controllers/admin/banner");
 const { CreateFeed,UpdateFeed,ViewFeeds } = require("../controllers/admin/feed");
@@ -55,6 +55,7 @@ const { UpdateProfileImageSettings,UpdateUserDataWithImage } = require("../contr
 const { ViewMyAppliedJobs } = require("../controllers/jobs/applications");
 const { CreateServiceEnquiry, ViewServiceEnquiry } = require("../controllers/admin/services_enquiry");
 const { Utilities } = require("../controllers/admin/utilities");
+const { ViewMyProfile } = require("../controllers/jobseeker/profile");
 
 
 //user account
@@ -119,6 +120,7 @@ router.route("/updatejob").post(protect, UpdateJobInfo);
 router.route("/approvejob").post(protect, AdminApproveJobInfo);
 router.route("/viewmyjobs").post(protect, ViewMyJobs);
 router.route("/viewcompanies").post(protect, ViewCompany);
+router.route("/adminlistjobs").post(protect, AdminListJobs);
 
 
 
@@ -126,8 +128,11 @@ router.route("/viewcompanies").post(protect, ViewCompany);
 router.route("/createquestion").post(protect, CreateQuestionnaire);
 router.route("/viewquestions").post(protect, AdminViewQuestionnaire);
 router.route("/viewmyquestions").post(protect, ViewMyQuestionnaire);
+router.route("/viewmysinglequestion").post(protect, ViewMySingleQuestionnaire);
 router.route("/viewjointquestions").post(protect, ViewJointQuestionnaire);
 router.route("/createbulkquestion").post(protect, findJob, CreateBulkQuestionnaire);
+router.route("/updatequestion").post(protect, UpdateQuestionnaire);
+router.route("/deletequestion").post(protect, DeleteMySingleQuestionnaire);
 router.route("/linkquestion").post(protect, LinkQuestionnaire);
 router.route("/unlinkquestion").post(protect, DeleteLinkage);
 
@@ -141,7 +146,7 @@ router.route("/viewbanner").post(protect, ViewBanners);
 router.route("/createresume").post(protect, CreateResume);
 router.route("/updateresume").post(protect, findResume, UpdateCv);
 router.route("/myresume").post(protect, ViewMyCv);
-
+router.route("/viewprofile").post(protect, ViewMyProfile);
 //manage coverletter
 router.route("/createcv").post(protect, CreateCoverLetter);
 router.route("/updatecv").post(protect, UpdateCoverLetter);

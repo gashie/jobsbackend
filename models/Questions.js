@@ -53,4 +53,26 @@ jobsdb.RemoveLinkage = (jobLinkedQId) => {
         });
     });
 };
+jobsdb.delete = (questionId) => {
+    return new Promise((resolve, reject) => {
+        pool.query('DELETE FROM job_question_option WHERE questionId = ?', [questionId], (err, results) => {
+            if (err) {
+                return reject(err);
+            }
+
+            return resolve(results);
+        });
+    });
+};
+jobsdb.deleteQuestion = (questionId) => {
+    return new Promise((resolve, reject) => {
+        pool.query('DELETE FROM job_question WHERE questionId = ?', [questionId], (err, results) => {
+            if (err) {
+                return reject(err);
+            }
+
+            return resolve(results);
+        });
+    });
+};
 module.exports = jobsdb;

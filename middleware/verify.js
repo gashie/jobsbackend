@@ -338,13 +338,13 @@ exports.findCourseBedoreApprove = asynHandler(async (req, res, next) => {
   //check if resume table if file exist
   // Define your dynamic query parameters
   const tableName = 'course';
-  const columnsToSelect = ['courseId', 'courseStatus']; // Replace with your desired columns
+  const columnsToSelect = ['courseId', 'courseApprovalStatus']; // Replace with your desired columns
 
   // Define an array of conditions (each condition is an object with condition and value)
 
   const conditions = [
     { column: 'courseId', operator: '=', value: courseId },
-    { column: 'courseStatus', operator: '=', value: 'approved' },
+    { column: 'courseApprovalStatus', operator: '=', value: 'approved' },
     // Add more conditions as needed
   ];
 
