@@ -272,3 +272,52 @@ const userAnswersData = {
 const { results, overallScore } = checkAnswers(questionsData.Questions, userAnswersData.answers);
 console.log('Results:', results);
 console.log('Overall Score:', overallScore);
+
+
+function calculateGrandTotal(itemsData, discount, tax) {
+  let totalSum = 0;
+
+  // Calculate itemAmount for each item and accumulate the total sum
+  for (const item of itemsData) {
+    item.itemAmount = item.itemUnitCost * item.itemQuantity;
+    totalSum += item.itemAmount;
+  }
+
+  // Apply discount and tax
+  const discountedTotal = totalSum - (totalSum * (discount / 100));
+  const grandTotal = discountedTotal + (discountedTotal * (tax / 100));
+
+  return {
+    itemsData,
+    totalSum,
+    discount,
+    tax,
+    grandTotal,
+  };
+}
+
+// Example data
+const itemsData = [
+  {
+    itemName: "Rice",
+    itemDescription: "Rice",
+    itemUnitCost: 100,
+    itemQuantity: 2,
+    itemAmount: "",
+  },
+  {
+    itemName: "Beans",
+    itemDescription: "Beans",
+    itemUnitCost: 20,
+    itemQuantity: 2,
+    itemAmount: "",
+  },
+];
+
+const discount = 0; // 20% discount
+const tax = 0;      // 2% tax
+
+// Calculate grand total
+const result = calculateGrandTotal(itemsData, discount, tax);
+
+console.log(result);

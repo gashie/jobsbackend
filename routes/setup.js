@@ -56,6 +56,7 @@ const { ViewMyAppliedJobs } = require("../controllers/jobs/applications");
 const { CreateServiceEnquiry, ViewServiceEnquiry } = require("../controllers/admin/services_enquiry");
 const { Utilities } = require("../controllers/admin/utilities");
 const { ViewMyProfile } = require("../controllers/jobseeker/profile");
+const { CreateInvoice,DeletInvoce } = require("../controllers/jobs/invoice");
 
 
 //user account
@@ -228,6 +229,10 @@ router.route("/verifypayment").post(protect,VerifyPayment);
 router.route("/viewtransactiontotal").post(protect,PaystackViewTransactionTotal);
 router.route("/transactionhistory").post(protect,ViewTransactionTotal);
 router.route("/employer/transactionhistory").post(protect,ViewEmployerTransactionTotal);
+
+//manage invoice
+router.route("/createinvoice").post(protect,CreateInvoice);
+router.route("/deleteinvoice").post(protect,DeletInvoce);
 
 //manage frontend
 router.route("/services").post(CreateServiceEnquiry);
