@@ -7,8 +7,26 @@ const { autoFindLinkage } = require('./autoFinder');
 const { SendEmailApi } = require('../sevices/comm');
 module.exports = {
   autoSaveCompany: async (payload, req, res, rawResetToken) => {
-    let companyId = uuidV4.v4()
-    let { location, website, companyName, userType, roleid, username, companySize, companyProfile, companyLogo, userId, fullName, email, phone, password, address, country, birthDate, maritalStatus, gender, highestEducation, industryId, facebook, linkedin, twitter } = payload
+    let companyId = uuidV4.v4();
+    const appLogo = req.files.appLogo;
+    if (appLogo && !appLogo.mimetype.startsWith("image")) {
+      return sendResponse(res, 0, 200, "Please make sure to upload an image", [])
+
+  }
+  if (appLogo && appLogo.mimetype.startsWith("image")) {
+
+      //change filename
+      // removeFile('./uploads/images/logos/', oldsettings.appLogo)
+      appLogo.name = `logo_id_${companyId}_md_${appLogo.md5}_${path.parse(appLogo.name).ext}`;
+      appLogo.mv(`./uploads/image/logos/${appLogo.name}`, async (err) => {
+          if (err) {
+              console.log(err);
+              return sendResponse(res, 0, 200, "Problem with file upload", [])
+          }
+      });
+
+  }
+    let { location, website, companyName, userType, roleid, username, companySize, companyProfile, userId, fullName, email, phone, password, address, country, birthDate, maritalStatus, gender, highestEducation, industryId, facebook, linkedin, twitter } = payload
     let companyPayload = {
       companyId,
       companyName,
@@ -21,7 +39,8 @@ module.exports = {
       industryId,
       facebook,
       linkedin,
-      twitter
+      twitter,
+      companyLogo: appLogo.name,
     };
     let userPayload = {
       userId,
