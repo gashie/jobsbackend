@@ -37,66 +37,95 @@ exports.CreateInvoice = asynHandler(async (req, res, next) => {
 exports.DeletInvoce = asynHandler(async (req, res, next) => {
     let actor = req.user.userInfo
     let { invoiceId } = req.body
-  
-  
-  
+
+
+
     // Define your dynamic query parameters
     const tableName = 'invoice_data';
     const columnsToSelect = ['invoiceId']; // Replace with your desired columns
-  
+
     // Define an array of conditions (each condition is an object with condition and value
-  
+
     const conditions = [
-      { column: 'invoiceId', operator: '=', value: invoiceId },
-      // Add more conditions as needed
+        { column: 'invoiceId', operator: '=', value: invoiceId },
+        // Add more conditions as needed
     ];
-  
-  
+
+
     let results = await GlobalModel.QueryDynamic(tableName, columnsToSelect, conditions);
     let removeinvoice = await Invoice.deleteInvoiceData(invoiceId); ///delete old questions
-  
+
     let removeoinvoice = await Invoice.deleteInvoiceItem(invoiceId); ///delete optio
-  
+
 
     return sendResponse(res, 1, 200, 'Sorry no record found', [])
-  });
+});
 
-  exports.ViewSingleInvoice = asynHandler(async (req, res, next) => {
+exports.ViewSingleInvoice = asynHandler(async (req, res, next) => {
     let actor = req.user.userInfo
     let { invoiceId } = req.body
-  
-  
-  
+
+
+
     // Define your dynamic query parameters
     const tableName = 'invoice_data';
     const columnsToSelect = []; // Replace with your desired columns
-  
+
     // Define an array of conditions (each condition is an object with condition and value
-  
+
     const conditions = [
-      { column: 'invoiceId', operator: '=', value: invoiceId }
-      // Add more conditions as needed
+        { column: 'invoiceId', operator: '=', value: invoiceId }
+        // Add more conditions as needed
     ];
-  
-  
+
+
     let results = await GlobalModel.QueryDynamic(tableName, columnsToSelect, conditions);
     if (!results) {
         return sendResponse(res, 1, 200, 'Sorry no record found', [])
     }
-  
+
     let itemsData = []
     const conditionsTwo = [
-      { column: 'invoiceId', operator: '=', value: invoiceId },
-      // Add more conditions as needed
+        { column: 'invoiceId', operator: '=', value: invoiceId },
+        // Add more conditions as needed
     ];
     let optionsArray = await GlobalModel.QueryDynamicArray('invoice_items', [], conditionsTwo)
     itemsData.push(optionsArray)
 
     let questionsData = {
-      ...results,
-      itemsData
+        ...results,
+        itemsData
     }
 
     CatchHistory({ event: `user with id: ${actor.userId} viewed  invoice with id ${invoiceId}`, functionName: 'ViewSingleInvoice', response: `Record Found for invoice`, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
     return sendResponse(res, 1, 200, 'Record Found', questionsData)
-  });
+});
+
+exports.UpdateInvoice = asynHandler(async (req, res, next) => {
+    const { patchData, invoiceId } = req.body;
+    let actor = req.user.userInfo
+
+    let { totalSum, grandTotal, itemsData } = invoiceCalc(patchData?.itemsData, patchData?.discount, patchData?.tax)
+    let preparedItems = prePareLocations(itemsData, invoiceId)
+    patchData.total = totalSum
+    patchData.grandTotal = grandTotal
+    patchData.itemsData = JSON.stringify(itemsData)
+
+    let patchUserPayload = {
+        updatedAt: req.date,
+        updatedById: actor.userId,
+        ...patchData
+    };
+    let result = await GlobalModel.Update('invoice_data', patchUserPayload, 'invoiceId', invoiceId);
+    await Invoice.deleteInvoiceItem(invoiceId);
+    await Invoice.create(preparedItems);
+    if (result.affectedRows === 1) {
+        CatchHistory({ event: 'Update Invoice', functionName: 'UpdateInvoice', response: `Invoice record with id ${invoiceId} was updated by ${actor.userId}`, dateStarted: req.date, state: 1, requestStatus: 200, actor: actor.userId }, req);
+        return sendResponse(res, 1, 200, 'Record Updated')
+
+    } else {
+        CatchHistory({ event: 'Update Invoice', functionName: 'UpdateInvoice', response: `Error Updating Record with id ${invoiceId}`, dateStarted: req.date, state: 0, requestStatus: 200, actor: actor.userId }, req);
+        return sendResponse(res, 0, 200, 'Error Updating Record')
+    }
+
+})
