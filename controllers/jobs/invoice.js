@@ -60,3 +60,43 @@ exports.DeletInvoce = asynHandler(async (req, res, next) => {
 
     return sendResponse(res, 1, 200, 'Sorry no record found', [])
   });
+
+  exports.ViewSingleInvoice = asynHandler(async (req, res, next) => {
+    let actor = req.user.userInfo
+    let { invoiceId } = req.body
+  
+  
+  
+    // Define your dynamic query parameters
+    const tableName = 'invoice_data';
+    const columnsToSelect = []; // Replace with your desired columns
+  
+    // Define an array of conditions (each condition is an object with condition and value
+  
+    const conditions = [
+      { column: 'invoiceId', operator: '=', value: invoiceId }
+      // Add more conditions as needed
+    ];
+  
+  
+    let results = await GlobalModel.QueryDynamic(tableName, columnsToSelect, conditions);
+    if (!results) {
+        return sendResponse(res, 1, 200, 'Sorry no record found', [])
+    }
+  
+    let itemsData = []
+    const conditionsTwo = [
+      { column: 'invoiceId', operator: '=', value: invoiceId },
+      // Add more conditions as needed
+    ];
+    let optionsArray = await GlobalModel.QueryDynamicArray('invoice_items', [], conditionsTwo)
+    itemsData.push(optionsArray)
+
+    let questionsData = {
+      ...results,
+      itemsData
+    }
+
+    CatchHistory({ event: `user with id: ${actor.userId} viewed  invoice with id ${invoiceId}`, functionName: 'ViewSingleInvoice', response: `Record Found for invoice`, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
+    return sendResponse(res, 1, 200, 'Record Found', questionsData)
+  });
