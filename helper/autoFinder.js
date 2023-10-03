@@ -1,7 +1,6 @@
-const uuidV4 = require('uuid');
 const GlobalModel = require("../models/Global");
 const QuestionModel = require("../models/Questions");
-const { sendResponse, CatchHistory } = require('./utilfunc');
+const InvoiceModel = require("../models/Invoice");
 module.exports = {
 
   autoFindLinkage: async (questionPayload) => {
@@ -10,8 +9,20 @@ module.exports = {
     if (!linkedResult) {
       let results = await GlobalModel.Create('job_linked_question', { jobId: questionPayload.jobId, questionId: questionPayload.questionId });
     }
+    
 
 
+  },
+  generateInvoiceNumber: async () => {
+
+    let count = await InvoiceModel.countInvoice();
+      // Calculate the number of zeros needed for padding
+      const maxCounterValue = 10000000; // Adjust as needed
+      const zeroPadding = Math.max(String(maxCounterValue).length - String(count.counter == 0 ? 1: count.counter).length, 0);
+  
+      // Format the invoice number with leading zeros
+      const invoiceNumber = `INV-${'0'.repeat(zeroPadding)}${count.counter == 0 ? 1: count.counter}`;
+      return invoiceNumber;
   },
   autoFindQuestionsWithJobId: async (jobId) => {
     let arrObject = []

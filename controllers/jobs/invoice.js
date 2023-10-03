@@ -6,6 +6,7 @@ const GlobalModel = require("../../models/Global");
 const Invoice = require("../../models/Invoice");
 const { sendResponse, CatchHistory } = require("../../helper/utilfunc");
 const { prePareLocations, invoiceCalc } = require('../../helper/func');
+const { generateInvoiceNumber } = require('../../helper/autoFinder');
 exports.CreateInvoice = asynHandler(async (req, res, next) => {
     let payload = req.body;
     let actor = req.user.userInfo
@@ -17,6 +18,7 @@ exports.CreateInvoice = asynHandler(async (req, res, next) => {
     payload.grandTotal = grandTotal
     payload.createdById = actor?.userId
     payload.itemsData = JSON.stringify(itemsData)
+    payload.counter = await generateInvoiceNumber();
 
 
     let results = await GlobalModel.Create('invoice_data', payload);
@@ -129,3 +131,29 @@ exports.UpdateInvoice = asynHandler(async (req, res, next) => {
     }
 
 })
+exports.ViewMyUnpaidInvoice = asynHandler(async (req, res, next) => {
+    let actor = req.user.userInfo
+
+
+
+    // Define your dynamic query parameters
+    const tableName = 'invoice_data';
+    const columnsToSelect = []; // Replace with your desired columns
+
+    // Define an array of conditions (each condition is an object with condition and value
+    const conditions = [
+        { column: 'companyId', operator: '=', value:actor?.company?.companyId },
+        { column: 'invoiceStatus', operator: '=', value: 'un-paid' }
+        // Add more conditions as needed
+    ];
+
+
+    let results = await GlobalModel.QueryDynamicArray(tableName, columnsToSelect, conditions);
+    if (results.length == 0) {
+        return sendResponse(res, 1, 200, 'Sorry no record found', [])
+    }
+
+
+    CatchHistory({ event: `user with id: ${actor.userId} viewed  invoice unpaid invoice`, functionName: 'ViewMyUnpaidInvoice', response: ` ${results.length} record Found`, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
+    return sendResponse(res, 1, 200, 'Record Found', results)
+});

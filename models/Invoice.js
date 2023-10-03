@@ -26,6 +26,17 @@ jobsdb.deleteInvoiceData = (postData) => {
         });
     });
 };
+jobsdb.countInvoice = (postData) => {
+    return new Promise((resolve, reject) => {
+        pool.query('SELECT COUNT(id) AS counter FROM invoice_data', [postData], (err, results) => {
+            if (err) {
+                return reject(err);
+            }
+
+            return resolve(results[0]);
+        });
+    });
+};
 jobsdb.deleteInvoiceItem = (postData) => {
     return new Promise((resolve, reject) => {
         pool.query('DELETE FROM invoice_items WHERE invoiceId = ?', [postData], (err, results) => {

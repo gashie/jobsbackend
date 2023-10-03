@@ -13,7 +13,7 @@ const { protect } = require("../middleware/protect");
 const { checkBaseId, checkOriginatorBaseId, checkUserMenuBaseId } = require("../middleware/rolemenu");
 const { SetupRoleMenu, AllRoleMenu, SingleRoleMenu, RemoveRoleMenu, UpdateRoleMenu, AllMenus, DeleteRoleMenu } = require("../controllers/user/rolemenu");
 const { checkDuplicateaccount } = require("../middleware/duplicate");
-const { verifyAccountActivate, verifyAccountReactivate, verifyResetAccount, verifyAccountReset, verifyUser, findBanner, findJob, findResume, findSettings, findAppSettings, findFeedBedoreApprove, findRateCardBedoreApprove, findCourseBedoreApprove, findCourse, findFeed, findCourseContent, findCoursePartnerships, findRate, findBeforePay, findJobBeforeApply, findApplicationBeforeApprove } = require("../middleware/verify");
+const { verifyAccountActivate, verifyAccountReactivate, verifyResetAccount, verifyAccountReset, verifyUser, findBanner, findJob, findResume, findSettings, findAppSettings, findFeedBedoreApprove, findRateCardBedoreApprove, findCourseBedoreApprove, findCourse, findFeed, findCourseContent, findCoursePartnerships, findRate, findBeforePay, findJobBeforeApply, findApplicationBeforeApprove, findInvoiceBeforePaying } = require("../middleware/verify");
 const { CreateSkills, ViewSkills, ViewMySkills, UpdateSkills } = require("../controllers/jobs/skills");
 const { CreateJobCategory, ViewJobCategory, UpdateJobCategory } = require("../controllers/jobs/jobcategory");
 const { CreateQuestionnaire, CreateBulkQuestionnaire, LinkQuestionnaire, DeleteLinkage,ViewMyQuestionnaire,AdminViewQuestionnaire,ViewJointQuestionnaire, ViewMySingleQuestionnaire, UpdateQuestionnaire, DeleteMySingleQuestionnaire} = require("../controllers/jobs/questionnaire");
@@ -49,14 +49,14 @@ const { CreateSystemSettings, UpdateSystemSettings } = require("../controllers/a
  */
 
 
-const { GeneralPayment,VerifyPayment, PaystackViewTransactionTotal, ViewTransactionTotal, ViewEmployerTransactionTotal } = require("../controllers/jobs/pay");
+const { GeneralPayment,VerifyPayment, PaystackViewTransactionTotal, ViewTransactionTotal, ViewEmployerTransactionTotal, InvoicePayment } = require("../controllers/jobs/pay");
 const { UpdateLogoSettings } = require("../controllers/admin/logo_settings");
 const { UpdateProfileImageSettings,UpdateUserDataWithImage } = require("../controllers/admin/profileimage_settings");
 const { ViewMyAppliedJobs } = require("../controllers/jobs/applications");
 const { CreateServiceEnquiry, ViewServiceEnquiry } = require("../controllers/admin/services_enquiry");
 const { Utilities } = require("../controllers/admin/utilities");
 const { ViewMyProfile } = require("../controllers/jobseeker/profile");
-const { CreateInvoice,DeletInvoce, ViewSingleInvoice, UpdateInvoice } = require("../controllers/jobs/invoice");
+const { CreateInvoice,DeletInvoce, ViewSingleInvoice, UpdateInvoice, ViewMyUnpaidInvoice } = require("../controllers/jobs/invoice");
 
 
 //user account
@@ -234,7 +234,9 @@ router.route("/employer/transactionhistory").post(protect,ViewEmployerTransactio
 router.route("/createinvoice").post(protect,CreateInvoice);
 router.route("/deleteinvoice").post(protect,DeletInvoce);
 router.route("/viewinvoicedetails").post(protect,ViewSingleInvoice);
+router.route("/viewmyunpaid").post(protect,ViewMyUnpaidInvoice);
 router.route("/updateinvoice").post(protect,UpdateInvoice);
+router.route("/payinvoice").post(protect,findInvoiceBeforePaying,InvoicePayment);
 
 //manage frontend
 router.route("/services").post(CreateServiceEnquiry);

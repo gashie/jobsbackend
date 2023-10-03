@@ -64,6 +64,61 @@ exports.GeneralPayment = asynHandler(async (req, res, next) => {
     }
 
 })
+exports.InvoicePayment = asynHandler(async (req, res, next) => {
+    const { invoiceId } = req.body;
+    let actor = req.user.userInfo
+    let invoice = req.invoice
+
+    /**
+    * Check if user has no questions and want to pay now.
+    * @param {string} invoiceId - The API endpoint URL.
+    */
+
+    const apiHeaders = {
+        // Add any other headers as needed
+        Authorization: `Bearer ${process.env.public_Secret_Key}`
+    };
+
+    // Example JSON request data
+    const jsonRequestData = {
+        email: actor.email,
+        amount: invoice?.grandTotal * 100,
+    };
+
+    // Call the function with either JSON or FormData
+    const jsonResponseData = await makeApiCall(`${process.env.paystackUrl}transaction/initialize`, 'POST', apiHeaders, jsonRequestData);
+
+    if (jsonResponseData && !jsonResponseData?.status) {
+        return sendResponse(res, 0, 200, jsonResponseData?.message, [])
+    }
+
+    let paymentPayload = {
+        invoiceId,
+        courseId:invoice?.courseId,
+        invoiceCounter:invoice?.counter,
+        paymentId: uuidV4.v4(),
+        transactionFor:invoice?.invoiceFor,
+        paymentDescription:invoice?.otherInformation,
+        jobId:invoice?.jobId,
+        isInvoice: true,
+        paidById: actor.id,
+        reference: jsonResponseData?.data?.reference,
+        accessCode: jsonResponseData?.data?.access_code,
+        payStackInitialise: JSON.stringify(jsonResponseData?.data),
+        amount: invoice?.grandTotal
+    }
+
+    let results = await GlobalModel.Create('payment_transaction', paymentPayload);
+    if (results.affectedRows === 1) {
+        CatchHistory({ event: 'General payment for transaction', functionName: 'GeneralPayment', response: `Invoice with id ${invoiceId} was paid by ${actor.userId}`, dateStarted: req.date, state: 1, requestStatus: 200, actor: actor.userId }, req);
+        return sendResponse(res, 1, 200, 'Record Updated', jsonResponseData?.data)
+
+    } else {
+        CatchHistory({ event: 'General payment for transaction', functionName: 'GeneralPayment', response: `Error making payment for invoice with id ${invoiceId}`, dateStarted: req.date, state: 0, requestStatus: 200, actor: actor.userId }, req);
+        return sendResponse(res, 0, 200, 'Error Updating Record')
+    }
+
+})
 exports.VerifyPayment = asynHandler(async (req, res, next) => {
     const { reference } = req.body;
     let actor = req.user.userInfo

@@ -488,3 +488,34 @@ exports.findJobBeforeApply = asynHandler(async (req, res, next) => {
 
 
 });
+
+exports.findInvoiceBeforePaying = asynHandler(async (req, res, next) => {
+  let actor = req.user.userInfo
+  let { invoiceId } = req.body
+
+
+  // Define your dynamic query parameters
+  const tableNameOne = 'invoice_data';
+  const columnsToSelectOne = []; // Replace with your desired columns
+
+  // Define an array of conditions (each condition is an object with condition and value
+
+  const conditionOne = [
+    { column: 'invoiceId', operator: '=', value: invoiceId },
+    { column: 'invoiceStatus', operator: '=', value: 'un-paid' }
+    // Add more conditions as needed
+  ];
+
+  let objectExist = await GlobalModel.QueryDynamic(tableNameOne, columnsToSelectOne, conditionOne)
+
+  if (!objectExist) {
+    CatchHistory({ event: `user with id: ${actor.userId} tried paying for invoice with id ${invoiceId}`, functionName: 'findInvoiceBeforePaying', response: `No Record Found for ${invoiceId}`, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
+    return sendResponse(res, 0, 200, 'No Record Found')
+  }
+
+  req.date = systemDate
+  req.invoice = objectExist
+  return next();
+
+
+});

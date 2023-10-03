@@ -321,3 +321,4 @@ const tax = 0;      // 2% tax
 const result = calculateGrandTotal(itemsData, discount, tax);
 
 console.log(result);
+
