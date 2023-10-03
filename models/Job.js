@@ -258,4 +258,29 @@ jobsdb.JobSeekerViewJobApplicants = (userId) => {
         });
     });
 };
+
+jobsdb.ViewJob = (jobId) => {
+    return new Promise((resolve, reject) => {
+        pool.query(`
+        SELECT * FROM job_info WHERE jobId = ?`, [jobId], (err, results) => {
+            if (err) {
+                return reject(err);
+            }
+
+            return resolve(results);
+        });
+    });
+};
+jobsdb.ViewJobByUserId = (jobId,userId) => {
+    return new Promise((resolve, reject) => {
+        pool.query(`
+        SELECT * FROM job_info WHERE jobId = ? AND createdById = ?`, [jobId,userId], (err, results) => {
+            if (err) {
+                return reject(err);
+            }
+
+            return resolve(results);
+        });
+    });
+};
 module.exports = jobsdb;

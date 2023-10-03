@@ -48,27 +48,34 @@ module.exports = {
     let sqlValues = arrayObj.map(obj => Object.values(obj));
     return sqlValues
   },
-  spreadLocations(jobLocation){
+  prePareInvoiceItems(ItemsData, invoiceId) {
+    let arrayObj = ItemsData.map(item => {
+      return { invoiceId, ...item };
+    });
+    let sqlValues = arrayObj.map(obj => Object.values(obj));
+    return sqlValues
+  },
+  spreadLocations(jobLocation) {
     return jobLocation.map((item) => { return item.locationName }).join(',')
   },
-  scoring(questions, userAnswers){
+  scoring(questions, userAnswers) {
     {
       const Scoreresults = [];
-    
+
       let totalCorrect = 0; // Initialize the total number of correct answers.
       let totalQuestions = 0; // Initialize the total number of questions.
-    
+
       for (const userAnswer of userAnswers) {
         const question = questions.find(q => q.questionId === userAnswer.questionId);
-    
+
         if (!question) {
           // Handle the case where the question ID is not found in the questions data.
           Scoreresults.push({ questionId: userAnswer.questionId, result: 'Question not found' });
           continue;
         }
-    
+
         let isCorrect = false;
-    
+
         if (question.questionType === 'yesno') {
           // For 'yesno' questions, compare user's answer to the benchmark.
           isCorrect = userAnswer.ans === question.benchMark;
@@ -91,25 +98,46 @@ module.exports = {
           const minAge = Number(question.minimumValue);
           const maxAge = Number(question.maximumValue);
           isCorrect = userAge >= minAge && userAge <= maxAge || userAge === question.benchMark;
-    
+
         }
-    
+
         if (isCorrect) {
           totalCorrect++; // Increment the total correct count.
         }
         totalQuestions++; // Increment the total questions count.
-    
+
         Scoreresults.push({
           questionId: userAnswer.questionId,
           result: isCorrect ? 'Correct' : 'Incorrect'
         });
       }
-    
+
       const overallScore = (totalCorrect / totalQuestions) * 100; // Calculate overall score.
-    
+
       return { Scoreresults, overallScore };
     }
+  },
+  invoiceCalc(itemsData, discount, tax) {
+    let totalSum = 0;
+
+    // Calculate itemAmount for each item and accumulate the total sum
+    for (const item of itemsData) {
+      item.itemAmount = item.itemUnitCost * item.itemQuantity;
+      totalSum += item.itemAmount;
+    }
+
+    // Apply discount and tax
+    const discountedTotal = totalSum - (totalSum * (discount / 100));
+    const grandTotal = discountedTotal + (discountedTotal * (tax / 100));
+
+    return {
+      itemsData,
+      totalSum,
+      discount,
+      tax,
+      grandTotal,
+    };
   }
-  
+
 
 };

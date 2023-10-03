@@ -20,7 +20,7 @@ const { CreateQuestionnaire, CreateBulkQuestionnaire, LinkQuestionnaire, DeleteL
 
 const { CreateJobStatus, UpdateJobStatus, ViewJobStatus } = require("../controllers/jobs/jobstatus");
 const { CreateIndustry, ViewIndustry, UpdateIndustry, ViewCompany } = require("../controllers/company/industry");
-const { CreateJobInfo, UpdateJobInfo, AdminApproveJobInfo, ViewMyJobs,ViewJobDetails, ViewJobsData, ApplyJob, ApproveJobApplication, ViewJobApplications, ViewMyJobApplications, ViewMyShortlistedJobApplicants, AdminListJobs } = require("../controllers/jobs/jobinfo");
+const { CreateJobInfo, UpdateJobInfo, AdminApproveJobInfo, ViewMyJobs,ViewJobDetails, ViewJobsData, ApplyJob, ApproveJobApplication, ViewJobApplications, ViewMyJobApplications, ViewMyShortlistedJobApplicants, AdminListJobs, AdminViewJobDetails ,EmoloyerViewJobDetails} = require("../controllers/jobs/jobinfo");
 
 const { CreateBanner, ViewBanners, UpdateBanner } = require("../controllers/admin/banner");
 const { CreateFeed,UpdateFeed,ViewFeeds } = require("../controllers/admin/feed");
@@ -56,6 +56,7 @@ const { ViewMyAppliedJobs } = require("../controllers/jobs/applications");
 const { CreateServiceEnquiry, ViewServiceEnquiry } = require("../controllers/admin/services_enquiry");
 const { Utilities } = require("../controllers/admin/utilities");
 const { ViewMyProfile } = require("../controllers/jobseeker/profile");
+const { CreateInvoice,DeletInvoce } = require("../controllers/jobs/invoice");
 
 
 //user account
@@ -147,6 +148,9 @@ router.route("/createresume").post(protect, CreateResume);
 router.route("/updateresume").post(protect, findResume, UpdateCv);
 router.route("/myresume").post(protect, ViewMyCv);
 router.route("/viewprofile").post(protect, ViewMyProfile);
+
+
+
 //manage coverletter
 router.route("/createcv").post(protect, CreateCoverLetter);
 router.route("/updatecv").post(protect, UpdateCoverLetter);
@@ -168,7 +172,8 @@ router.route("/public/jobdata").post(ViewJobsData);
 router.route("/apply").post(protect,findJobBeforeApply,ApplyJob);
 router.route("/approveapplication").post(protect,findApplicationBeforeApprove,ApproveJobApplication);
 router.route("/admin/viewapplications").post(protect,ViewJobApplications);
-router.route("/employer/viewmyapplications").post(protect,ViewMyJobApplications);
+router.route("/admin/viewjob").post(protect,AdminViewJobDetails);
+router.route("/employer/viewjob").post(protect,EmoloyerViewJobDetails);
 router.route("/employer/viewmyshortlisted").post(protect,findJob,ViewMyShortlistedJobApplicants);
 router.route("/jobseeker/viewmyappliedjobs").post(protect,ViewMyAppliedJobs);
 
@@ -224,6 +229,10 @@ router.route("/verifypayment").post(protect,VerifyPayment);
 router.route("/viewtransactiontotal").post(protect,PaystackViewTransactionTotal);
 router.route("/transactionhistory").post(protect,ViewTransactionTotal);
 router.route("/employer/transactionhistory").post(protect,ViewEmployerTransactionTotal);
+
+//manage invoice
+router.route("/createinvoice").post(protect,CreateInvoice);
+router.route("/deleteinvoice").post(protect,DeletInvoce);
 
 //manage frontend
 router.route("/services").post(CreateServiceEnquiry);
