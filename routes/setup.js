@@ -57,6 +57,8 @@ const { CreateServiceEnquiry, ViewServiceEnquiry } = require("../controllers/adm
 const { Utilities } = require("../controllers/admin/utilities");
 const { ViewMyProfile } = require("../controllers/jobseeker/profile");
 const { CreateInvoice,DeletInvoce, ViewSingleInvoice, UpdateInvoice, ViewMyUnpaidInvoice, AdminViewInvoices } = require("../controllers/jobs/invoice");
+const { FrontendListJobs, FrontendFindJob } = require("../controllers/frontend/jobs");
+const { FrontendListCategories, FrontendListIndustries, FrontendListLocations, FrontendListCourses, FrontendFindCourses } = require("../controllers/frontend/utilities");
 
 
 //user account
@@ -242,6 +244,13 @@ router.route("/payinvoice").post(protect,findInvoiceBeforePaying,InvoicePayment)
 //manage frontend
 router.route("/services").post(CreateServiceEnquiry);
 router.route("/viewservices").post(protect,ViewServiceEnquiry);
+router.route("/listjobs").post(protect,FrontendListJobs);
+router.route("/findjob").post(protect,FrontendFindJob);
+router.route("/findlocations").post(protect,FrontendListLocations);
+router.route("/findindustries").post(protect,FrontendListIndustries);
+router.route("/findcategories").post(protect,FrontendListCategories);
+router.route("/listcourses").post(protect,FrontendListCourses);
+router.route("/findcourse").post(protect,FrontendFindCourses);
 
 //manage dashboard
 router.route("/utilities").post(protect,Utilities);

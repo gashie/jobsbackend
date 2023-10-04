@@ -185,6 +185,74 @@ AND job_info.jobState = ?
         });
     });
 };
+jobsdb.PublicFindJob = (jobId) => {
+    return new Promise((resolve, reject) => {
+        pool.query(`
+        SELECT 
+    job_info.jobId, 
+    job_info.jobTitle, 
+    job_info.jobLocation, 
+    job_info.jobDescription, 
+    job_info.jobStatus, 
+    job_info.jobSkills, 
+    job_info.goLiveDate,
+    company.companyName, 
+    company.companyLogo, 
+    job_category.jobCategoryName, 
+    job_category.jobCategoryId,
+    industry.industryTitle 
+    FROM job_info 
+    JOIN company ON job_info.companyId = company.companyId 
+    JOIN job_category ON job_info.jobCategoryId = job_category.jobCategoryId 
+    JOIN industry ON company.industryId = industry.industryId
+    WHERE job_info.goLiveDate >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+    AND job_info.jobState = ?
+    AND  job_info.jobId = ?
+
+; 
+        `, ['approved', jobId], (err, results) => {
+            if (err) {
+                return reject(err);
+            }
+
+            return resolve(results[0]);
+        });
+    });
+};
+jobsdb.PublicFindJobByCategory = (jobCategoryId) => {
+    return new Promise((resolve, reject) => {
+        pool.query(`
+        SELECT 
+    job_info.jobId, 
+    job_info.jobTitle, 
+    job_info.jobLocation, 
+    job_info.jobDescription, 
+    job_info.jobStatus, 
+    job_info.jobSkills, 
+    job_info.goLiveDate,
+    company.companyName, 
+    company.companyLogo, 
+    job_category.jobCategoryName, 
+    job_category.jobCategoryId,
+    industry.industryTitle 
+    FROM job_info 
+    JOIN company ON job_info.companyId = company.companyId 
+    JOIN job_category ON job_info.jobCategoryId = job_category.jobCategoryId 
+    JOIN industry ON company.industryId = industry.industryId
+    WHERE job_info.goLiveDate >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+    AND job_info.jobState = ?
+    AND  job_info.jobCategoryId = ?
+
+; 
+        `, ['approved', jobCategoryId], (err, results) => {
+            if (err) {
+                return reject(err);
+            }
+
+            return resolve(results);
+        });
+    });
+};
 jobsdb.ListJobs = () => {
     return new Promise((resolve, reject) => {
         pool.query(`
@@ -282,10 +350,10 @@ jobsdb.ViewJob = (jobId) => {
         });
     });
 };
-jobsdb.ViewJobByUserId = (jobId,userId) => {
+jobsdb.ViewJobByUserId = (jobId, userId) => {
     return new Promise((resolve, reject) => {
         pool.query(`
-        SELECT * FROM job_info WHERE jobId = ? AND createdById = ?`, [jobId,userId], (err, results) => {
+        SELECT * FROM job_info WHERE jobId = ? AND createdById = ?`, [jobId, userId], (err, results) => {
             if (err) {
                 return reject(err);
             }

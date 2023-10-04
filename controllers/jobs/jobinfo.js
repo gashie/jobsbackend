@@ -121,7 +121,7 @@ exports.AdminApproveJobInfo = asynHandler(async (req, res, next) => {
   let result = await GlobalModel.Update('job_info', patchUserPayload, 'jobId', jobId);
 
   if (result.affectedRows === 1) {
-    CatchHistory({ event: 'Approve Job Info', functionName: 'AdminApproveJobInfo', response: `Job Info record with id ${jobId} was approved by ${actor.userId}`, dateStarted: req.date, state: 1, requestStatus: 200, actor: actor.userId }, req);
+    CatchHistory({ event: 'Approve Job Info', functionName: 'AdminApproveJobInfo', response: `Job Info record with id ${jobId} was ${jobState} by ${actor.userId}`, dateStarted: req.date, state: 1, requestStatus: 200, actor: actor.userId }, req);
     return sendResponse(res, 1, 200, 'Record Updated')
 
   } else {

@@ -163,7 +163,7 @@ exports.CreateBulkQuestionnaire = asynHandler(async (req, res, next) => {
   if (isDone) {
     GlobalModel.Update('job_info', { hasQuestions: true }, 'jobsId', jobId);
 
-    return sendResponse(res, 1, 200, "Saved successfully", { jobId: payload.jobId })
+    return sendResponse(res, 1, 200, "Saved successfully", { jobId: jobId })
   }
 
 
