@@ -13,7 +13,7 @@ const { protect } = require("../middleware/protect");
 const { checkBaseId, checkOriginatorBaseId, checkUserMenuBaseId } = require("../middleware/rolemenu");
 const { SetupRoleMenu, AllRoleMenu, SingleRoleMenu, RemoveRoleMenu, UpdateRoleMenu, AllMenus, DeleteRoleMenu } = require("../controllers/user/rolemenu");
 const { checkDuplicateaccount } = require("../middleware/duplicate");
-const { verifyAccountActivate, verifyAccountReactivate, verifyResetAccount, verifyAccountReset, verifyUser, findBanner, findJob, findResume, findSettings, findAppSettings, findFeedBedoreApprove, findRateCardBedoreApprove, findCourseBedoreApprove, findCourse, findFeed, findCourseContent, findCoursePartnerships, findRate, findBeforePay, findJobBeforeApply, findApplicationBeforeApprove, findInvoiceBeforePaying } = require("../middleware/verify");
+const { verifyAccountActivate, verifyAccountReactivate, verifyResetAccount, verifyAccountReset, verifyUser, findBanner, findJob, findResume, findSettings, findAppSettings, findFeedBedoreApprove, findRateCardBedoreApprove, findCourseBedoreApprove, findCourse, findFeed, findCourseContent, findCoursePartnerships, findRate, findBeforePay, findJobBeforeApply, findApplicationBeforeApprove, findInvoiceBeforePaying, findSavedJob } = require("../middleware/verify");
 const { CreateSkills, ViewSkills, ViewMySkills, UpdateSkills } = require("../controllers/jobs/skills");
 const { CreateJobCategory, ViewJobCategory, UpdateJobCategory } = require("../controllers/jobs/jobcategory");
 const { CreateQuestionnaire, CreateBulkQuestionnaire, LinkQuestionnaire, DeleteLinkage,ViewMyQuestionnaire,AdminViewQuestionnaire,ViewJointQuestionnaire, ViewMySingleQuestionnaire, UpdateQuestionnaire, DeleteMySingleQuestionnaire} = require("../controllers/jobs/questionnaire");
@@ -164,7 +164,7 @@ router.route("/myjobalert").post(protect, ViewMyJobAlert);
 
 
 //manage job
-router.route("/savejob").post(protect, SaveJob);
+router.route("/savejob").post(protect,findSavedJob, SaveJob);
 router.route("/updatesavedjob").post(protect, UpdateSavedJob);
 router.route("/mysavedjobs").post(protect, ViewMySavedJobs);
 router.route("/jobdetails").post(protect, ViewJobDetails);

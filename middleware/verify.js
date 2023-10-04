@@ -519,3 +519,32 @@ exports.findInvoiceBeforePaying = asynHandler(async (req, res, next) => {
 
 
 });
+exports.findSavedJob = asynHandler(async (req, res, next) => {
+  let actor = req.user.userInfo
+  let { jobId } = req.body
+
+
+  // Define your dynamic query parameters
+  const tableNameOne = 'saved_jobs';
+  const columnsToSelectOne = []; // Replace with your desired columns
+
+  // Define an array of conditions (each condition is an object with condition and value
+
+  const conditionOne = [
+    { column: 'jobId', operator: '=', value: jobId },
+    { column: 'userId', operator: '=', value: actor?.userId }
+    // Add more conditions as needed
+  ];
+
+  let objectExist = await GlobalModel.QueryDynamic(tableNameOne, columnsToSelectOne, conditionOne)
+
+  if (objectExist) {
+    CatchHistory({ event: `user with id: ${actor.userId} tried saving an already existing job with id ${jobId}`, functionName: 'findSavedJob', response: ` Record Found for ${jobId}`, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
+    return sendResponse(res, 0, 200, 'Sorry, this job has already been saved')
+  }
+
+  req.date = systemDate
+  return next();
+
+
+});
