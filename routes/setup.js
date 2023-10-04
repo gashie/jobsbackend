@@ -56,7 +56,7 @@ const { ViewMyAppliedJobs } = require("../controllers/jobs/applications");
 const { CreateServiceEnquiry, ViewServiceEnquiry } = require("../controllers/admin/services_enquiry");
 const { Utilities } = require("../controllers/admin/utilities");
 const { ViewMyProfile } = require("../controllers/jobseeker/profile");
-const { CreateInvoice,DeletInvoce, ViewSingleInvoice, UpdateInvoice, ViewMyUnpaidInvoice } = require("../controllers/jobs/invoice");
+const { CreateInvoice,DeletInvoce, ViewSingleInvoice, UpdateInvoice, ViewMyUnpaidInvoice, AdminViewInvoices } = require("../controllers/jobs/invoice");
 
 
 //user account
@@ -234,6 +234,7 @@ router.route("/employer/transactionhistory").post(protect,ViewEmployerTransactio
 router.route("/createinvoice").post(protect,CreateInvoice);
 router.route("/deleteinvoice").post(protect,DeletInvoce);
 router.route("/viewinvoicedetails").post(protect,ViewSingleInvoice);
+router.route("/admin/viewinvoices").post(protect,AdminViewInvoices);
 router.route("/viewmyunpaid").post(protect,ViewMyUnpaidInvoice);
 router.route("/updateinvoice").post(protect,UpdateInvoice);
 router.route("/payinvoice").post(protect,findInvoiceBeforePaying,InvoicePayment);
