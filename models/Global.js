@@ -54,6 +54,17 @@ jobsdb.Findall = (table) => {
     });
   });
 };
+jobsdb.FindallArray = (table) => {
+  return new Promise((resolve, reject) => {
+    const sql = "SELECT * FROM ?? ";
+    pool.query(sql, [table], function (error, results, fields) {
+      if (error) {
+        return reject(error);
+      }
+      return resolve(results);
+    });
+  });
+};
 jobsdb.QueryDynamic = (tableName, columnsToSelect, conditions) => {
   return new Promise((resolve, reject) => {
     // Build the dynamic SQL query with the dynamic conditions
