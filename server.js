@@ -1,6 +1,8 @@
+const path = require("path");
+const https = require("https");
+const fs = require("fs");
 const express = require("express");
 const helmet = require("helmet");
-const path = require("path")
 const xss = require("xss-clean");
 const fileupload = require("express-fileupload");
 const dotenv = require("dotenv");
@@ -14,6 +16,10 @@ dotenv.config({ path: "./config/config.env" });
 //initialise express
 const app = express();
 
+const ssslServer = https.createServer({
+    key: fs.readFileSync(path.join(__dirname, 'cert','key.pem')),
+    cert:fs.readFileSync(path.join(__dirname, 'cert','cert.pem')),
+},app)
 //body parser
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -81,7 +87,7 @@ app.use((error, req, res, next) => {
 //create port
 const PORT = process.env.PORT || 9000;
 //listen to portnpm
-app.listen(PORT, () => {
+ssslServer.listen(PORT, () => {
     console.log(
         `JOBSINGH: Running in ${process.env.NODE_ENV} mode and listening on port http://:${PORT}`
     );
