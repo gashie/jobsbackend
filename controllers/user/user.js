@@ -22,32 +22,34 @@ exports.CreateUser = asynHandler(async (req, res, next) => {
   payload.password = await bcyrpt.hash(payload.password, salt);
   payload.resetToken = await bcyrpt.hash(rawResetToken, salt);
   payload.resetPeriod = req.date
-  console.log(rawResetToken);
+  console.log(req?.files);
   //find company in db
   if (payload.userType === 'employer') {
     //find company
     let companyResult = await COMPANY.FindCompany(payload.companyName);
     if (companyResult) {
       //set user status to pending and respond
-      let userPayload = {
-        userId: uuidV4.v4(),
-        email: payload.email,
-        username: payload.username,
-        userType: payload.userType,
-        fullName: payload.fullName,
-        password: payload.password,
-        phone: payload.phone,
-        address: payload.address,
-        country: payload.country,
-        birthDate: payload.birthDate,
-        maritalStatus: payload.maritalStatus,
-        gender: payload.gender,
-        highestEducation: payload.highestEducation,
-        status: 0,
-        roleid: 3,
+      // let userPayload = {
+      //   userId: uuidV4.v4(),
+      //   email: payload.email,
+      //   username: payload.username,
+      //   userType: payload.userType,
+      //   fullName: payload.fullName,
+      //   password: payload.password,
+      //   phone: payload.phone,
+      //   address: payload.address,
+      //   country: payload.country,
+      //   birthDate: payload.birthDate,
+      //   maritalStatus: payload.maritalStatus,
+      //   gender: payload.gender,
+      //   highestEducation: payload.highestEducation,
+      //   status: 0,
+      //   roleid: 3,
 
-      }
-      return await autoSaveUser(userPayload, req, res, rawResetToken)
+      // }
+      // return await autoSaveUser(userPayload, req, res, rawResetToken)
+      return sendResponse(res, 0, 200, 'Sorry, this company already exist')
+
 
     } else {
       return autoSaveCompany(payload, req, res)

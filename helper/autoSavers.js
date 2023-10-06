@@ -8,12 +8,12 @@ const { SendEmailApi } = require('../sevices/comm');
 module.exports = {
   autoSaveCompany: async (payload, req, res, rawResetToken) => {
     let companyId = uuidV4.v4();
-    const appLogo = req.files.appLogo;
-    if (appLogo && !appLogo.mimetype.startsWith("image")) {
+    const appLogo = req?.files?.appLogo;
+    if (appLogo && !appLogo?.mimetype?.startsWith("image")) {
       return sendResponse(res, 0, 200, "Please make sure to upload an image", [])
 
   }
-  if (appLogo && appLogo.mimetype.startsWith("image")) {
+  if (appLogo && appLogo?.mimetype.startsWith("image")) {
 
       //change filename
       // removeFile('./uploads/images/logos/', oldsettings.appLogo)
@@ -40,7 +40,8 @@ module.exports = {
       facebook,
       linkedin,
       twitter,
-      companyLogo: appLogo.name,
+      createdByName:userId,
+      companyLogo: appLogo?.name,
     };
     let userPayload = {
       userId,
@@ -85,26 +86,28 @@ module.exports = {
 
   },
   autoSaveUser: async (payload, req, res, rawResetToken) => {
-    const myCv = req.files.myCv;
+    const myCv = req?.files?.myCv;
     let resumeId = uuidV4.v4()
 
-    if (!myCv.mimetype.startsWith("application/pdf")) {
+    if (myCv && !myCv.mimetype.startsWith("application/pdf")) {
       return sendResponse(res, 0, 200, "Please make sure to upload a pdf file", [])
 
     }
+    if (myCv && !myCv.mimetype.startsWith("application/pdf")) {
 
-    //change filename
-    myCv.name = `resumeId_id_${resumeId}_md_${myCv.md5}_${path.parse(myCv.name).ext}`;
-    myCv.mv(`./uploads/pdf/resume/${myCv.name}`, async (err) => {
-      if (err) {
-        console.log(err);
-        return sendResponse(res, 0, 200, "Problem with file upload", [])
-      }
-    });
+      //change filename
+      myCv.name = `resumeId_id_${resumeId}_md_${myCv?.md5}_${path.parse(myCv?.name).ext}`;
+      myCv.mv(`./uploads/pdf/resume/${myCv.name}`, async (err) => {
+        if (err) {
+          console.log(err);
+          return sendResponse(res, 0, 200, "Problem with file upload", [])
+        }
+      });
+    }
     let resumePayload = {
       resumeId: resumeId,
       userId: payload.userId,
-      fileName: myCv.name
+      fileName: myCv?.name
     }
     let results = await GlobalModel.Create('users', payload);
     if (results.affectedRows === 1) {
