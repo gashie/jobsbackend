@@ -59,6 +59,7 @@ const { ViewMyProfile } = require("../controllers/jobseeker/profile");
 const { CreateInvoice,DeletInvoce, ViewSingleInvoice, UpdateInvoice, ViewMyUnpaidInvoice, AdminViewInvoices } = require("../controllers/jobs/invoice");
 const { FrontendListJobs, FrontendFindJob } = require("../controllers/frontend/jobs");
 const { FrontendListCategories, FrontendListIndustries, FrontendListLocations, FrontendListCourses, FrontendFindCourses } = require("../controllers/frontend/utilities");
+const { Webhook } = require("../controllers/jobs/webhook");
 
 
 //user account
@@ -227,10 +228,12 @@ router.route("/viewpartnerships").post(protect, ViewCoursePartners);
 
 //manage course
 router.route("/pay").post(protect,findRate,findBeforePay, GeneralPayment);
+router.route("/webhook").post(Webhook);
 router.route("/verifypayment").post(protect,VerifyPayment);
 router.route("/viewtransactiontotal").post(protect,PaystackViewTransactionTotal);
 router.route("/transactionhistory").post(protect,ViewTransactionTotal);
 router.route("/employer/transactionhistory").post(protect,ViewEmployerTransactionTotal);
+
 
 //manage invoice
 router.route("/createinvoice").post(protect,CreateInvoice);
