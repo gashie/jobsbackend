@@ -334,17 +334,17 @@ exports.findApplicationBeforeApprove = asynHandler(async (req, res, next) => {
 });
 exports.RestrictApplication = asynHandler(async (req, res, next) => {
   let actor = req.user.userInfo
-  let { applicationId } = req.body
+  let { jobId } = req.body
   //check if resume table if file exist
   // Define your dynamic query parameters
   const tableName = 'job_application';
-  const columnsToSelect = ['applicationId', 'applicationStatus']; // Replace with your desired columns
+  const columnsToSelect = ['jobId', 'applicationStatus']; // Replace with your desired columns
 
   // Define an array of conditions (each condition is an object with condition and value
 
   const conditions = [
-    { column: 'applicationId', operator: '=', value: applicationId },
-    { column: 'applicationStatus', operator: '=', value: 'accepted' },
+    { column: 'jobId', operator: '=', value: jobId },
+    { column: 'userId', operator: '=', value: actor?.userId},
     // Add more conditions as needed
   ];
 
@@ -352,12 +352,12 @@ exports.RestrictApplication = asynHandler(async (req, res, next) => {
   let objectExist = await GlobalModel.QueryDynamic(tableName, columnsToSelect, conditions);
   //if resumeo exist
   if (objectExist) {
-    CatchHistory({ api_response: `Sorry, this application has already been accepted`, function_name: 'findApplicationBeforeApprove/middleware', date_started: systemDate, sql_action: "UPDATE", event: "Find application before approving", actor: actor.userId }, req)
-    return sendResponse(res, 0, 200, "Sorry, this application has already been accepted")
+    CatchHistory({ api_response: `Sorry, you have already applied for this job`, function_name: 'RestrictApplication/middleware', date_started: systemDate, sql_action: "UPDATE", event: "Restrict duplicate job application", actor: actor.userId }, req)
+    return sendResponse(res, 0, 200, "Sorry, you have already applied for this job")
 
   }
   req.date = systemDate
-  req.jobapplication = objectExist
+  req.existapplication = objectExist
   return next();
 });
 exports.findCourseBedoreApprove = asynHandler(async (req, res, next) => {
