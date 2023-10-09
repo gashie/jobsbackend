@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 //user account
-const { CreateUser, ActivateAccount, SendActivation, PasswordReset, GetAllUsers, UpdateUser,GoogleAuth,GoogleAuthFetchUser, AdminCreateUser, ReSendActivation } = require("../controllers/user/user")
+const { CreateUser, ActivateAccount, SendActivation, PasswordReset, GetAllUsers, UpdateUser,GoogleAuth,GoogleAuthFetchUser, AdminCreateUser, ReSendActivation, FetchUserDetails } = require("../controllers/user/user")
 
 //USER AUTH
 const {
@@ -89,6 +89,8 @@ router.route("/updaterolemenu")["post"](UpdateRoleMenu);
 router.route("/allusers").post(protect, FetchVariousUsers);
 router.route("/fetchemployers").post(protect, FetchEmployersUsers);
 router.route("/updateuser").post(protect, verifyUser, UpdateUser);
+router.route("/myprofile").post(protect, FetchUserDetails);
+
 
 
 //user login auth
@@ -177,6 +179,7 @@ router.route("/approveapplication").post(protect,findApplicationBeforeApprove,Ap
 router.route("/admin/viewapplications").post(protect,ViewJobApplications);
 router.route("/admin/viewjob").post(protect,AdminViewJobDetails);
 router.route("/employer/viewjob").post(protect,EmoloyerViewJobDetails);
+router.route("/viewmyapplications").post(protect,EmoloyerViewJobDetails);ViewMyJobApplications
 router.route("/employer/viewmyshortlisted").post(protect,findJob,ViewMyShortlistedJobApplicants);
 router.route("/jobseeker/viewmyappliedjobs").post(protect,ViewMyAppliedJobs);
 

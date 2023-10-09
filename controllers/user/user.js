@@ -329,3 +329,26 @@ exports.AdminCreateUser = asynHandler(async (req, res, next) => {
 
 
 })
+
+exports.FetchUserDetails = asynHandler(async (req, res, next) => {
+  let actor = req.user.userInfo
+ // Define your dynamic query parameters
+ const tableName = 'users';
+ const columnsToSelect = ['userId', 'fullName', 'username', 'email', 'phone', 'address','country','birthDate','maritalStatus','gender','highestEducation','profileImage']; // Replace with your desired columns
+
+ // Define an array of conditions (each condition is an object with condition and value
+ const conditions = [
+   { column: 'userId', operator: '=', value: actor?.userId },
+ // Add more conditions as needed, including different date columns
+   // Add more conditions as needed
+ ];
+
+
+ let results = await GlobalModel.QueryDynamic(tableName, columnsToSelect, conditions);
+ if (!results) {
+   return sendResponse(res, 0, 200, 'Sorry no record found', [])
+ }
+
+ return sendResponse(res, 1, 200, 'Record Found', results)
+
+});
