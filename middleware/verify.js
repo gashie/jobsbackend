@@ -332,6 +332,34 @@ exports.findApplicationBeforeApprove = asynHandler(async (req, res, next) => {
   req.jobapplication = objectExist
   return next();
 });
+exports.RestrictApplication = asynHandler(async (req, res, next) => {
+  let actor = req.user.userInfo
+  let { applicationId } = req.body
+  //check if resume table if file exist
+  // Define your dynamic query parameters
+  const tableName = 'job_application';
+  const columnsToSelect = ['applicationId', 'applicationStatus']; // Replace with your desired columns
+
+  // Define an array of conditions (each condition is an object with condition and value
+
+  const conditions = [
+    { column: 'applicationId', operator: '=', value: applicationId },
+    { column: 'applicationStatus', operator: '=', value: 'accepted' },
+    // Add more conditions as needed
+  ];
+
+
+  let objectExist = await GlobalModel.QueryDynamic(tableName, columnsToSelect, conditions);
+  //if resumeo exist
+  if (objectExist) {
+    CatchHistory({ api_response: `Sorry, this application has already been accepted`, function_name: 'findApplicationBeforeApprove/middleware', date_started: systemDate, sql_action: "UPDATE", event: "Find application before approving", actor: actor.userId }, req)
+    return sendResponse(res, 0, 200, "Sorry, this application has already been accepted")
+
+  }
+  req.date = systemDate
+  req.jobapplication = objectExist
+  return next();
+});
 exports.findCourseBedoreApprove = asynHandler(async (req, res, next) => {
   let actor = req.user.userInfo
   let { courseId } = req.body

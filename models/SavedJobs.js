@@ -8,7 +8,7 @@ jobsdb.FindMySavedJobs = (userId) => {
     return new Promise((resolve, reject) => {
         const sql = `
     SELECT
-        saved_jobs.savedJobsId,
+        saved.savedJobsId,
         jobs.jobId,
         jobs.jobTitle,
         jobs.createdAt,
