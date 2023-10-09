@@ -17,7 +17,9 @@ FROM
           job_info jobs
           INNER JOIN company company ON company.companyId  = jobs.companyId
           INNER JOIN saved_jobs saved ON saved.jobId = jobs.jobId
-          where saved.userId = ?`;
+          where saved.userId = ?
+          AND saved.deletedAt IS NULL
+          `;
         pool.query(sql, [userId], function (error, results, fields) {
             if (error) {
                 return reject(error);
