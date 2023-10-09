@@ -12,7 +12,8 @@ jobsdb.FindMySavedJobs = (userId) => {
         jobs.jobId,
         jobs.jobTitle,
         jobs.createdAt,
-        company.companyName
+        company.companyName,
+        company.companyLogo
 FROM
           job_info jobs
           INNER JOIN company company ON company.companyId  = jobs.companyId
