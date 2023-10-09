@@ -244,7 +244,7 @@ exports.GoogleAuth = asynHandler(async (req, res, next) => {
   res.header('Access-Control-Allow-Origin', 'http://loclahost:5050')
   res.header('Referrer-Policy', 'no-referrer-whendowngrade');
 
-  const redirectUrl = 'https://127.0.0.1:3000/oauth';
+  const redirectUrl = 'http://localhost:3000';
 
   const oAuth2Client = new OAuth2Client(
     process.env.GOOGLE_CLIENT_ID,

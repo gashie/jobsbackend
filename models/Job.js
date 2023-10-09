@@ -253,6 +253,76 @@ jobsdb.PublicFindJobByCategory = (jobCategoryId) => {
         });
     });
 };
+jobsdb.PublicFindJobByLocation = (locationName) => {
+    return new Promise((resolve, reject) => {
+        pool.query(`
+        SELECT 
+        job_info.jobId, 
+        job_info.jobTitle, 
+        job_info.jobLocation, 
+        job_info.jobDescription, 
+        job_info.jobStatus, 
+        job_info.jobSkills, 
+        job_info.goLiveDate,
+        company.companyName, 
+        company.companyLogo, 
+        job_category.jobCategoryName, 
+        job_category.jobCategoryId,
+        industry.industryTitle 
+        FROM job_info 
+        JOIN company ON job_info.companyId = company.companyId 
+        JOIN job_category ON job_info.jobCategoryId = job_category.jobCategoryId 
+        JOIN industry ON company.industryId = industry.industryId
+        INNER JOIN job_location ON job_info.jobId = job_location.jobId
+        WHERE job_info.goLiveDate >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+    AND job_info.jobState = ?
+    AND job_location.locationName = ?
+
+; 
+        `, ['approved', locationName], (err, results) => {
+            if (err) {
+                return reject(err);
+            }
+
+            return resolve(results);
+        });
+    });
+};
+jobsdb.PublicFindJobByIndustry = (industryId) => {
+    return new Promise((resolve, reject) => {
+        pool.query(`
+        SELECT 
+        job_info.jobId, 
+        job_info.jobTitle, 
+        job_info.jobLocation, 
+        job_info.jobDescription, 
+        job_info.jobStatus, 
+        job_info.jobSkills, 
+        job_info.goLiveDate,
+        company.companyName, 
+        company.companyLogo, 
+        job_category.jobCategoryName, 
+        job_category.jobCategoryId,
+        industry.industryTitle 
+        FROM job_info 
+        JOIN company ON job_info.companyId = company.companyId 
+        JOIN job_category ON job_info.jobCategoryId = job_category.jobCategoryId 
+        JOIN industry ON company.industryId = industry.industryId
+        INNER JOIN job_location ON job_info.jobId = job_location.jobId
+        WHERE job_info.goLiveDate >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+    AND job_info.jobState = ?
+    AND company.industryId = ?
+
+; 
+        `, ['approved', industryId], (err, results) => {
+            if (err) {
+                return reject(err);
+            }
+
+            return resolve(results);
+        });
+    });
+};
 jobsdb.ListJobs = () => {
     return new Promise((resolve, reject) => {
         pool.query(`

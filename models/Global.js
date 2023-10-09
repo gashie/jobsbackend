@@ -70,32 +70,39 @@ jobsdb.QueryDynamic = (tableName, columnsToSelect, conditions) => {
     // Build the dynamic SQL query with the dynamic conditions
     console.log('Columns to Select:', columnsToSelect);
     console.log('Conditions:', conditions);
-
+    
     // Build the dynamic SQL query with the dynamic conditions
-    // Build the dynamic SQL query with the dynamic conditions
-    const conditionClauses = conditions.map((conditionObj) =>
-      conditionObj.operator === 'IS NOT NULL'
-        ? `${conditionObj.column} IS NOT NULL`
-        : `${conditionObj.column} ${conditionObj.operator} ?`
+    const conditionClauses = conditions.map((conditionObj) => {
+      if (conditionObj.operator === 'IS NOT NULL') {
+        return `${conditionObj.column} IS NOT NULL`;
+      } else if (conditionObj.isDateColumn) {
+        // Handle date columns with MySQL functions
+        return `${conditionObj.column} >= ${conditionObj.value}`;
+      } else {
+        return `${conditionObj.column} ${conditionObj.operator} ?`;
+      }
+    });
+    const conditionValues = conditions.map((conditionObj) =>
+      conditionObj.isDateColumn ? undefined : conditionObj.value
     );
-    const conditionValues = conditions.filter((conditionObj) => conditionObj.operator !== 'IS NOT NULL').map((conditionObj) => conditionObj.value);
-
-
+    
     console.log('Condition Clauses:', conditionClauses);
     console.log('Condition Values:', conditionValues);
-
+    
     // Construct the SELECT clause based on whether columnsToSelect is empty
     const selectClause = columnsToSelect.length > 0 ? columnsToSelect.join(', ') : '*';
-
+    
     console.log('Select Clause:', selectClause);
-
+    
     const whereClause = conditionClauses.length > 0 ? `WHERE ${conditionClauses.join(' AND ')}` : '';
-
+    
     console.log('Where Clause:', whereClause);
-
+    
     const sql = `SELECT ${selectClause} FROM ${tableName} ${whereClause}`;
-
+    
     console.log('Final Query:', sql);
+    
+    // Now, you can use the "sql" query in your database operations
 
 
     pool.query(sql, conditionValues, function (error, results, fields) {
@@ -111,32 +118,40 @@ jobsdb.QueryDynamicArray = (tableName, columnsToSelect, conditions) => {
     // Build the dynamic SQL query with the dynamic conditions
     console.log('Columns to Select:', columnsToSelect);
     console.log('Conditions:', conditions);
-
+    
     // Build the dynamic SQL query with the dynamic conditions
-    // Build the dynamic SQL query with the dynamic conditions
-    const conditionClauses = conditions.map((conditionObj) =>
-      conditionObj.operator === 'IS NOT NULL'
-        ? `${conditionObj.column} IS NOT NULL`
-        : `${conditionObj.column} ${conditionObj.operator} ?`
+    const conditionClauses = conditions.map((conditionObj) => {
+      if (conditionObj.operator === 'IS NOT NULL') {
+        return `${conditionObj.column} IS NOT NULL`;
+      } else if (conditionObj.isDateColumn) {
+        // Handle date columns with MySQL functions
+        return `${conditionObj.column} >= ${conditionObj.value}`;
+      } else {
+        return `${conditionObj.column} ${conditionObj.operator} ?`;
+      }
+    });
+    const conditionValues = conditions.map((conditionObj) =>
+      conditionObj.isDateColumn ? undefined : conditionObj.value
     );
-    const conditionValues = conditions.filter((conditionObj) => conditionObj.operator !== 'IS NOT NULL').map((conditionObj) => conditionObj.value);
-
-
+    
     console.log('Condition Clauses:', conditionClauses);
     console.log('Condition Values:', conditionValues);
-
+    
     // Construct the SELECT clause based on whether columnsToSelect is empty
     const selectClause = columnsToSelect.length > 0 ? columnsToSelect.join(', ') : '*';
-
+    
     console.log('Select Clause:', selectClause);
-
+    
     const whereClause = conditionClauses.length > 0 ? `WHERE ${conditionClauses.join(' AND ')}` : '';
-
+    
     console.log('Where Clause:', whereClause);
-
+    
     const sql = `SELECT ${selectClause} FROM ${tableName} ${whereClause}`;
-
+    
     console.log('Final Query:', sql);
+    
+    // Now, you can use the "sql" query in your database operations
+    
 
 
     pool.query(sql, conditionValues, function (error, results, fields) {

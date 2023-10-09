@@ -94,14 +94,14 @@ exports.InvoicePayment = asynHandler(async (req, res, next) => {
 
     let paymentPayload = {
         invoiceId,
-        courseId:invoice?.courseId,
-        invoiceCounter:invoice?.counter,
+        courseId: invoice?.courseId,
+        invoiceCounter: invoice?.counter,
         paymentId: uuidV4.v4(),
-        transactionFor:invoice?.invoiceFor,
-        paymentDescription:invoice?.otherInformation,
-        jobId:invoice?.jobId,
+        transactionFor: invoice?.invoiceFor,
+        paymentDescription: invoice?.otherInformation,
+        jobId: invoice?.jobId,
         isInvoice: true,
-        paidById: actor.id,
+        paidById: actor.userId,
         reference: jsonResponseData?.data?.reference,
         accessCode: jsonResponseData?.data?.access_code,
         payStackInitialise: JSON.stringify(jsonResponseData?.data),
@@ -141,34 +141,45 @@ exports.VerifyPayment = asynHandler(async (req, res, next) => {
     if (jsonResponseData && !jsonResponseData?.status) {
         return sendResponse(res, 0, 200, jsonResponseData?.message, [])
     }
+
+    //find payment instructions
+    let findreference = await GlobalModel.Find('payment_transaction', 'reference', reference);
+    if (findreference && findreference.updatedAt !== null) {
+        res.send(jsonResponseData)
+    }
+
+    // res.send(jsonResponseData)
+
+
+    let paymentPayload = {
+        paystackStatus:jsonResponseData?.data?.status,
+        updatedAt:req.date,
+        updatedBy:actor.userId,
+        paymentStatus:jsonResponseData?.data?.status === 'success' ? 'paid':'unpaid',
+        paystackResponse:JSON.stringify(jsonResponseData?.data),
+        currency:jsonResponseData?.data?.currency,
+        channel:jsonResponseData?.data?.channel,
+        ipAddress:jsonResponseData?.data?.ip_address,
+        domain:jsonResponseData?.data?.domain,
+        gatewayResponse:jsonResponseData?.data?.gateway_response,
+        receivedAt:jsonResponseData?.data?.paid_at,
+    }
+
+
+    if (findreference?.transactionFor === 'job') { //update payment and update invoice, and update job
+      await GlobalModel.Update('payment_transaction', paymentPayload, 'reference', reference);
+      await GlobalModel.Update('job_info', {paidStatus:paymentPayload.paymentStatus}, 'jobId', findreference?.jobId);
+      res.send(jsonResponseData)
+    }
+    if (findreference?.transactionFor === 'course') { //update payment and update invoice, and update job
+        await GlobalModel.Update('payment_transaction', paymentPayload, 'reference', reference);
+        await GlobalModel.Update('course', {paidStatus:paymentPayload.paymentStatus}, 'courseId', findreference?.courseId);
+        res.send(jsonResponseData)
+    }
+
     res.send(jsonResponseData)
 
 
-    // let paymentPayload = {
-    //     courseId,
-    //     rateId,
-    //     paymentId: uuidV4.v4(),
-    //     transactionFor,
-    //     paymentDescription,
-    //     jobId,
-    //     isManual: false,
-    //     paidById: actor.id,
-    //     reference: jsonResponseData?.data?.reference,
-    //     accessCode: jsonResponseData?.data?.access_code,
-    //     payStackInitialise: JSON.stringify(jsonResponseData?.data),
-    //     rateAmount: mainrate.ratePrice,
-    //     amount: mainrate.ratePrice
-    // }
-
-    // let results = await GlobalModel.Create('payment_transaction', paymentPayload);
-    // if (results.affectedRows === 1) {
-    //     CatchHistory({ event: 'General payment for transaction', functionName: 'GeneralPayment', response: `Job Info record with id ${jobId} was approved by ${actor.userId}`, dateStarted: req.date, state: 1, requestStatus: 200, actor: actor.userId }, req);
-    //     return sendResponse(res, 1, 200, 'Record Updated',jsonResponseData?.data)
-
-    // } else {
-    //     CatchHistory({ event: 'General payment for transaction', functionName: 'GeneralPayment', response: `Error Updating Record with id ${jobId}`, dateStarted: req.date, state: 0, requestStatus: 200, actor: actor.userId }, req);
-    //     return sendResponse(res, 0, 200, 'Error Updating Record')
-    // }
 
 })
 
@@ -224,7 +235,7 @@ exports.ViewEmployerTransactionTotal = asynHandler(async (req, res, next) => {
     let { transactionFor } = req.body
     let actor = req.user.userInfo
 
-    let results = await EmployerTransactionHistory(transactionFor,actor?.company?.companyId);
+    let results = await EmployerTransactionHistory(transactionFor, actor?.company?.companyId);
     if (results.length == 0) {
         CatchHistory({ event: `user with id: ${actor.userId} viewed ${results.length} transaction history for ${transactionFor}`, functionName: 'ViewEmployerTransactionTotal', response: `No Record Found transaction history`, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
         return sendResponse(res, 0, 200, 'No Record Found')

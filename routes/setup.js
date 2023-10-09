@@ -57,9 +57,9 @@ const { CreateServiceEnquiry, ViewServiceEnquiry } = require("../controllers/adm
 const { Utilities } = require("../controllers/admin/utilities");
 const { ViewMyProfile } = require("../controllers/jobseeker/profile");
 const { CreateInvoice,DeletInvoce, ViewSingleInvoice, UpdateInvoice, ViewMyUnpaidInvoice, AdminViewInvoices } = require("../controllers/jobs/invoice");
-const { FrontendListJobs, FrontendFindJob } = require("../controllers/frontend/jobs");
-const { FrontendListCategories, FrontendListIndustries, FrontendListLocations, FrontendListCourses, FrontendFindCourses } = require("../controllers/frontend/utilities");
-const { Webhook } = require("../controllers/jobs/webhook");
+const { FrontendListJobs, FrontendFindJob, FrontendFindJobByCategories, FrontendFindJobByLocation, FrontendFindJobIndustry } = require("../controllers/frontend/jobs");
+const { FrontendListCategories, FrontendListIndustries, FrontendListLocations, FrontendListCourses, FrontendFindCourses, FrontendHrCareerNews, FrontendFindCareerNews } = require("../controllers/frontend/utilities");
+const { googleAuth, googleCallback } = require("../controllers/user/google");
 
 
 //user account
@@ -246,14 +246,20 @@ router.route("/payinvoice").post(protect,findInvoiceBeforePaying,InvoicePayment)
 
 //manage frontend
 router.route("/services").post(CreateServiceEnquiry);
-router.route("/viewservices").post(protect,ViewServiceEnquiry);
-router.route("/listjobs").post(protect,FrontendListJobs);
-router.route("/findjob").post(protect,FrontendFindJob);
-router.route("/findlocations").post(protect,FrontendListLocations);
-router.route("/findindustries").post(protect,FrontendListIndustries);
-router.route("/findcategories").post(protect,FrontendListCategories);
-router.route("/listcourses").post(protect,FrontendListCourses);
-router.route("/findcourse").post(protect,FrontendFindCourses);
+router.route("/viewservices").post(ViewServiceEnquiry);
+router.route("/listjobs").post(FrontendListJobs);
+router.route("/findjob").post(FrontendFindJob);
+router.route("/findjobbycategories").post(FrontendFindJobByCategories);
+router.route("/findjobbylocation").post(FrontendFindJobByLocation);
+router.route("/findjobbyindustry").post(FrontendFindJobIndustry);
+router.route("/findlocations").post(FrontendListLocations);
+router.route("/findindustries").post(FrontendListIndustries);
+router.route("/findcategories").post(FrontendListCategories);
+router.route("/listcourses").post(FrontendListCourses);
+router.route("/findcourse").post(FrontendFindCourses);
+router.route("/autofeeds").post(FrontendHrCareerNews);
+router.route("/findautofeeds").post(FrontendFindCareerNews);
+
 
 //manage dashboard
 router.route("/utilities").post(protect,Utilities);
