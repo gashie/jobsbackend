@@ -179,7 +179,7 @@ router.route("/approveapplication").post(protect,findApplicationBeforeApprove,Ap
 router.route("/admin/viewapplications").post(protect,ViewJobApplications);
 router.route("/admin/viewjob").post(protect,AdminViewJobDetails);
 router.route("/employer/viewjob").post(protect,EmoloyerViewJobDetails);
-router.route("/viewmyapplications").post(protect,EmoloyerViewJobDetails);ViewMyJobApplications
+router.route("/viewmyapplications").post(protect,ViewMyJobApplications);
 router.route("/employer/viewmyshortlisted").post(protect,findJob,ViewMyShortlistedJobApplicants);
 router.route("/jobseeker/viewmyappliedjobs").post(protect,ViewMyAppliedJobs);
 
