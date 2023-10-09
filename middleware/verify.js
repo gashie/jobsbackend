@@ -560,7 +560,8 @@ exports.findSavedJob = asynHandler(async (req, res, next) => {
 
   const conditionOne = [
     { column: 'jobId', operator: '=', value: jobId },
-    { column: 'userId', operator: '=', value: actor?.userId }
+    { column: 'userId', operator: '=', value: actor?.userId },
+    { column: 'deletedAt', operator: 'IS', value: null },
     // Add more conditions as needed
   ];
 
