@@ -228,7 +228,6 @@ router.route("/viewpartnerships").post(protect, ViewCoursePartners);
 
 //manage course
 router.route("/pay").post(protect,findRate,findBeforePay, GeneralPayment);
-router.route("/webhook").post(Webhook);
 router.route("/verifypayment").post(protect,VerifyPayment);
 router.route("/viewtransactiontotal").post(protect,PaystackViewTransactionTotal);
 router.route("/transactionhistory").post(protect,ViewTransactionTotal);
