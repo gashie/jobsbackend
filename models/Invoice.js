@@ -48,5 +48,22 @@ jobsdb.deleteInvoiceItem = (postData) => {
         });
     });
 };
+jobsdb.AdminViewInvoices = () => {
+    return new Promise((resolve, reject) => {
+        pool.query(`
+        SELECT 
+        company.*,
+        invoice_data.*
+         FROM invoice_data 
+         JOIN company ON invoice_data.companyId = company.companyId
+        `, [], (err, results) => {
+            if (err) {
+                return reject(err);
+            }
+
+            return resolve(results);
+        });
+    });
+};
 
 module.exports = jobsdb;

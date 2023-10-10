@@ -162,7 +162,7 @@ exports.AdminViewInvoices = asynHandler(async (req, res, next) => {
     let { viewAction } = req.body
     let actor = req.user.userInfo
   
-    let results = await GlobalModel.FindallArray('invoice_data');
+    let results = await Invoice.AdminViewInvoices('invoice_data');
     if (results.length == 0) {
       CatchHistory({ event: `user with id: ${actor.userId} viewed ${results.length} invoice_data`, functionName: 'AdminViewInvoices', response: `No Record Found For Invoice`, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
       return sendResponse(res, 0, 200, 'No Record Found')
