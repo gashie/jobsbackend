@@ -95,6 +95,7 @@ jobsdb.EmployerViewJobApplicants = (jobId, companyId) => {
         job_application.applicantEmail,
         job_application.applicantPhone,
         job_application.applicantResume,
+        users.profileImage,
         job_application.appliedAt,
         job_application.applicationId,
         job_application.sumQuestions,
@@ -108,6 +109,7 @@ jobsdb.EmployerViewJobApplicants = (jobId, companyId) => {
          FROM job_info 
          JOIN company ON job_info.companyId = company.companyId 
          JOIN job_application ON job_info.jobId = job_application.jobId
+         JOIN users ON users.userId = job_application.userId
          WHERE job_info.companyId = ?
          AND job_info.jobId = ?
         `, [companyId, jobId], (err, results) => {
