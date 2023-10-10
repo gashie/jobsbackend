@@ -37,6 +37,19 @@ exports.ViewMyJobs = asynHandler(async (req, res, next) => {
 
 });
 
+exports.ViewMyJobsByCompanyId = asynHandler(async (req, res, next) => {
+  let { viewAction,companyId } = req.body
+  let actor = req.user.userInfo
+  let results = await GlobalModel.ViewWithActionById('job_info', viewAction, 'companyId', companyId);
+  if (results.length == 0) {
+    CatchHistory({ event: `user with id: ${actor.userId} viewed ${results.length} job info`, functionName: 'ViewMyJobsById', response: `No Record Found For Job info`, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
+    return sendResponse(res, 0, 200, 'No Record Found')
+  }
+  CatchHistory({ event: `user with id: ${actor.userId} viewed ${results.length} job info`, functionName: 'ViewMyJobsById', response: `Record Found, job info contains ${results.length} record's`, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
+
+  return sendResponse(res, 1, 200, 'Record Found', results)
+
+});
 exports.CreateJobInfo = asynHandler(async (req, res, next) => {
   let payload = req.body;
   let actor = req.user.userInfo

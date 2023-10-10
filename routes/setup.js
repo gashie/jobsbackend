@@ -20,13 +20,13 @@ const { CreateQuestionnaire, CreateBulkQuestionnaire, LinkQuestionnaire, DeleteL
 
 const { CreateJobStatus, UpdateJobStatus, ViewJobStatus } = require("../controllers/jobs/jobstatus");
 const { CreateIndustry, ViewIndustry, UpdateIndustry, ViewCompany } = require("../controllers/company/industry");
-const { CreateJobInfo, UpdateJobInfo, AdminApproveJobInfo, ViewMyJobs,ViewJobDetails, ViewJobsData, ApplyJob, ApproveJobApplication, ViewJobApplications, ViewMyJobApplications, ViewMyShortlistedJobApplicants, AdminListJobs, AdminViewJobDetails ,EmoloyerViewJobDetails} = require("../controllers/jobs/jobinfo");
+const { CreateJobInfo, UpdateJobInfo, AdminApproveJobInfo, ViewMyJobs,ViewMyJobsByCompanyId,ViewJobDetails, ViewJobsData, ApplyJob, ApproveJobApplication, ViewJobApplications, ViewMyJobApplications, ViewMyShortlistedJobApplicants, AdminListJobs, AdminViewJobDetails ,EmoloyerViewJobDetails} = require("../controllers/jobs/jobinfo");
 
 const { CreateBanner, ViewBanners, UpdateBanner } = require("../controllers/admin/banner");
 const { CreateFeed,UpdateFeed,ViewFeeds } = require("../controllers/admin/feed");
 const { CreateUserFeeds,ViewUserFeeds,UpdateUserFeed,ApproveUserFeed,ViewMyUserFeeds } = require("../controllers/admin/userfeeds");
 const { ViewRateCards,ApproveRateCard,UpdateRateCard,CreateRateCard, ViewApprovedRateCards} = require("../controllers/admin/ratecard");
-const { CreateCourse,ViewCourse,ViewMyCourses,UpdateCourse,ApproveCourse } = require("../controllers/admin/courses");
+const { CreateCourse,ViewCourse,ViewMyCourses,UpdateCourse,ApproveCourse,ViewMyCoursesByCompanyId } = require("../controllers/admin/courses");
 const { CreateCourseContent,ViewCourseContent,UpdateCourseContent } = require("../controllers/admin/courses_content");
 const { ViewCoursePartners,UpdateCoursePartners,CreateCoursePartners } = require("../controllers/admin/courses_partnership");
 const { CreateCourseSchedule,UpdateCourseSchedule,ViewCourseSchedule } = require("../controllers/admin/courses_schedule");
@@ -125,6 +125,7 @@ router.route("/setupjob").post(protect, CreateJobInfo);
 router.route("/updatejob").post(protect, UpdateJobInfo);
 router.route("/approvejob").post(protect, AdminApproveJobInfo);
 router.route("/viewmyjobs").post(protect, ViewMyJobs);
+router.route("/viewcompanyjobs").post(protect, ViewMyJobsByCompanyId);
 router.route("/viewcompanies").post(protect, ViewCompany);
 router.route("/adminlistjobs").post(protect, AdminListJobs);
 
@@ -214,6 +215,7 @@ router.route("/approveratecards").post(protect,findRateCardBedoreApprove, Approv
 
 //manage course
 router.route("/savecourse").post(protect, CreateCourse);
+router.route("/viewcompanycourse").post(protect, ViewMyCoursesByCompanyId);
 router.route("/updatesavedcourse").post(protect,findCourse, UpdateCourse);
 router.route("/mysavedcourses").post(protect, ViewMyCourses);
 router.route("/viewsavedcourses").post(protect, ViewCourse);

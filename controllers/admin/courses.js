@@ -35,6 +35,20 @@ exports.ViewMyCourses = asynHandler(async (req, res, next) => {
 
 });
 
+exports.ViewMyCoursesByCompanyId = asynHandler(async (req, res, next) => {
+    let { viewAction,companyId } = req.body
+    let actor = req.user.userInfo
+    let results = await GlobalModel.ViewWithActionById('course', viewAction, 'companyId', companyId);
+    if (results.length == 0) {
+        CatchHistory({ event: `user with id: ${actor.userId} viewed ${results.length} course`, functionName: 'ViewMyCourses', response: `No Record Found For Course`, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
+        return sendResponse(res, 0, 200, 'No Record Found')
+    }
+    CatchHistory({ event: `user with id: ${actor.userId} viewed ${results.length} course`, functionName: 'ViewMyCourses', response: `Record Found, course contains ${results.length} record's`, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
+
+    return sendResponse(res, 1, 200, 'Record Found', results)
+
+});
+
 
 exports.CreateCourse = asynHandler(async (req, res, next) => {
     let payload = req.body;
@@ -92,6 +106,7 @@ exports.CreateCourse = asynHandler(async (req, res, next) => {
     payload.courseImage = courseImage.name
     payload.courseVideoAd = courseVideoAd.name
     payload.courseBrochure = courseBrochure.name
+    payload.companyId = actor?.company?.companyId || req.body.companyId
 
     let results = await GlobalModel.Create('course', payload);
     if (results.affectedRows === 1) {
