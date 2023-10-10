@@ -78,7 +78,7 @@ exports.FrontendListCourses = asynHandler(async (req, res, next) => {
   // Define an array of conditions (each condition is an object with condition and value
   const conditions = [
     { column: 'courseApprovalStatus', operator: '=', value: 'approved' },
-    { column: 'courseStatus', operator: '=', value: 'open' },
+    // { column: 'courseStatus', operator: '=', value: 'open' },
     // Add more conditions as needed
   ];
 
