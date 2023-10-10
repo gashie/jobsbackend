@@ -156,6 +156,7 @@ exports.ViewJobsData = asynHandler(async (req, res, next) => {
 exports.ApplyJob = asynHandler(async (req, res, next) => {
   let { jobId, fullName, email, phone, answers } = req.body
   const resume = req.files.resume;
+
   let actor = req.user.userInfo   //get userInfo
   let jobInfo = req.job
 
@@ -168,6 +169,21 @@ exports.ApplyJob = asynHandler(async (req, res, next) => {
     applicantPhone: phone,
     applicationId: uuidV4.v4()
   }
+
+  if (!resume.mimetype.startsWith("application/pdf")) {
+    return sendResponse(res, 0, 200, "Please make sure to upload a pdf file", [])
+
+  }
+
+  //change filename
+  resume.name = `resumeId_id_${applicationData?.applicationId}_md_${resume.md5}_${path.parse(resume.name).ext}`;
+  resume.mv(`./uploads/jobseeker/resume/${resume.name}`, async (err) => {
+    if (err) {
+      console.log(err);
+      return sendResponse(res, 0, 200, "Problem with file upload", [])
+    }
+  });
+  applicationData.applicantResume = resume.name
   if (jobInfo?.hasQuestions === "no") {
     //save application info
     let results = await GlobalModel.Create('job_application', applicationData);
@@ -335,42 +351,42 @@ exports.AdminListJobs = asynHandler(async (req, res, next) => {
 
 exports.AdminViewJobDetails = asynHandler(async (req, res, next) => {
   let { jobId } = req.body
-   let actor = req.user.userInfo
-   let arrayData = [];
-   let results = await JobModel.ViewJob(jobId);
-   if (results.length == 0) {
-     CatchHistory({ event: `user with id: ${actor.userId} viewed ${results.length} job info`, functionName: 'AdminViewJobDetails', response: `No Record Found For Job info`, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
-     return sendResponse(res, 0, 200, 'No Record Found')
-   }
-   let findapplicants = await JobModel.CountJobApplicants(jobId);
-   let jobData = {
-     ...results,
-     applicantCount: findapplicants[0]
-   }
-   arrayData.push(jobData)
-   CatchHistory({ event: `user with id: ${actor.userId} viewed ${results.length} job info`, functionName: 'AdminViewJobDetails', response: `Record Found, job info contains ${results.length} record's`, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
-     
-   return sendResponse(res, 1, 200, 'Record Found', arrayData)
+  let actor = req.user.userInfo
+  let arrayData = [];
+  let results = await JobModel.ViewJob(jobId);
+  if (results.length == 0) {
+    CatchHistory({ event: `user with id: ${actor.userId} viewed ${results.length} job info`, functionName: 'AdminViewJobDetails', response: `No Record Found For Job info`, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
+    return sendResponse(res, 0, 200, 'No Record Found')
+  }
+  let findapplicants = await JobModel.CountJobApplicants(jobId);
+  let jobData = {
+    ...results,
+    applicantCount: findapplicants[0]
+  }
+  arrayData.push(jobData)
+  CatchHistory({ event: `user with id: ${actor.userId} viewed ${results.length} job info`, functionName: 'AdminViewJobDetails', response: `Record Found, job info contains ${results.length} record's`, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
+
+  return sendResponse(res, 1, 200, 'Record Found', arrayData)
 
 })
 
 exports.EmoloyerViewJobDetails = asynHandler(async (req, res, next) => {
   let { jobId } = req.body
-   let actor = req.user.userInfo
-   let arrayData = [];
-   let results = await JobModel.ViewJobByUserId(jobId,actor?.userId);
-   if (results.length == 0) {
-     CatchHistory({ event: `user with id: ${actor.userId} viewed ${results.length} job info`, functionName: 'EmoloyerViewJobDetails', response: `No Record Found For Job info`, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
-     return sendResponse(res, 0, 200, 'No Record Found')
-   }
-   let findapplicants = await JobModel.CountJobApplicants(jobId);
-   let jobData = {
-     ...results,
-     applicantCount: findapplicants[0]
-   }
-   arrayData.push(jobData)
-   CatchHistory({ event: `user with id: ${actor.userId} viewed ${results.length} job info`, functionName: 'EmoloyerViewJobDetails', response: `Record Found, job info contains ${results.length} record's`, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
- 
-   return sendResponse(res, 1, 200, 'Record Found', findapplicants)
+  let actor = req.user.userInfo
+  let arrayData = [];
+  let results = await JobModel.ViewJobByUserId(jobId, actor?.userId);
+  if (results.length == 0) {
+    CatchHistory({ event: `user with id: ${actor.userId} viewed ${results.length} job info`, functionName: 'EmoloyerViewJobDetails', response: `No Record Found For Job info`, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
+    return sendResponse(res, 0, 200, 'No Record Found')
+  }
+  let findapplicants = await JobModel.CountJobApplicants(jobId);
+  let jobData = {
+    ...results,
+    applicantCount: findapplicants[0]
+  }
+  arrayData.push(jobData)
+  CatchHistory({ event: `user with id: ${actor.userId} viewed ${results.length} job info`, functionName: 'EmoloyerViewJobDetails', response: `Record Found, job info contains ${results.length} record's`, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
+
+  return sendResponse(res, 1, 200, 'Record Found', findapplicants)
 
 })
