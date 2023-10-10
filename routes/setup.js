@@ -248,7 +248,7 @@ router.route("/payinvoice").post(protect,findInvoiceBeforePaying,InvoicePayment)
 
 //manage frontend
 router.route("/services").post(CreateServiceEnquiry);
-router.route("/viewservices").post(ViewServiceEnquiry);
+router.route("/viewservices").post(protect,ViewServiceEnquiry);
 router.route("/listjobs").post(FrontendListJobs);
 router.route("/listratecard").post(FrontendListRateCard);
 router.route("/findjob").post(FrontendFindJob);
