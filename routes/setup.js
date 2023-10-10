@@ -58,7 +58,7 @@ const { Utilities } = require("../controllers/admin/utilities");
 const { ViewMyProfile } = require("../controllers/jobseeker/profile");
 const { CreateInvoice,DeletInvoce, ViewSingleInvoice, UpdateInvoice, ViewMyUnpaidInvoice, AdminViewInvoices } = require("../controllers/jobs/invoice");
 const { FrontendListJobs, FrontendFindJob, FrontendFindJobByCategories, FrontendFindJobByLocation, FrontendFindJobIndustry } = require("../controllers/frontend/jobs");
-const { FrontendListCategories, FrontendListIndustries, FrontendListLocations, FrontendListCourses, FrontendFindCourses, FrontendHrCareerNews, FrontendFindCareerNews } = require("../controllers/frontend/utilities");
+const { FrontendListCategories, FrontendListIndustries, FrontendListLocations, FrontendListCourses, FrontendFindCourses, FrontendHrCareerNews, FrontendFindCareerNews, FrontendListRateCard, FrontendOnlyHrCareerNews } = require("../controllers/frontend/utilities");
 const { googleAuth, googleCallback } = require("../controllers/user/google");
 
 
@@ -250,6 +250,7 @@ router.route("/payinvoice").post(protect,findInvoiceBeforePaying,InvoicePayment)
 router.route("/services").post(CreateServiceEnquiry);
 router.route("/viewservices").post(ViewServiceEnquiry);
 router.route("/listjobs").post(FrontendListJobs);
+router.route("/listratecard").post(FrontendListRateCard);
 router.route("/findjob").post(FrontendFindJob);
 router.route("/findjobbycategories").post(FrontendFindJobByCategories);
 router.route("/findjobbylocation").post(FrontendFindJobByLocation);
@@ -261,6 +262,7 @@ router.route("/listcourses").post(FrontendListCourses);
 router.route("/findcourse").post(FrontendFindCourses);
 router.route("/autofeeds").post(FrontendHrCareerNews);
 router.route("/findautofeeds").post(FrontendFindCareerNews);
+router.route("/dynamiccareer").post(FrontendOnlyHrCareerNews);
 
 
 //manage dashboard

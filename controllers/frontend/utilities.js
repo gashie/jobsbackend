@@ -178,3 +178,49 @@ exports.FrontendFindCareerNews = asynHandler(async (req, res, next) => {
 
 });
 
+exports.FrontendOnlyHrCareerNews = asynHandler(async (req, res, next) => {
+  let {postType,postCategory} = req.body
+ // Define your dynamic query parameters
+ const tableName = 'generated_feeds';
+ const columnsToSelect = ['feedId', 'title', 'description', 'postImage', 'postType', 'pubdate', 'summary','link','author','comments','isSystem']; // Replace with your desired columns
+
+ // Define an array of conditions (each condition is an object with condition and value
+ const conditions = [
+   { column: 'status', operator: '=', value: 'approved' },
+   { column: 'postType', operator: '=', value: postType },
+   { column: 'postCategory', operator: '=', value: postCategory },
+   { column: 'approvedAt', operator: '>=', value: 'DATE_SUB(NOW(), INTERVAL 120 DAY)', isDateColumn: true }, // Example date column
+ // Add more conditions as needed, including different date columns
+   // Add more conditions as needed
+ ];
+
+
+ let results = await GlobalModel.QueryDynamicArray(tableName, columnsToSelect, conditions);
+ if (results.length == 0) {
+   return sendResponse(res, 0, 200, 'Sorry no record found', [])
+ }
+
+ return sendResponse(res, 1, 200, 'Record Found', results)
+
+});
+exports.FrontendListRateCard = asynHandler(async (req, res, next) => {
+
+  // Define your dynamic query parameters
+  const tableName = 'rate_card';
+  const columnsToSelect = ['rateId', 'rateTitle', 'rateDescription', 'ratePrice', 'rateLimit']; // Replace with your desired columns
+
+  // Define an array of conditions (each condition is an object with condition and value
+  const conditions = [
+    { column: 'rateStatus', operator: '=', value: 'approved' },
+    // Add more conditions as needed
+  ];
+
+
+  let results = await GlobalModel.QueryDynamicArray(tableName, columnsToSelect, conditions);
+  if (results.length == 0) {
+    return sendResponse(res, 0, 200, 'Sorry no record found', [])
+  }
+
+  return sendResponse(res, 1, 200, 'Record Found', results)
+
+});
