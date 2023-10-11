@@ -367,7 +367,7 @@ exports.EmployerListJobs = asynHandler(async (req, res, next) => {
   let arrayData = [];
   let results = await JobModel.EmployerListJobs(actor?.company?.companyId);
   if (results.length == 0) {
-    CatchHistory({ event: `user with id: ${actor.userId} viewed ${results.length} list of jobs`, functionName: 'AdminListJobs', response: `No Record Found For Jobs`, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
+    CatchHistory({ event: `user with id: ${actor.userId} viewed ${results.length} list of jobs`, functionName: 'EmployerListJobs', response: `No Record Found For Jobs`, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
     return sendResponse(res, 0, 200, 'No Record Found')
   }
   for (const iterator of results) {
@@ -378,7 +378,7 @@ exports.EmployerListJobs = asynHandler(async (req, res, next) => {
     }
     arrayData.push(jobData)
   }
-  CatchHistory({ event: `user with id: ${actor.userId} viewed ${results.length} list of jobs`, functionName: 'AdminListJobs', response: `Record Found, Jobs contains ${results.length} record's`, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
+  CatchHistory({ event: `user with id: ${actor.userId} viewed ${results.length} list of jobs`, functionName: 'EmployerListJobs', response: `Record Found, Jobs contains ${results.length} record's`, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
 
   return sendResponse(res, 1, 200, 'Record Found', arrayData)
 
