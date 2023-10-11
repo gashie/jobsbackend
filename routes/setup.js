@@ -20,7 +20,7 @@ const { CreateQuestionnaire, CreateBulkQuestionnaire, LinkQuestionnaire, DeleteL
 
 const { CreateJobStatus, UpdateJobStatus, ViewJobStatus } = require("../controllers/jobs/jobstatus");
 const { CreateIndustry, ViewIndustry, UpdateIndustry, ViewCompany } = require("../controllers/company/industry");
-const { CreateJobInfo, UpdateJobInfo, AdminApproveJobInfo, ViewMyJobs,ViewMyJobsByCompanyId,ViewJobDetails, ViewJobsData, ApplyJob, ApproveJobApplication, ViewJobApplications, ViewMyJobApplications, ViewMyShortlistedJobApplicants, AdminListJobs, AdminViewJobDetails ,EmoloyerViewJobDetails} = require("../controllers/jobs/jobinfo");
+const { CreateJobInfo, UpdateJobInfo, AdminApproveJobInfo, ViewMyJobs,ViewMyJobsByCompanyId,ViewJobDetails, ViewJobsData, ApplyJob, ApproveJobApplication, ViewJobApplications, ViewMyJobApplications, ViewMyShortlistedJobApplicants, AdminListJobs, AdminViewJobDetails ,EmoloyerViewJobDetails, EmployerListJobs} = require("../controllers/jobs/jobinfo");
 
 const { CreateBanner, ViewBanners, UpdateBanner } = require("../controllers/admin/banner");
 const { CreateFeed,UpdateFeed,ViewFeeds } = require("../controllers/admin/feed");
@@ -128,6 +128,7 @@ router.route("/viewmyjobs").post(protect, ViewMyJobs);
 router.route("/viewcompanyjobs").post(protect, ViewMyJobsByCompanyId);
 router.route("/viewcompanies").post(protect, ViewCompany);
 router.route("/adminlistjobs").post(protect, AdminListJobs);
+router.route("/employerlistjobs").post(protect, EmployerListJobs);
 
 
 
