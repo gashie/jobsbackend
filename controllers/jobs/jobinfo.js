@@ -365,7 +365,7 @@ exports.AdminListJobs = asynHandler(async (req, res, next) => {
 exports.EmployerListJobs = asynHandler(async (req, res, next) => {
   let actor = req.user.userInfo
   let arrayData = [];
-  let results = await JobModel.EmployerViewJobApplicants(actor?.company?.companyId);
+  let results = await JobModel.EmployerListJobs(actor?.company?.companyId);
   if (results.length == 0) {
     CatchHistory({ event: `user with id: ${actor.userId} viewed ${results.length} list of jobs`, functionName: 'AdminListJobs', response: `No Record Found For Jobs`, dateStarted: req.date, requestStatus: 200, actor: actor.userId }, req);
     return sendResponse(res, 0, 200, 'No Record Found')

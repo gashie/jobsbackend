@@ -363,6 +363,46 @@ jobsdb.ListJobs = () => {
         });
     });
 };
+jobsdb.EmployerListJobs = (companyId) => {
+    return new Promise((resolve, reject) => {
+        pool.query(`
+        SELECT 
+    job_info.jobId, 
+    job_info.jobTitle, 
+    job_info.jobLocation, 
+    job_info.jobDescription, 
+    job_info.jobStatus, 
+    job_info.jobSkills, 
+    job_info.goLiveDate,
+    job_info.jobState,
+    job_info.jobCloseStatus,
+    job_info.jobScore,
+    job_info.applyMode,
+    job_info.applyMode,
+    job_info.applyLink,
+    job_info.appliedEmail,
+    job_info.paidStatus,
+    job_info.jobLocation,
+    job_info.jobSalaryAmount,
+    job_info.jobCategoryId,
+    company.companyName, 
+    company.companyLogo, 
+    job_category.jobCategoryName, 
+    industry.industryTitle 
+    FROM job_info 
+    JOIN company ON job_info.companyId = company.companyId 
+    JOIN job_category ON job_info.jobCategoryId = job_category.jobCategoryId 
+    JOIN industry ON company.industryId = industry.industryId
+    WHERE company.companyId = ?
+    `, [companyId], (err, results) => {
+            if (err) {
+                return reject(err);
+            }
+
+            return resolve(results);
+        });
+    });
+};
 jobsdb.CountJobApplicants = (jobId) => {
     return new Promise((resolve, reject) => {
         pool.query(`
