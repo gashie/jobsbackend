@@ -57,7 +57,7 @@ exports.CreateQuestionnaire = asynHandler(async (req, res, next) => {
     createdByName: actor.fullName,
     createdById: actor.userId
   }
-
+  GlobalModel.Update('job_info', { hasQuestions: true }, 'jobId', jobId);
   return payload?.questionType === 'multi' || payload?.questionType === 'single' ? autoSaveWithOptions(questionPayload, preparedOptions, actor, req, res) : autoSaveNoOptions(questionPayload, actor, req, res)
 
 })
@@ -161,7 +161,7 @@ exports.CreateBulkQuestionnaire = asynHandler(async (req, res, next) => {
     }
   }
   if (isDone) {
-    GlobalModel.Update('job_info', { hasQuestions: true }, 'jobsId', jobId);
+    GlobalModel.Update('job_info', { hasQuestions: true }, 'jobId', jobId);
 
     return sendResponse(res, 1, 200, "Saved successfully", { jobId: jobId })
   }

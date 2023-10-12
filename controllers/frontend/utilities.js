@@ -73,7 +73,7 @@ exports.FrontendListCourses = asynHandler(async (req, res, next) => {
 
   // Define your dynamic query parameters
   const tableName = 'course';
-  const columnsToSelect = ['courseId', 'courseTitle', 'courseOrganiser', 'courseVenue', 'courseCost', 'courseStartDate', 'courseEndDate']; // Replace with your desired columns
+  const columnsToSelect = ['courseId', 'courseTitle', 'courseOrganiser', 'courseVenue', 'courseCost', 'courseStartDate', 'courseEndDate','courseStudyMode','courseDuration','courseCategory','courseAudience','courseGoals','courseLink','courseImage','courseVideoAd','courseBrochure','courseCertificationNote']; // Replace with your desired columns
 
   // Define an array of conditions (each condition is an object with condition and value
   const conditions = [
